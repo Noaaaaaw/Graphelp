@@ -7,7 +7,7 @@
     padding: 0 32px;
     background: #ed6f50;
     position: relative;
-    z-index: 1001;
+    z-index: 1005;
 }
 
 .logo {
@@ -35,7 +35,7 @@
     padding: 0 32px;
     background: #b6a261;
     position: relative;
-    z-index: 1001;
+    z-index: 1000;
 }
 
 .navbar-links {
@@ -64,7 +64,7 @@
     font-weight: 800;
 }
 
-/* === HAMBURGER (hidden on desktop, lives in header on mobile) === */
+/* === HAMBURGER === */
 .hamburger {
     display: none;
     flex-direction: column;
@@ -76,10 +76,11 @@
     border: none;
     cursor: pointer;
     padding: 0;
-    z-index: 1002;
+    z-index: 1006; /* Menjaga tombol tetap berada di layer paling atas */
     flex-shrink: 0;
-    opacity: 1;
-    transition: opacity 0.2s ease;
+    position: relative;
+    opacity: 1 !important; /* Memastikan ikon tidak transparan */
+    pointer-events: auto !important; /* Memastikan ikon tetap bisa diklik */
 }
 
 .hamburger span {
@@ -88,19 +89,19 @@
     width: 100%;
     background: white;
     border-radius: 2px;
-    transition: transform 0.25s ease, opacity 0.25s ease;
 }
 
+/* Mengabaikan efek sembunyi/silang saat status active */
 .hamburger.active {
-    opacity: 0;
-    pointer-events: none;
+    opacity: 1 !important;
+    pointer-events: auto !important;
 }
 
 /* === SIDEBAR OVERLAY === */
 .sidebar-overlay {
     display: none;
     position: fixed;
-    inset: 92px 0 0 0; /* starts below header + navbar */
+    inset: 92px 0 0 0;
     background: rgba(30, 24, 15, 0.5);
     backdrop-filter: blur(2px);
     opacity: 0;
@@ -113,21 +114,22 @@
     opacity: 1;
 }
 
-/* === SIDEBAR (sharp corners, compact width) === */
+/* === SIDEBAR === */
 .sidebar {
     position: fixed;
-    top: 92px; /* header 58px + navbar 34px */
+    top: 92px;
     left: 0;
     bottom: 0;
     width: 190px;
-    background: linear-gradient(180deg, #c3ae6f 0%, #b6a261 100%);
+    /* Warna dibuat lebih gelap dari Navbar (#b6a261) agar pemisah kontras */
+    background: linear-gradient(180deg, #8c793e 0%, #7a6832 100%);
     transform: translateX(-100%);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 999;
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
     border-radius: 0;
     padding: 18px 12px;
-    overflow: hidden;
+    overflow-y: auto;
 }
 
 .sidebar.open {
@@ -152,8 +154,7 @@
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.12);
     border: 1px solid rgba(255, 255, 255, 0.22);
-    transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease,
-        opacity 0.3s ease;
+    transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease, opacity 0.3s ease;
     opacity: 0;
     transform: translateX(-12px);
 }
@@ -174,6 +175,60 @@
     transform: translateY(0);
 }
 
+/* === MOBILE PROFILE IN SIDEBAR === */
+.mobile-profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25); /* Garis pembatas ditaruh di bawah */
+}
+
+.mobile-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    color: #333333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 20px;
+    text-transform: uppercase;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+}
+
+.mobile-username {
+    margin: 0;
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+    text-align: center;
+}
+
+.mobile-logout-btn {
+    width: 100%;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.mobile-logout-btn:hover {
+    background-color: #e63939;
+    transform: translateY(-1px);
+}
+
 /* === FOOTER === */
 .footer {
     min-height: 50px;
@@ -191,6 +246,9 @@
 
 /* === RESPONSIVE === */
 @media (max-width: 550px) {
+    .desktop-profile {
+        display: none !important;
+    }
     .header {
         padding: 0 18px;
     }

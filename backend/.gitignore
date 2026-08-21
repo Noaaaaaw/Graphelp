@@ -1,0 +1,9 @@
+# Environment variables (SANGAT PENTING)
+.env
+
+# Virtual Environment
+venv/
+
+# Python Cache & Artifacts
+__pycache__/
+*.pyc

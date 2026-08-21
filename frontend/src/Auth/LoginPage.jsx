@@ -1,56 +1,84 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../style/auth.css";
 
 function LoginPage() {
+    const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
 
+    // State untuk menyimpan input
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setErrorMessage("");
+        setIsLoading(true);
+
+        try {
+            const response = await fetch("http://localhost:8000/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Simpan data user ke localStorage
+                localStorage.setItem("user", JSON.stringify(data.user));
+                alert("Login berhasil!");
+                navigate("/"); // Ubah rute ini sesuai halaman utama/dashboard kamu
+            } else {
+                setErrorMessage(data.detail || "Login gagal! Periksa username/password.");
+            }
+        } catch (error) {
+            console.error("Error login:", error);
+            setErrorMessage("Gagal terhubung ke server backend.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <main className="login-page">
-
             <section className="login-background">
+                <form className="login-card" onSubmit={handleLogin}>
+                    <h1 className="login-logo">Graphelp_</h1>
+                    <p className="login-subtitle">Selamat Datang Kembali</p>
 
-                <div className="login-card">
-
-                    <h1 className="login-logo">
-                        Graphelp_
-                    </h1>
-
-                    <p className="login-subtitle">
-                        Selamat Datang Kembali
-                    </p>
+                    {errorMessage && <p style={{ color: "#ff4d4d", fontSize: "14px", textAlign: "center" }}>{errorMessage}</p>}
 
                     {/* Username */}
                     <div className="login-field">
-
-                        <label htmlFor="username">
-                            Username
-                        </label>
-
+                        <label htmlFor="username">Username</label>
                         <input
                             id="username"
                             type="text"
                             autoComplete="username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
                         />
-
                     </div>
 
                     {/* Password */}
                     <div className="login-field">
-
-                        <label htmlFor="password">
-                            Password
-                        </label>
-
+                        <label htmlFor="password">Password</label>
                         <div className="password-wrapper">
-
                             <input
                                 id="password"
                                 type={showPassword ? "text" : "password"}
                                 autoComplete="current-password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
                             />
-
                             <button
                                 type="button"
                                 className="password-toggle"
@@ -69,59 +97,34 @@ function LoginPage() {
                                     </svg>
                                 )}
                             </button>
-
                         </div>
-
                     </div>
 
                     {/* Remember & Forgot */}
                     <div className="login-options">
-
                         <label className="remember-me">
-
                             <input
                                 type="checkbox"
                                 checked={rememberMe}
                                 onChange={(e) => setRememberMe(e.target.checked)}
                             />
-
-                            <span>
-                                Ingat saya
-                            </span>
-
+                            <span>Ingat saya</span>
                         </label>
-
-                        <a href="#">
-                            Lupa Password?
-                        </a>
-
+                        <a href="#">Lupa Password?</a>
                     </div>
 
                     {/* Button */}
-                    <button
-                        type="button"
-                        className="login-button"
-                    >
-                        Masuk
+                    <button type="submit" className="login-button" disabled={isLoading}>
+                        {isLoading ? "Memproses..." : "Masuk"}
                     </button>
 
-                    {/* Register */}
+                    {/* Register Link */}
                     <div className="register-text">
-
-                        <span>
-                            Belum punya akun?
-                        </span>
-
-                        <Link to="/register">
-                            Daftar disini
-                        </Link>
-
+                        <span>Belum punya akun?</span>
+                        <Link to="/register">Daftar disini</Link>
                     </div>
-
-                </div>
-
+                </form>
             </section>
-
         </main>
     );
 }

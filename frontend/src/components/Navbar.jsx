@@ -1,9 +1,33 @@
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
 function Navbar({ isMenuOpen, onCloseMenu }) {
+    const navigate = useNavigate();
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const checkUser = () => {
+            const savedUser = localStorage.getItem("user");
+            setUser(savedUser ? JSON.parse(savedUser) : null);
+        };
+
+        checkUser();
+        window.addEventListener("storage", checkUser);
+
+        return () => window.removeEventListener("storage", checkUser);
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem("user");
+        setUser(null);
+        onCloseMenu();
+        navigate("/login");
+    };
+
     const links = [
         { href: "/", label: "Home" },
         { href: "/analyze", label: "Analyze" },
         { href: "/learn-more", label: "Learn More" },
-        { href: "/login", label: "Login" },
     ];
 
     return (
@@ -11,10 +35,12 @@ function Navbar({ isMenuOpen, onCloseMenu }) {
             <nav className="navbar">
                 <div className="navbar-links">
                     {links.map((link) => (
-                        <a key={link.href} href={link.href}>
+                        <Link key={link.href} to={link.href}>
                             {link.label}
-                        </a>
+                        </Link>
                     ))}
+
+                    {!user && <Link to="/login">Login</Link>}
                 </div>
             </nav>
 
@@ -24,17 +50,37 @@ function Navbar({ isMenuOpen, onCloseMenu }) {
             />
 
             <aside className={`sidebar ${isMenuOpen ? "open" : ""}`}>
+                {/* 1. Profil Khusus Mobile (Ditaruh di ATAS) */}
+                {user && (
+                    <div className="mobile-profile-container">
+                        <div className="mobile-avatar">
+                            {user.username.charAt(0)}
+                        </div>
+                        <p className="mobile-username">Hi, {user.username}</p>
+                        <button onClick={handleLogout} className="mobile-logout-btn">
+                            Logout
+                        </button>
+                    </div>
+                )}
+
+                {/* 2. Menu Navigasi (Ditaruh di BAWAH profil) */}
                 <div className="sidebar-links">
                     {links.map((link, i) => (
-                        <a
+                        <Link
                             key={link.href}
-                            href={link.href}
+                            to={link.href}
                             onClick={onCloseMenu}
                             style={{ transitionDelay: `${i * 40}ms` }}
                         >
                             {link.label}
-                        </a>
+                        </Link>
                     ))}
+
+                    {!user && (
+                        <Link to="/login" onClick={onCloseMenu}>
+                            Login
+                        </Link>
+                    )}
                 </div>
             </aside>
         </>
