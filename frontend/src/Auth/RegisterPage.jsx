@@ -13,19 +13,17 @@ function RegisterPage() {
     const [email, setEmail] = useState("");
     const [schoolName, setSchoolName] = useState("");
     const [schoolEmail, setSchoolEmail] = useState("");
-    const [buktiFile, setBuktiFile] = useState(null);
-    const [buktiFileName, setBuktiFileName] = useState("");
+    const [teacherId, setTeacherId] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
     const [errorMessage, setErrorMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleRegister = async (e) => {
+    const handleRegisterStepOne = async (e) => {
         e.preventDefault();
         setErrorMessage("");
 
-        // Validasi Konfirmasi Password
         if (password !== confirmPassword) {
             setErrorMessage("Password dan Konfirmasi Password tidak cocok!");
             return;
@@ -33,37 +31,34 @@ function RegisterPage() {
 
         setIsLoading(true);
 
-        // Menggunakan FormData karena backend menerima Form Data + File Upload
-        const formData = new FormData();
-        formData.append("username", username);
-        formData.append("email", email);
-        formData.append("password", password);
-        formData.append("role", role);
-
-        if (role === "guru") {
-            formData.append("schoolName", schoolName);
-            formData.append("schoolEmail", schoolEmail);
-            if (buktiFile) {
-                formData.append("buktiFile", buktiFile);
-            }
-        }
+        const registerData = {
+            username,
+            email,
+            password,
+            role,
+            school_name: role === "guru" ? schoolName : null,
+            school_email: role === "guru" ? schoolEmail : null,
+            bukti_path: role === "guru" ? teacherId : null,
+        };
 
         try {
-            const response = await fetch("http://localhost:8000/register", {
+            // Kirim OTP ke email
+            const response = await fetch("http://localhost:8000/send-otp-register", {
                 method: "POST",
-                body: formData,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                alert("Registrasi berhasil! Silahkan login.");
-                navigate("/login");
+                // Pindah ke halaman Verifikasi OTP & bawa data registrasi
+                navigate("/verify-otp", { state: { registerData } });
             } else {
-                setErrorMessage(data.detail || "Registrasi gagal!");
+                setErrorMessage(data.detail || "Gagal mengirim OTP.");
             }
         } catch (error) {
-            console.error("Error register:", error);
+            console.error("Error register step 1:", error);
             setErrorMessage("Gagal terhubung ke server backend.");
         } finally {
             setIsLoading(false);
@@ -73,7 +68,7 @@ function RegisterPage() {
     return (
         <main className="login-page">
             <section className="login-background">
-                <form className="login-card" onSubmit={handleRegister}>
+                <form className="login-card" onSubmit={handleRegisterStepOne}>
                     <h1 className="login-logo">Graphelp_</h1>
                     <p className="login-subtitle">Silahkan daftarkan akun</p>
 
@@ -103,7 +98,6 @@ function RegisterPage() {
                         <input
                             id="username"
                             type="text"
-                            autoComplete="username"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             required
@@ -116,7 +110,6 @@ function RegisterPage() {
                         <input
                             id="email"
                             type="email"
-                            autoComplete="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
@@ -149,20 +142,13 @@ function RegisterPage() {
                             </div>
 
                             <div className="login-field">
-                                <label htmlFor="buktiFile">Bukti Mengajar (SK/Surat Tugas/ID Sekolah)</label>
-                                <label htmlFor="buktiFile" className="file-upload">
-                                    {buktiFileName || "Pilih file bukti"}
-                                </label>
+                                <label htmlFor="teacherId">Nomor Pengajar / NUPTK / NIP</label>
                                 <input
-                                    id="buktiFile"
-                                    type="file"
-                                    accept="image/*,.pdf"
-                                    className="file-input-hidden"
-                                    onChange={(e) => {
-                                        const file = e.target.files[0];
-                                        setBuktiFile(file);
-                                        setBuktiFileName(file?.name || "");
-                                    }}
+                                    id="teacherId"
+                                    type="text"
+                                    placeholder="Contoh: 1234567890"
+                                    value={teacherId}
+                                    onChange={(e) => setTeacherId(e.target.value)}
                                     required
                                 />
                             </div>
@@ -176,7 +162,6 @@ function RegisterPage() {
                             <input
                                 id="password"
                                 type={showPassword ? "text" : "password"}
-                                autoComplete="new-password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
@@ -209,7 +194,6 @@ function RegisterPage() {
                             <input
                                 id="confirmPassword"
                                 type={showConfirmPassword ? "text" : "password"}
-                                autoComplete="new-password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
@@ -235,12 +219,10 @@ function RegisterPage() {
                         </div>
                     </div>
 
-                    {/* Button */}
                     <button type="submit" className="login-button" disabled={isLoading}>
-                        {isLoading ? "Memproses..." : "Daftar"}
+                        {isLoading ? "Mengirim OTP..." : "Daftar"}
                     </button>
 
-                    {/* Login Link */}
                     <div className="register-text">
                         <span>Sudah punya akun?</span>
                         <Link to="/login">Masuk</Link>

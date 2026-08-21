@@ -7,7 +7,7 @@ function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
 
-    // State untuk menyimpan input
+    // State Input
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
@@ -18,24 +18,36 @@ function LoginPage() {
         setErrorMessage("");
         setIsLoading(true);
 
+        // FastAPI OAuth2 / Form handling membutuhkan x-www-form-urlencoded
+        const formData = new URLSearchParams();
+        formData.append("username", username);
+        formData.append("password", password);
+
         try {
             const response = await fetch("http://localhost:8000/login", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type": "application/x-www-form-urlencoded",
                 },
-                body: JSON.stringify({ username, password }),
+                body: formData,
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                // Simpan data user ke localStorage
-                localStorage.setItem("user", JSON.stringify(data.user));
+                // Simpan data user / token ke localStorage
+                localStorage.setItem("user", JSON.stringify(data.user || data));
                 alert("Login berhasil!");
-                navigate("/"); // Ubah rute ini sesuai halaman utama/dashboard kamu
+                navigate("/");
             } else {
-                setErrorMessage(data.detail || "Login gagal! Periksa username/password.");
+                // Konversi error object ke string agar React tidak crash
+                if (typeof data.detail === "string") {
+                    setErrorMessage(data.detail);
+                } else if (Array.isArray(data.detail)) {
+                    setErrorMessage(data.detail[0]?.msg || "Username atau password salah.");
+                } else {
+                    setErrorMessage("Login gagal! Periksa username/password.");
+                }
             }
         } catch (error) {
             console.error("Error login:", error);
@@ -110,7 +122,8 @@ function LoginPage() {
                             />
                             <span>Ingat saya</span>
                         </label>
-                        <a href="#">Lupa Password?</a>
+                        {/* Link ke Halaman Lupa Password */}
+                        <Link to="/forgot-password">Lupa Password?</Link>
                     </div>
 
                     {/* Button */}

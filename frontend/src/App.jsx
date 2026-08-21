@@ -4,7 +4,12 @@ import Homepage from "./pages/homepage";
 import LearnMorePage from "./pages/learnmorepage";
 import LoginPage from "./Auth/LoginPage";
 import RegisterPage from "./Auth/RegisterPage";
+import VerifyOtpPage from "./Auth/VerifyOtpPage";
+import ForgotPasswordPage from "./Auth/ForgotPasswordPage";
+import VerifyOtpForgotPage from "./Auth/VerifyOtpForgotPage";
+import ResetPasswordPage from "./Auth/ResetPasswordPage";
 import AnalyzePage from "./pages/analyzepage";
+import StudentPage from "./pages/StudentPage";
 
 import Layout from "./components/Layout";
 import "./style/component.css";
@@ -50,6 +55,32 @@ function App() {
                 <Route
                     path="/register"
                     element={<RegisterPage />}
+                />
+                <Route
+                    path="/verify-otp"
+                    element={<VerifyOtpPage />}
+                />
+
+                {/* Halaman Lupa Password */}
+                <Route
+                    path="/forgot-password"
+                    element={<ForgotPasswordPage />}
+                />
+                <Route
+                    path="/forgot-password/verify-otp"
+                    element={<VerifyOtpForgotPage />}
+                />
+                <Route
+                    path="/forgot-password/reset"
+                    element={<ResetPasswordPage />}
+                />
+                <Route
+                    path="/student"
+                    element={
+                    <Layout>
+                        <StudentPage />
+                    </Layout>
+                    }
                 />
             </Routes>
         </BrowserRouter>

@@ -24,9 +24,11 @@ function Navbar({ isMenuOpen, onCloseMenu }) {
         navigate("/login");
     };
 
+    // Suspends/Adds links based on teacher role
     const links = [
         { href: "/", label: "Home" },
         { href: "/analyze", label: "Analyze" },
+        ...(user?.role === "guru" ? [{ href: "/student", label: "Student" }] : []),
         { href: "/learn-more", label: "Learn More" },
     ];
 
@@ -50,11 +52,11 @@ function Navbar({ isMenuOpen, onCloseMenu }) {
             />
 
             <aside className={`sidebar ${isMenuOpen ? "open" : ""}`}>
-                {/* 1. Profil Khusus Mobile (Ditaruh di ATAS) */}
+                {/* Profil Khusus Mobile */}
                 {user && (
                     <div className="mobile-profile-container">
                         <div className="mobile-avatar">
-                            {user.username.charAt(0)}
+                            {user.username ? user.username.charAt(0).toUpperCase() : "U"}
                         </div>
                         <p className="mobile-username">Hi, {user.username}</p>
                         <button onClick={handleLogout} className="mobile-logout-btn">
@@ -63,7 +65,7 @@ function Navbar({ isMenuOpen, onCloseMenu }) {
                     </div>
                 )}
 
-                {/* 2. Menu Navigasi (Ditaruh di BAWAH profil) */}
+                {/* Menu Navigasi Sidebar */}
                 <div className="sidebar-links">
                     {links.map((link, i) => (
                         <Link
