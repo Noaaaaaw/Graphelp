@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useToast } from "../components/Toast";
 import "../style/auth.css";
 
 function ResetPasswordPage() {
     const navigate = useNavigate();
     const location = useLocation();
+    const toast = useToast();
 
     const email = location.state?.email;
     const otp = location.state?.otp;
@@ -60,7 +62,7 @@ function ResetPasswordPage() {
             const data = await response.json();
 
             if (response.ok) {
-                alert("Password berhasil diperbarui! Silahkan login.");
+                toast.success("Password berhasil diperbarui! Silahkan login.");
                 navigate("/login");
             } else {
                 setErrorMessage(data.detail || "Gagal memperbarui password.");
@@ -82,7 +84,6 @@ function ResetPasswordPage() {
 
                     {errorMessage && <p style={{ color: "#ff4d4d", fontSize: "14px", textAlign: "center" }}>{errorMessage}</p>}
 
-                    {/* Password Baru */}
                     <div className="login-field">
                         <label htmlFor="newPassword">Password</label>
                         <div className="password-wrapper">
@@ -113,7 +114,6 @@ function ResetPasswordPage() {
                         </div>
                     </div>
 
-                    {/* Konfirmasi Password */}
                     <div className="login-field">
                         <label htmlFor="confirmPassword">Konfirmasi Password</label>
                         <div className="password-wrapper">

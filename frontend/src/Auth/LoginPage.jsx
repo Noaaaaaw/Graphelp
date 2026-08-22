@@ -1,24 +1,22 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useToast } from "../components/Toast";
 import "../style/auth.css";
 
 function LoginPage() {
     const navigate = useNavigate();
+    const toast = useToast();
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
 
-    // State Input
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        setErrorMessage("");
         setIsLoading(true);
 
-        // FastAPI OAuth2 / Form handling membutuhkan x-www-form-urlencoded
         const formData = new URLSearchParams();
         formData.append("username", username);
         formData.append("password", password);
@@ -35,23 +33,21 @@ function LoginPage() {
             const data = await response.json();
 
             if (response.ok) {
-                // Simpan data user / token ke localStorage
                 localStorage.setItem("user", JSON.stringify(data.user || data));
-                alert("Login berhasil!");
+                toast.success("Login berhasil!");
                 navigate("/");
             } else {
-                // Konversi error object ke string agar React tidak crash
                 if (typeof data.detail === "string") {
-                    setErrorMessage(data.detail);
+                    toast.error(data.detail);
                 } else if (Array.isArray(data.detail)) {
-                    setErrorMessage(data.detail[0]?.msg || "Username atau password salah.");
+                    toast.error(data.detail[0]?.msg || "Username atau password salah.");
                 } else {
-                    setErrorMessage("Login gagal! Periksa username/password.");
+                    toast.error("Login gagal! Periksa username/password.");
                 }
             }
         } catch (error) {
             console.error("Error login:", error);
-            setErrorMessage("Gagal terhubung ke server backend.");
+            toast.error("Gagal terhubung ke server backend.");
         } finally {
             setIsLoading(false);
         }
@@ -64,9 +60,6 @@ function LoginPage() {
                     <h1 className="login-logo">Graphelp_</h1>
                     <p className="login-subtitle">Selamat Datang Kembali</p>
 
-                    {errorMessage && <p style={{ color: "#ff4d4d", fontSize: "14px", textAlign: "center" }}>{errorMessage}</p>}
-
-                    {/* Username */}
                     <div className="login-field">
                         <label htmlFor="username">Username</label>
                         <input
@@ -79,7 +72,6 @@ function LoginPage() {
                         />
                     </div>
 
-                    {/* Password */}
                     <div className="login-field">
                         <label htmlFor="password">Password</label>
                         <div className="password-wrapper">
@@ -112,7 +104,6 @@ function LoginPage() {
                         </div>
                     </div>
 
-                    {/* Remember & Forgot */}
                     <div className="login-options">
                         <label className="remember-me">
                             <input
@@ -122,16 +113,13 @@ function LoginPage() {
                             />
                             <span>Ingat saya</span>
                         </label>
-                        {/* Link ke Halaman Lupa Password */}
                         <Link to="/forgot-password">Lupa Password?</Link>
                     </div>
 
-                    {/* Button */}
                     <button type="submit" className="login-button" disabled={isLoading}>
                         {isLoading ? "Memproses..." : "Masuk"}
                     </button>
 
-                    {/* Register Link */}
                     <div className="register-text">
                         <span>Belum punya akun?</span>
                         <Link to="/register">Daftar disini</Link>

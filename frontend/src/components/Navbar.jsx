@@ -24,11 +24,16 @@ function Navbar({ isMenuOpen, onCloseMenu }) {
         navigate("/login");
     };
 
-    // Suspends/Adds links based on teacher role
+    // Menambahkan menu Student & History khusus untuk Role Guru
     const links = [
         { href: "/", label: "Home" },
         { href: "/analyze", label: "Analyze" },
-        ...(user?.role === "guru" ? [{ href: "/student", label: "Student" }] : []),
+        ...(user?.role === "guru" 
+            ? [
+                { href: "/student", label: "Student" },
+                { href: "/history", label: "History" }
+              ] 
+            : []),
         { href: "/learn-more", label: "Learn More" },
     ];
 
