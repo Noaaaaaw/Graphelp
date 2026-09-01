@@ -3221,20 +3221,43 @@ body {
 }
 
 .student-result-item {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    text-align: left;
+}
+.student-result-header {
     display: flex;
     justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid #f0ece0;
-    font-size: 13px;
-    color: #2b2b2b;
+    align-items: center;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
 }
-
+.student-result-desc {
+    color: #4b5563;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+}
+.student-result-top3 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.student-result-badge {
+    background: #f3f4f6;
+    border-radius: 999px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+    color: #374151;
+}
 .student-result-item:last-child {
     border-bottom: none;
 }
 
 .student-result-status {
-    color: #2f6f6b;
+    color: #d97706;
     font-weight: 700;
 }
 

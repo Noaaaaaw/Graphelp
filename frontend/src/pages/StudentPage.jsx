@@ -438,6 +438,7 @@ function StudentPage() {
                     </form>
 
                     {analysisResult && (
+                        
                         <div className="student-result-card">
                             <h2>Hasil Analisis Tulisan Tangan Kelas {gradeClass}</h2>
                             <p className="student-result-school">Sekolah: {schoolName}</p>
@@ -445,10 +446,23 @@ function StudentPage() {
                             <hr className="student-result-divider" />
 
                             <div className="student-result-list">
+                                
                                 {analysisResult.details?.map((res, idx) => (
                                     <div key={idx} className="student-result-item">
-                                        <span>{res.name}</span>
-                                        <span className="student-result-status">{res.status}</span>
+                                        <div className="student-result-header">
+                                            <span>{res.name}</span>
+                                            <span className="student-result-status">
+                                                Tipe {res.pred_type}: {res.type_name} ({res.confidence}%)
+                                            </span>
+                                        </div>
+                                        <p className="student-result-desc">{res.description}</p>
+                                        <div className="student-result-top3">
+                                            {res.top3?.map((t, i) => (
+                                                <span key={i} className="student-result-badge">
+                                                    #{i + 1} Tipe {t.type} - {t.name} ({t.prob.toFixed(1)}%)
+                                                </span>
+                                            ))}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
