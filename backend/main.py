@@ -2,6 +2,11 @@ from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 import auth
+from database import Base, engine
+import models
+from predict import predict_image
+
+Base.metadata.create_all(bind=engine)
 
 from predict import predict_image
 
