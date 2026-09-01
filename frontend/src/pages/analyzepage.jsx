@@ -448,6 +448,9 @@ function CameraView({ onClose, onCapture }) {
 function AnalyzePage() {
     const [activeTab, setActiveTab] = useState("foto");
     const [fileName, setFileName] = useState("");
+    const [fileObj, setFileObj] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [analysisResult, setAnalysisResult] = useState(null);
     const [hasDrawn, setHasDrawn] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const [cameraOpen, setCameraOpen] = useState(false);
@@ -457,6 +460,7 @@ function AnalyzePage() {
     function handleFileSelect(file) {
         if (file) {
             setFileName(file.name);
+            setFileObj(file);
         }
     }
 
@@ -466,7 +470,37 @@ function AnalyzePage() {
         const file = e.dataTransfer.files?.[0];
         handleFileSelect(file);
     }
+    async function handleAnalyze() {
+    if (!fileObj) return;
+    setIsLoading(true);
 
+    const formData = new FormData();
+    formData.append("school_name", "-");
+    formData.append("grade_class", "-");
+    formData.append("absence_numbers", "1");
+    formData.append("student_names", "Anda");
+    formData.append("ages", "0");
+    formData.append("genders", "L");
+    formData.append("handwriting_images", fileObj);
+
+    try {
+        const response = await fetch("http://localhost:8000/analyze-handwriting", {
+            method: "POST",
+            body: formData,
+        });
+        const data = await response.json();
+        if (response.ok) {
+            setAnalysisResult(data.details?.[0] || null);
+        } else {
+            alert(data.detail || "Gagal memproses analisis.");
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Tidak bisa terhubung ke server.");
+    } finally {
+        setIsLoading(false);
+    }
+}
     return (
         <main className="analyze-page">
 
@@ -543,6 +577,22 @@ function AnalyzePage() {
                 {activeTab === "foto" && (
 
                     <div className="analyze-panel">
+                        {analysisResult && (
+                            <div className="student-result-item" style={{ marginTop: "1.5rem" }}>
+                                <div className="student-result-header">
+                                    <span>Tipe {analysisResult.pred_type}: {analysisResult.type_name}</span>
+                                    <span className="student-result-status">{analysisResult.confidence}%</span>
+                                </div>
+                                <p className="student-result-desc">{analysisResult.description}</p>
+                                <div className="student-result-top3">
+                                    {analysisResult.top3?.map((t, i) => (
+                                        <span key={i} className="student-result-badge">
+                                            #{i + 1} Tipe {t.type} - {t.name} ({t.prob.toFixed(1)}%)
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         <h2>
                             Upload Foto Tulisan
@@ -585,8 +635,8 @@ function AnalyzePage() {
 
                         </div>
 
-                        <button type="button" className="analyze-submit" disabled={!fileName}>
-                            🚀 Lanjut ke Hasil Analisis
+                        <button type="button" className="analyze-submit" disabled={!fileName || isLoading} onClick={handleAnalyze}>
+                            {isLoading ? "Menganalisis..." : "🚀 Lanjut ke Hasil Analisis"}
                         </button>
 
                     </div>

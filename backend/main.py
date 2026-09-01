@@ -8,6 +8,9 @@ from predict import predict_image
 
 Base.metadata.create_all(bind=engine)
 
+from predict import predict_image
+
+
 app = FastAPI()
 
 app.add_middleware(
@@ -33,10 +36,12 @@ async def analyze_handwriting(
 ):
     details = []
     for i, image in enumerate(handwriting_images):
-        result_label = predict_image(image.file)
+        result = predict_image(image.file)
         details.append({
             "name": f"No. {absence_numbers[i]} - {student_names[i]}",
-            "status": result_label
+            "pred_type": result["pred_type"],
+            "confidence": result["confidence"],
+            "top3": result["top3"]
         })
 
     return {
