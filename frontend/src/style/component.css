@@ -5,7 +5,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 32px;
-    background: #ed6f50;
+    background: #16293a;
     position: relative;
     z-index: 1005;
 }
@@ -33,7 +33,9 @@
     align-items: center;
     justify-content: flex-end;
     padding: 0 32px;
-    background: #b6a261;
+    background: #1c3446;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     position: relative;
     z-index: 1000;
 }
@@ -76,11 +78,11 @@
     border: none;
     cursor: pointer;
     padding: 0;
-    z-index: 1006; /* Menjaga tombol tetap berada di layer paling atas */
+    z-index: 1006;
     flex-shrink: 0;
     position: relative;
-    opacity: 1 !important; /* Memastikan ikon tidak transparan */
-    pointer-events: auto !important; /* Memastikan ikon tetap bisa diklik */
+    opacity: 1 !important;
+    pointer-events: auto !important;
 }
 
 .hamburger span {
@@ -121,7 +123,6 @@
     left: 0;
     bottom: 0;
     width: 190px;
-    /* Warna dibuat lebih gelap dari Navbar (#b6a261) agar pemisah kontras */
     background: linear-gradient(180deg, #8c793e 0%, #7a6832 100%);
     transform: translateX(-100%);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -184,7 +185,7 @@
     margin-top: 0;
     margin-bottom: 16px;
     padding-bottom: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.25); /* Garis pembatas ditaruh di bawah */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 .mobile-avatar {
@@ -235,7 +236,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #ed6f50;
+    background: #1c3446;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
     color: white;
     font-size: 13px;
 }

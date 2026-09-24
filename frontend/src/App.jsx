@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Homepage from "./pages/homepage";
-import LearnMorePage from "./pages/learnmorepage";
 import LoginPage from "./Auth/LoginPage";
 import RegisterPage from "./Auth/RegisterPage";
 import VerifyOtpPage from "./Auth/VerifyOtpPage";
@@ -11,6 +10,7 @@ import ResetPasswordPage from "./Auth/ResetPasswordPage";
 import AnalyzePage from "./pages/analyzepage";
 import StudentPage from "./pages/StudentPage";
 import HistoryPage from "./pages/HistoryPage";
+import ResultsPage from "./pages/resultspage";
 import { ToastProvider } from "./components/Toast";
 
 import Layout from "./components/Layout";
@@ -33,15 +33,6 @@ function App() {
                     />
 
                     <Route
-                        path="/learn-more"
-                        element={
-                            <Layout>
-                                <LearnMorePage />
-                            </Layout>
-                        }
-                    />
-
-                    <Route
                         path="/analyze"
                         element={
                             <Layout>
@@ -50,33 +41,15 @@ function App() {
                         }
                     />
 
-                    {/* Halaman auth, tanpa Header/Navbar/Footer */}
                     <Route
-                        path="/login"
-                        element={<LoginPage />}
-                    />
-                    <Route
-                        path="/register"
-                        element={<RegisterPage />}
-                    />
-                    <Route
-                        path="/verify-otp"
-                        element={<VerifyOtpPage />}
+                        path="/analyze/result"
+                        element={
+                            <Layout>
+                                <ResultsPage />
+                            </Layout>
+                        }
                     />
 
-                    {/* Halaman Lupa Password */}
-                    <Route
-                        path="/forgot-password"
-                        element={<ForgotPasswordPage />}
-                    />
-                    <Route
-                        path="/forgot-password/verify-otp"
-                        element={<VerifyOtpForgotPage />}
-                    />
-                    <Route
-                        path="/forgot-password/reset"
-                        element={<ResetPasswordPage />}
-                    />
                     <Route
                         path="/history"
                         element={
@@ -85,14 +58,25 @@ function App() {
                             </Layout>
                         }
                     />
+
                     <Route
                         path="/student"
                         element={
-                        <Layout>
-                            <StudentPage />
-                        </Layout>
+                            <Layout>
+                                <StudentPage />
+                            </Layout>
                         }
                     />
+
+                    {/* Halaman auth, tanpa Header/Navbar/Footer */}
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/verify-otp" element={<VerifyOtpPage />} />
+
+                    {/* Halaman Lupa Password */}
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/forgot-password/verify-otp" element={<VerifyOtpForgotPage />} />
+                    <Route path="/forgot-password/reset" element={<ResetPasswordPage />} />
                 </Routes>
             </BrowserRouter>
         </ToastProvider>
