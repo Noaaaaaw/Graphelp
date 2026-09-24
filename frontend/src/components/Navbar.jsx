@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useToast } from "./Toast";
 
 function Navbar({ isMenuOpen, onCloseMenu }) {
     const navigate = useNavigate();
+    const toast = useToast();
     const [user, setUser] = useState(null);
 
     useEffect(() => {
@@ -24,17 +26,28 @@ function Navbar({ isMenuOpen, onCloseMenu }) {
         navigate("/login");
     };
 
-    // Menambahkan menu Student & History khusus untuk Role Guru
+    // Handler khusus untuk navigasi Analyze agar dicek dulu status login-nya
+    const handleAnalyzeClick = (e, callback) => {
+        e.preventDefault();
+        if (!user) {
+            toast.error("Silakan login terlebih dahulu untuk mengakses fitur Analyze.");
+            navigate("/login");
+        } else {
+            navigate("/analyze");
+        }
+        if (callback) callback();
+    };
+
+    // Daftar link navigasi (menu "Learn More" sudah dihapus)
     const links = [
         { href: "/", label: "Home" },
-        { href: "/analyze", label: "Analyze" },
-        ...(user?.role === "guru" 
+        { href: "/analyze", label: "Analyze", isProtected: true },
+        ...(user?.role === "guru"
             ? [
                 { href: "/student", label: "Student" },
                 { href: "/history", label: "History" }
-              ] 
+              ]
             : []),
-        { href: "/learn-more", label: "Learn More" },
     ];
 
     return (
@@ -42,9 +55,20 @@ function Navbar({ isMenuOpen, onCloseMenu }) {
             <nav className="navbar">
                 <div className="navbar-links">
                     {links.map((link) => (
-                        <Link key={link.href} to={link.href}>
-                            {link.label}
-                        </Link>
+                        link.isProtected ? (
+                            <a
+                                key={link.href}
+                                href={link.href}
+                                onClick={(e) => handleAnalyzeClick(e)}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {link.label}
+                            </a>
+                        ) : (
+                            <Link key={link.href} to={link.href}>
+                                {link.label}
+                            </Link>
+                        )
                     ))}
 
                     {!user && <Link to="/login">Login</Link>}
@@ -73,14 +97,25 @@ function Navbar({ isMenuOpen, onCloseMenu }) {
                 {/* Menu Navigasi Sidebar */}
                 <div className="sidebar-links">
                     {links.map((link, i) => (
-                        <Link
-                            key={link.href}
-                            to={link.href}
-                            onClick={onCloseMenu}
-                            style={{ transitionDelay: `${i * 40}ms` }}
-                        >
-                            {link.label}
-                        </Link>
+                        link.isProtected ? (
+                            <a
+                                key={link.href}
+                                href={link.href}
+                                onClick={(e) => handleAnalyzeClick(e, onCloseMenu)}
+                                style={{ transitionDelay: `${i * 40}ms`, cursor: "pointer" }}
+                            >
+                                {link.label}
+                            </a>
+                        ) : (
+                            <Link
+                                key={link.href}
+                                to={link.href}
+                                onClick={onCloseMenu}
+                                style={{ transitionDelay: `${i * 40}ms` }}
+                            >
+                                {link.label}
+                            </Link>
+                        )
                     ))}
 
                     {!user && (

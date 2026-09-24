@@ -239,37 +239,109 @@ function StudentPage() {
         <main className="student-page">
 
             <section className="student-hero">
-                <span className="student-hero-blob student-hero-blob-1" />
-                <span className="student-hero-blob student-hero-blob-2" />
-                <span className="student-hero-blob student-hero-blob-3" />
 
-                <span className="student-float student-float-1"><BookIcon /></span>
-                <span className="student-float student-float-2"><PencilFloatIcon /></span>
-                <span className="student-float student-float-3"><PenFloatIcon /></span>
-                <span className="student-float student-float-4"><EraserFloatIcon /></span>
-                <span className="student-float student-float-5"><RulerFloatIcon /></span>
-                <span className="student-float student-float-6"><BookIcon /></span>
-                <span className="student-float student-float-7"><GraduationCapIcon /></span>
-                <span className="student-float student-float-8"><AppleIcon /></span>
-                <span className="student-float student-float-9"><NotebookFloatIcon /></span>
-                <span className="student-float student-float-10"><PencilFloatIcon /></span>
+    {/* === BACKGROUND SPACE === */}
+    <div className="space-glow space-glow-1" />
+    <div className="space-glow space-glow-2" />
 
-                <span className="student-hero-star student-hero-star-1"><StarFloatIcon /></span>
-                <span className="student-hero-star student-hero-star-2"><StarFloatIcon /></span>
-                <span className="student-hero-star student-hero-star-3"><StarFloatIcon /></span>
-                <span className="student-hero-star student-hero-star-4"><StarFloatIcon /></span>
-                <span className="student-hero-star student-hero-star-5"><StarFloatIcon /></span>
+    {/* === STARS === */}
+    <span className="space-star star-1">✦</span>
+    <span className="space-star star-2">✦</span>
+    <span className="space-star star-3">✧</span>
+    <span className="space-star star-4">✦</span>
+    <span className="space-star star-5">✧</span>
+    <span className="space-star star-6">✦</span>
+    <span className="space-star star-7">✧</span>
+    <span className="space-star star-8">✦</span>
+    <span className="space-star star-9">✧</span>
+    <span className="space-star star-10">✦</span>
 
-                <span className="student-hero-dot sd-1" />
-                <span className="student-hero-dot sd-2" />
-                <span className="student-hero-dot sd-3" />
-                <span className="student-hero-dot sd-4" />
-                <span className="student-hero-dot sd-5" />
-                <span className="student-hero-dot sd-6" />
+    {/* titik-titik kecil */}
+    <span className="tiny-star tiny-star-1" />
+    <span className="tiny-star tiny-star-2" />
+    <span className="tiny-star tiny-star-3" />
+    <span className="tiny-star tiny-star-4" />
+    <span className="tiny-star tiny-star-5" />
+    <span className="tiny-star tiny-star-6" />
+    <span className="tiny-star tiny-star-7" />
+    <span className="tiny-star tiny-star-8" />
+    <span className="tiny-star tiny-star-9" />
+    <span className="tiny-star tiny-star-10" />
 
-                <h1>Analisis Tulisan Tangan Siswa</h1>
-                <p>Unggah sampel tulisan tangan siswa per kelas untuk dilakukan analisis.</p>
-            </section>
+    {/* === BULAN === */}
+    <div className="space-moon">
+        <span className="moon-crater moon-crater-1" />
+        <span className="moon-crater moon-crater-2" />
+        <span className="moon-crater moon-crater-3" />
+        <span className="moon-crater moon-crater-4" />
+    </div>
+
+    {/* === MATAHARI === */}
+    <div className="space-sun">
+        <div className="sun-core" />
+    </div>
+
+    {/* === PLANET === */}
+    <div className="space-planet planet-orange" />
+    <div className="space-planet planet-green" />
+    <div className="space-planet planet-purple" />
+
+    {/* === ALIEN === */}
+    <div className="space-alien">
+        <div className="alien-antenna alien-antenna-left" />
+        <div className="alien-antenna alien-antenna-right" />
+
+        <div className="alien-head">
+            <span className="alien-eye alien-eye-left" />
+            <span className="alien-eye alien-eye-right" />
+            <span className="alien-mouth" />
+        </div>
+
+        <div className="alien-body">
+            <span className="alien-arm alien-arm-left" />
+            <span className="alien-arm alien-arm-right" />
+        </div>
+    </div>
+
+    {/* === METEOR / BINTANG JATUH === */}
+
+<div className="space-meteor meteor-1" />
+<div className="space-meteor meteor-2" />
+<div className="space-meteor meteor-3" />
+
+    {/* ==================================================
+        UFO TERBANG ZIGZAG
+        ================================================== */}
+    <div className="flying-ufo">
+
+        <div className="ufo-beam" />
+
+        <div className="ufo-dome" />
+
+        <div className="ufo-body">
+            <span className="ufo-light ufo-light-1" />
+            <span className="ufo-light ufo-light-2" />
+            <span className="ufo-light ufo-light-3" />
+            <span className="ufo-light ufo-light-4" />
+        </div>
+
+    </div>
+
+    {/* === HERO CONTENT === */}
+    <div className="student-hero-content">
+
+        <h1>
+            Analisis Tulisan Tangan Siswa
+        </h1>
+
+        <p>
+            Unggah sampel tulisan tangan siswa per kelas
+            untuk dilakukan analisis menggunakan AI.
+        </p>
+
+    </div>
+
+</section>
 
             <section className="student-cardz">
                 <section className="student-container">
