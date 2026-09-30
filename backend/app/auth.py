@@ -3,10 +3,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 
-from database import get_db  
-from models import User      
-from schemas import UserRegister, OTPRequest, ResetPasswordRequest
-from utils import otp_storage, generate_otp, send_otp_email
+from .database import get_db
+from .models import User
+from .schemas import UserRegister, OTPRequest, ResetPasswordRequest
+from .utils import otp_storage, generate_otp, send_otp_email
 
 router = APIRouter()
 pwd_context = CryptContext(schemes=["pbkdf2_sha256", "bcrypt"], deprecated="auto")

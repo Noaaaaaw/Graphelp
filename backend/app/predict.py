@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 from torchvision import transforms, models
@@ -18,7 +19,10 @@ ENNEAGRAM_INFO = {
 }
 # ================================================================
 
-def load_enneagram_model(model_path='best_enneagram_model.pth'):
+def load_enneagram_model(model_path=None):
+    if model_path is None:
+        model_path = os.path.join(os.path.dirname(__file__), "..", "ml_models", "best_enneagram_model.pth")
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     if hasattr(models, 'EfficientNet_B0_Weights'):
