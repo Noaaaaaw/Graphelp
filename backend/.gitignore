@@ -7,3 +7,7 @@ venv/
 # Python Cache & Artifacts
 __pycache__/
 *.pyc
+
+.agents/
+
+skills-lock.json
