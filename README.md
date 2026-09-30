@@ -65,7 +65,7 @@ Pada saat backend dimuat, `predict.py` memuat bobot `backend/best_enneagram_mode
 
 - Analisis satu gambar tulisan tangan melalui halaman **Analyze**.
 - Analisis beberapa siswa dalam satu pengiriman melalui halaman **Student** untuk akun berperan `guru`.
-- Hasil prediksi berupa nomor tipe Enneagram, confidence, dan tiga probabilitas tertinggi.
+- Halaman **Results** yang menampilkan tipe Enneagram, confidence (grafik ring), top-3 probabilitas, interpretasi kepribadian, kekuatan & tantangan, rekomendasi, serta tombol unduh TXT/PDF dan share.
 - Pendaftaran akun dengan OTP email, login, lupa kata sandi, dan reset kata sandi.
 - Penyimpanan data akun pada database SQLAlchemy yang ditentukan melalui `DATABASE_URL`.
 - Antarmuka React dengan unggah gambar, drag-and-drop, serta tampilan kamera dan kanvas tulis manual.
@@ -75,19 +75,23 @@ Pada saat backend dimuat, `predict.py` memuat bobot `backend/best_enneagram_mode
 ```text
 Graphelp/
 ├── backend/
-│   ├── main.py                    # Aplikasi FastAPI dan endpoint prediksi
-│   ├── predict.py                 # Pemuatan EfficientNet-B0 dan inferensi gambar
-│   ├── auth.py                    # Endpoint autentikasi dan OTP
-│   ├── database.py                # Koneksi dan sesi SQLAlchemy
-│   ├── models.py                  # Model tabel User
-│   ├── schemas.py                 # Skema validasi Pydantic
-│   ├── utils.py                   # Generator dan pengiriman OTP email
-│   └── best_enneagram_model.pth   # Bobot model prediksi
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── main.py                # Aplikasi FastAPI dan endpoint prediksi
+│   │   ├── predict.py             # Pemuatan EfficientNet-B0 dan inferensi gambar
+│   │   ├── auth.py                # Endpoint autentikasi dan OTP
+│   │   ├── database.py            # Koneksi dan sesi SQLAlchemy
+│   │   ├── models.py              # Model tabel User
+│   │   ├── schemas.py             # Skema validasi Pydantic
+│   │   └── utils.py               # Generator dan pengiriman OTP email
+│   └── ml_models/
+│       └── best_enneagram_model.pth  # Bobot model prediksi
 ├── frontend/
 │   └── src/
 │       ├── pages/
 │       │   ├── homepage.jsx       # Halaman beranda
 │       │   ├── analyzepage.jsx    # Analisis satu gambar
+│       │   ├── resultspage.jsx    # Halaman hasil analisis
 │       │   ├── StudentPage.jsx    # Analisis banyak siswa untuk guru
 │       │   └── HistoryPage.jsx    # Antarmuka riwayat guru
 │       ├── Auth/                  # Halaman autentikasi
@@ -100,20 +104,21 @@ Graphelp/
 
 | Bagian | Teknologi |
 | --- | --- |
-| Frontend | React, Vite, React Router |
+| Frontend | React 19, Vite, React Router 7 |
 | Backend | FastAPI, Uvicorn |
-| AI | PyTorch, Torchvision, EfficientNet-B0 |
+| AI | PyTorch (CPU-only di `requirements.txt`), Torchvision, EfficientNet-B0 |
 | Pemrosesan gambar | Pillow, NumPy |
-| Database | SQLAlchemy, PostgreSQL driver (`psycopg2-binary`) |
+| Database | SQLAlchemy (dialect bebas); `psycopg2-binary` tersedia untuk PostgreSQL |
 | Autentikasi | Passlib (`pbkdf2_sha256`/`bcrypt`), OTP SMTP Gmail |
 
 ## Prasyarat
 
-- Python sesuai kebutuhan dependensi proyek (konfigurasi proyek menyatakan Python 3.13 atau lebih baru).
+- Python 3.13 atau lebih baru (sesuai `requires-python` pada `pyproject.toml`).
 - Node.js dan npm.
-- Database yang URL koneksinya dapat diberikan ke SQLAlchemy.
+- Database yang URL koneksinya dapat diberikan ke SQLAlchemy. PostgreSQL direkomendasikan; `psycopg2-binary` sudah ada di `requirements.txt`. SQLite juga dapat dipakai untuk lokal.
 - Akun SMTP Gmail untuk fitur OTP.
-- File model `backend/best_enneagram_model.pth` harus tersedia.
+- File model `backend/ml_models/best_enneagram_model.pth` harus tersedia.
+- **Catatan GPU:** `requirements.txt` menyertakan `torch==2.13.0+cpu` (CPU-only). Jika menggunakan GPU/CUDA, instal PyTorch versi CUDA secara terpisah sesuai panduan di [pytorch.org](https://pytorch.org/get-started/locally/).
 
 ## Konfigurasi
 
@@ -154,9 +159,9 @@ npm run dev
 Perintah tersebut menjalankan FastAPI pada `http://localhost:8000` dan Vite pada alamat yang ditampilkan di terminal (secara umum `http://localhost:5173`). Anda juga dapat menjalankannya secara terpisah:
 
 ```bash
-# Terminal 1
+# Terminal 1 — jalankan dari folder backend/
 cd backend
-..\\venv\\Scripts\\python.exe -m uvicorn main:app --reload
+..\venv\Scripts\python.exe -m uvicorn app.main:app --reload
 
 # Terminal 2
 cd frontend
@@ -213,8 +218,9 @@ Contoh respons yang benar-benar dibentuk oleh `main.py`:
 
 ## Catatan Implementasi Saat Ini
 
-- Fungsi prediksi memiliki `type_name` dan `description`, tetapi `main.py` saat ini hanya meneruskan `pred_type`, `confidence`, dan `top3` ke `details`. Karena itu, `type_name` dan deskripsi yang hendak ditampilkan frontend belum tersedia pada respons endpoint.
+- Fungsi prediksi memiliki `type_name` dan `description`, tetapi `main.py` saat ini hanya meneruskan `pred_type`, `confidence`, dan `top3` ke `details`. `ResultsPage` mengatasi ketiadaan field ini dengan fallback ke data `TYPE_INFO` lokal yang sudah ditulis lengkap di sisi frontend — sehingga nama tipe, interpretasi, kekuatan, tantangan, dan rekomendasi tetap ditampilkan.
 - Kolom `school_name`, `grade_class`, usia, dan gender diterima endpoint analisis, namun hasil analisis belum disimpan ke database. Model database yang tersedia hanya `User`.
 - `HistoryPage.jsx` mencoba memanggil `/analysis-history`, tetapi endpoint tersebut belum didefinisikan di backend. Jika pemanggilan gagal, halaman menggunakan data contoh di sisi klien.
 - Tab **Tulis Manual** dan **Scan Kamera** telah tersedia di antarmuka, tetapi tombol analisisnya belum mengirim data ke backend. Alur yang tersambung penuh saat ini adalah unggah file gambar.
 - OTP disimpan di memori proses (`otp_storage`), sehingga tidak persisten saat server dimulai ulang dan belum memiliki mekanisme kedaluwarsa eksplisit.
+- Nama proyek di `pyproject.toml` (baris 2) dan subjek email OTP di `utils.py` (baris 22) mengandung typo `graphhelp`/`Graphhelp`; nama yang benar adalah `Graphelp`. Perbaikan kode belum dilakukan.

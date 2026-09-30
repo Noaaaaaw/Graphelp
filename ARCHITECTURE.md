@@ -19,6 +19,7 @@ flowchart LR
     subgraph FE[React Frontend]
         HP[Homepage]
         AP[AnalyzePage]
+        RP[ResultsPage]
         SP[StudentPage]
         HY[HistoryPage]
         AU[Halaman autentikasi]
@@ -41,6 +42,7 @@ flowchart LR
     U --> FE
     HP --> AP
     AP -->|POST multipart/form-data| MAIN
+    AP -->|navigate + state| RP
     SP -->|POST multipart/form-data| MAIN
     MAIN --> PRED
     PRED --> ML
@@ -137,7 +139,7 @@ Tidak ada model atau tabel untuk sampel tulisan tangan, hasil prediksi, kelas, m
 1. `load_enneagram_model()` memilih perangkat CUDA jika tersedia; jika tidak, CPU.
 2. Model dasar adalah `torchvision.models.efficientnet_b0` dengan bobot EfficientNet-B0 default apabila API bobot tersedia; fallback memakai `pretrained=True`.
 3. Classifier bawaan diganti menjadi `Dropout(p=0.3)` dan `Linear(in_features, 9)`, sesuai sembilan kelas Enneagram.
-4. Checkpoint `best_enneagram_model.pth` dimuat. Kode mendukung checkpoint berupa dictionary dengan key `model_state_dict` ataupun state dictionary langsung.
+4. Checkpoint dimuat dari path default `../ml_models/best_enneagram_model.pth` relatif terhadap file `predict.py` (yaitu `backend/ml_models/best_enneagram_model.pth` dari root repo). Kode mendukung checkpoint berupa dictionary dengan key `model_state_dict` ataupun state dictionary langsung.
 5. Model dipindahkan ke perangkat terpilih dan dipasang pada mode evaluasi (`eval()`).
 
 Ketika `predict_image(image_file)` dipanggil, prosesnya adalah:
@@ -179,15 +181,16 @@ Request analisis tidak memakai schema Pydantic; validasinya bergantung pada dekl
 
 | Halaman/komponen | Peran dalam arsitektur |
 | --- | --- |
-| `Homepage` | Halaman informasi/landing. Menggunakan hook `useRevealOnScroll`, `IntersectionObserver`, dan asset gambar. Tidak memanggil backend. Tombol “Mulai Analisis” belum memiliki handler navigasi pada file ini. |
-| `AnalyzePage` | Antarmuka analisis personal. Tab unggah foto terhubung ke backend dan menampilkan hasil. Tab tulis manual serta kamera menyediakan UI, namun belum memanggil endpoint analisis. |
+| `Homepage` | Halaman informasi/landing. Menggunakan hook `useRevealOnScroll`, `IntersectionObserver`, dan asset gambar. Tidak memanggil backend. Tombol “Mulai Analisis” memiliki handler `handleMulaiAnalisis` yang memeriksa `localStorage` — jika pengguna belum login, menampilkan toast error dan mengarahkan ke `/login`; jika sudah login, mengarahkan ke `/analyze`. |
+| `AnalyzePage` | Antarmuka analisis personal. Tab unggah foto terhubung ke backend dan meneruskan hasil ke `ResultsPage` via `navigate('/analyze/result', { state })`. Tab tulis manual serta kamera menyediakan UI, namun belum memanggil endpoint analisis. |
+| `ResultsPage` | Halaman hasil analisis di route `/analyze/result`. Menerima data via `location.state` dari `AnalyzePage`. Menampilkan confidence ring, top-3 probabilitas, interpretasi, kekuatan & tantangan, rekomendasi, dan tombol unduh TXT/PDF serta share. Menggunakan `TYPE_INFO` lokal sebagai fallback ketika `type_name` dan `description` tidak dikirim backend. |
 | `SignaturePad` | Komponen internal `AnalyzePage` yang menggambar pada `<canvas>` menggunakan Pointer Events. Mendukung pena, penghapus, ukuran goresan, dan hapus kanvas. Data kanvas belum dikonversi/dikirim ke backend. |
 | `CameraView` | Komponen internal `AnalyzePage` yang meminta izin kamera melalui `navigator.mediaDevices.getUserMedia`, memotong frame persegi ke canvas, lalu menghasilkan data URL PNG. Hasil tangkapan belum dikirim ke backend. |
-| `HistoryPage` | Antarmuka riwayat untuk role `guru`. Membaca `user` dari `localStorage`, melakukan pengecekan role di sisi klien, dan mencoba mengambil riwayat. |
+| `HistoryPage` | Antarmuka riwayat untuk role `guru`. Membaca `user` dari `localStorage`, melakukan pengecekan role di sisi klien, dan mencoba mengambil riwayat. Tombol “Lihat Detail” menavigasi ke `/history/<id>`, tetapi route `/history/:id` belum didefinisikan di `App.jsx`. |
 | `StudentPage` | Halaman tambahan yang dirutekan pada `App.jsx` untuk role `guru`; membentuk data banyak siswa dan mengirimkannya ke endpoint analisis yang sama. |
 | Halaman auth | `LoginPage`, `RegisterPage`, halaman OTP, dan reset password memanggil endpoint autentikasi FastAPI serta menyimpan data login pada `localStorage`. |
 
-`App.jsx` menggunakan `BrowserRouter` dan mendefinisikan route untuk halaman publik, autentikasi, analisis, siswa, dan riwayat. `Navbar` menampilkan tautan `Student` dan `History` bila objek user pada `localStorage` memiliki `role === "guru"`.
+`App.jsx` menggunakan `BrowserRouter` dan mendefinisikan route untuk halaman publik, autentikasi, analisis, hasil analisis (`/analyze/result`), siswa, dan riwayat. `Navbar` menampilkan tautan `Student` dan `History` bila objek user pada `localStorage` memiliki `role === "guru"`. Fungsi logout (`handleLogout`) tersedia di `Navbar` dan menghapus key `user` dari `localStorage`, mereset state komponen, lalu mengarahkan ke `/login`. Tombol logout hanya muncul di **sidebar mobile**; tidak ada tombol logout di navbar desktop.
 
 ### Komunikasi Frontend ke Backend
 
@@ -263,12 +266,13 @@ Bagian berikut adalah catatan keamanan berdasarkan implementasi saat ini, bukan 
 
 ## 7. Batasan dan Catatan Teknis
 
-- **Catatan integrasi riwayat:** `HistoryPage.jsx` memanggil `GET /analysis-history?user_id=...`, sedangkan endpoint tersebut tidak ditemukan pada `main.py` maupun `auth.py`. Saat request gagal, halaman mengisi dua data contoh di sisi klien. Tidak ditemukan tabel atau model riwayat analisis.
+- **Catatan integrasi riwayat:** `HistoryPage.jsx` memanggil `GET /analysis-history?user_id=...`, sedangkan endpoint tersebut tidak ditemukan pada `main.py` maupun `auth.py`. Saat request gagal, halaman mengisi dua data contoh di sisi klien. Tidak ditemukan tabel atau model riwayat analisis. Selain itu, tombol "Lihat Detail" menavigasi ke `/history/<id>`, tetapi route `/history/:id` belum didefinisikan di `App.jsx`.
 - **Catatan konfigurasi API:** URL `http://localhost:8000` ditulis langsung dalam beberapa halaman frontend. Konfigurasi berbasis environment akan diperlukan bila frontend dan backend berada pada host/port lain.
-- **Catatan kontrak respons:** `predict_image()` membuat `type_name` dan `description`, tetapi `main.py` tidak meneruskan keduanya ke `details`. `AnalyzePage` dan `StudentPage` mencoba menampilkannya.
+- **Catatan kontrak respons:** `predict_image()` membuat `type_name` dan `description`, tetapi `main.py` tidak meneruskan keduanya ke `details`. `ResultsPage` mengatasi ini dengan fallback ke `TYPE_INFO` lokal sehingga tampilan tetap informatif, namun kontrak API tetap perlu diselaraskan.
 - **Catatan kelengkapan input:** `school_name`, `grade_class`, `ages`, dan `genders` diterima oleh endpoint analisis, namun tidak dipakai pada prediksi maupun disimpan oleh backend saat ini.
 - **Catatan keselarasan daftar:** Endpoint mengakses `absence_numbers[i]` dan `student_names[i]` untuk setiap gambar tanpa pemeriksaan jumlah elemen. Frontend membentuk daftar secara paralel, tetapi kontrak API perlu menjaga jumlah field tetap konsisten.
 - **Catatan fitur UI:** `SignaturePad` dan `CameraView` menghasilkan input di browser, tetapi belum menyalurkan hasilnya ke endpoint prediksi. Tab upload file adalah alur `AnalyzePage` yang sudah tersambung.
-- **Catatan validasi OTP di UI:** halaman verifikasi OTP lupa kata sandi tidak menghubungi server; validasi sesungguhnya baru terjadi pada endpoint reset. Hal ini tetap aman di sisi keputusan backend, tetapi pengalaman pengguna dapat berbeda dari label halaman “Verifikasi”.
+- **Catatan validasi OTP di UI:** halaman verifikasi OTP lupa kata sandi tidak menghubungi server; validasi sesungguhnya baru terjadi pada endpoint reset. Hal ini tetap aman di sisi keputusan backend, tetapi pengalaman pengguna dapat berbeda dari label halaman "Verifikasi".
 - **Catatan metadata model:** `ENNEAGRAM_INFO` menyimpan deskripsi placeholder `"..."`. Nama tipe dipakai pada top-3, namun deskripsi belum memiliki konten informatif.
-- **Catatan siklus hidup model:** Model dimuat saat import `predict.py`. Ini menghindari pemuatan ulang per request, tetapi membuat startup backend bergantung pada keberadaan file bobot dan ketersediaan dependensi PyTorch.
+- **Catatan siklus hidup model:** Model dimuat saat import `predict.py`. Ini menghindari pemuatan ulang per request, tetapi membuat startup backend bergantung pada keberadaan file bobot (`backend/ml_models/best_enneagram_model.pth`) dan ketersediaan dependensi PyTorch.
+- **Catatan typo nama proyek:** Subjek email OTP pada `utils.py` baris 22 mengandung typo `Graphhelp`; nama yang benar adalah `Graphelp`. Nama yang sama juga muncul pada `pyproject.toml` baris 2. Perbaikan kode belum dilakukan.

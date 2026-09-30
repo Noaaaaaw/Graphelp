@@ -17,9 +17,9 @@ Library utama backend yang digunakan oleh import kode meliputi FastAPI, SQLAlche
 
 ### Model AI
 
-Backend memuat `best_enneagram_model.pth` dari direktori kerja backend saat `predict.py` diimpor. Pada workspace ini file tersebut tersedia di `backend/best_enneagram_model.pth`.
+Backend memuat `best_enneagram_model.pth` dari path `../ml_models/` relatif terhadap `predict.py` saat modul diimpor. Pada workspace ini file tersebut tersedia di `backend/ml_models/best_enneagram_model.pth`.
 
-> **Perlu dikonfirmasi setelah clone:** pastikan file `backend/best_enneagram_model.pth` ikut tersedia. Jika tidak ada pada salinan repository Anda, file bobot model perlu dilengkapi secara manual sebelum backend dapat dijalankan.
+> **Perlu dikonfirmasi setelah clone:** pastikan file `backend/ml_models/best_enneagram_model.pth` ikut tersedia. Jika tidak ada pada salinan repository Anda, file bobot model perlu dilengkapi secara manual sebelum backend dapat dijalankan.
 
 ## 2. Instalasi Backend
 
@@ -33,19 +33,19 @@ Backend memuat `best_enneagram_model.pth` dari direktori kerja backend saat `pre
 2. Buat virtual environment.
 
    ```bash
-   python -m venv .venv
+   python -m venv venv
    ```
 
 3. Aktifkan virtual environment.
 
    ```powershell
    # Windows PowerShell
-   .\.venv\Scripts\Activate.ps1
+   .\venv\Scripts\Activate.ps1
    ```
 
    ```bash
    # macOS/Linux
-   source .venv/bin/activate
+   source venv/bin/activate
    ```
 
 4. Instal dependensi dari file yang sudah tersedia di repository.
@@ -59,10 +59,10 @@ Backend memuat `best_enneagram_model.pth` dari direktori kerja backend saat `pre
 5. Pastikan file model berada di lokasi berikut.
 
    ```text
-   backend/best_enneagram_model.pth
+   backend/ml_models/best_enneagram_model.pth
    ```
 
-   Jalankan backend dari folder `backend` agar path relatif `best_enneagram_model.pth` pada `predict.py` sesuai.
+   Jalankan backend dari folder `backend` agar path relatif `../ml_models/best_enneagram_model.pth` pada `predict.py` sesuai.
 
 ## 3. Konfigurasi Environment Variables (`.env`)
 
@@ -93,66 +93,48 @@ Alternatif SQLite dapat berbentuk berikut bila sesuai kebutuhan lokal:
 DATABASE_URL=sqlite:///./graphelp.db
 ```
 
-Jenis database produksi yang dipakai proyek tetap **perlu dikonfirmasi**, karena `database.py` hanya membaca URL dan tidak menetapkan dialect tertentu.
+PostgreSQL direkomendasikan karena driver-nya (`psycopg2-binary`) sudah tersedia di `requirements.txt`. SQLite cocok untuk pengembangan lokal.
 
-## 4. Menjalankan Backend
+## 4. Menjalankan Aplikasi
 
-Setelah virtual environment aktif dan `.env` selesai dikonfigurasi, jalankan:
-
-```bash
-cd backend
-uvicorn main:app --reload
-```
-
-Uvicorn menggunakan port **8000** secara default bila port tidak ditentukan. Frontend saat ini memanggil `http://localhost:8000`, jadi gunakan port tersebut untuk pengembangan lokal.
-
-Untuk memilih port lain, gunakan misalnya:
+Setelah instalasi selesai, jalankan dari **direktori root** proyek:
 
 ```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8080
-```
-
-Jika port diubah, URL API yang hardcoded di frontend juga harus disesuaikan.
-
-Cara memastikan backend berjalan:
-
-- Buka `http://localhost:8000/docs` untuk Swagger UI bawaan FastAPI.
-- Buka `http://localhost:8000/openapi.json` untuk spesifikasi OpenAPI.
-- Perhatikan terminal: kegagalan konfigurasi database, SMTP, atau file model akan muncul saat startup atau ketika endpoint terkait dipanggil.
-
-Saat aplikasi dimuat, `Base.metadata.create_all(bind=engine)` akan mencoba membuat tabel `users` berdasarkan koneksi `DATABASE_URL`.
-
-## 5. Instalasi dan Menjalankan Frontend
-
-1. Buka terminal baru dari direktori root proyek.
-
-2. Instal dependensi frontend.
-
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-3. Jalankan Vite.
-
-   ```bash
-   npm run dev
-   ```
-
-4. Buka alamat yang dicetak Vite di terminal; umumnya `http://localhost:5173`, tetapi alamat pastinya ditentukan oleh Vite saat dijalankan.
-
-Repository juga menyediakan perintah dari root:
-
-```bash
-npm install
 npm run dev
 ```
 
-Perintah tersebut menjalankan backend dan frontend secara bersamaan dengan `concurrently`. Skrip backend root memakai path Windows `venv\Scripts\python.exe`, bukan `.venv`. Jadi, untuk memakai skrip ini apa adanya, pastikan virtual environment bernama `venv`; atau gunakan dua terminal dengan langkah di atas.
+Perintah ini menjalankan backend (FastAPI) dan frontend (Vite) **secara bersamaan** menggunakan `concurrently`. Backend berjalan di `http://localhost:8000` dan frontend di `http://localhost:5173`.
 
-> **Catatan konfigurasi:** beberapa halaman frontend, termasuk `analyzepage.jsx` dan `HistoryPage.jsx`, menulis URL API `http://localhost:8000` langsung di kode. Untuk deployment, pertimbangkan memindahkan base URL ke environment variable Vite, lalu sesuaikan seluruh pemanggilan `fetch`.
+Cara memastikan aplikasi berjalan:
 
-## 6. Panduan Penggunaan Aplikasi
+- Buka `http://localhost:8000/docs` untuk Swagger UI backend.
+- Buka `http://localhost:5173` untuk antarmuka frontend.
+- Perhatikan terminal: kegagalan konfigurasi database, SMTP, atau file model akan muncul saat startup.
+
+Saat backend dimuat, `Base.metadata.create_all(bind=engine)` akan membuat tabel `users` bila belum ada.
+
+> **Catatan platform:** `npm run dev` dari root **hanya berjalan di Windows** karena skrip memakai path `venv\Scripts\python.exe`. Di macOS/Linux, gunakan cara alternatif di bawah.
+
+### Alternatif: jalankan terpisah (macOS/Linux atau jika ada kendala)
+
+Gunakan dua terminal berbeda:
+
+```bash
+# Terminal 1 - backend
+cd backend
+uvicorn app.main:app --reload
+```
+
+```bash
+# Terminal 2 - frontend
+cd frontend
+npm run dev
+```
+
+> **Catatan konfigurasi:** Beberapa halaman frontend (`analyzepage.jsx`, `HistoryPage.jsx`) menulis URL API `http://localhost:8000` langsung di kode. Untuk deployment, pertimbangkan memindahkan base URL ke environment variable Vite, lalu sesuaikan seluruh pemanggilan `fetch`.
+
+
+## 5. Panduan Penggunaan Aplikasi
 
 ### Registrasi akun
 
@@ -224,7 +206,7 @@ Setelah login sebagai guru, buka menu **History**. Halaman memeriksa role di bro
 
 > **Catatan penting:** endpoint `/analysis-history` tidak ditemukan di backend yang tersedia. Bila request gagal, `HistoryPage.jsx` mengisi data contoh/dummy. Karena itu, riwayat nyata dan halaman detail perlu dilengkapi di backend sebelum fitur ini dapat dipakai sebagai rekam data sebenarnya.
 
-## 7. Troubleshooting Umum
+## 6. Troubleshooting Umum
 
 ### Tidak bisa terhubung ke server backend
 
@@ -242,8 +224,8 @@ Setelah login sebagai guru, buka menu **History**. Halaman memeriksa role di bro
 
 ### Model gagal dimuat
 
-- Pastikan `backend/best_enneagram_model.pth` tersedia.
-- Jalankan perintah Uvicorn dari folder `backend` agar path relatif model benar.
+- Pastikan `backend/ml_models/best_enneagram_model.pth` tersedia.
+- Jalankan perintah Uvicorn dari folder `backend` (`uvicorn app.main:app --reload`) agar path relatif model benar.
 - Pastikan instalasi `torch`, `torchvision`, `pillow`, dan `numpy` berhasil.
 - Periksa log terminal untuk detail checkpoint atau perangkat CPU/CUDA.
 
@@ -260,11 +242,22 @@ Setelah login sebagai guru, buka menu **History**. Halaman memeriksa role di bro
 - Pastikan semua field `FormData` yang diwajibkan dikirim oleh frontend. Endpoint membutuhkan metadata sekolah/kelas dan daftar data siswa selain file.
 - Gunakan gambar yang dapat dibuka Pillow. Endpoint tidak memiliki validasi tipe/ukuran file yang eksplisit, sehingga error file dapat muncul dari proses pemrosesan gambar.
 
-## 8. FAQ Singkat
+### Backend gagal start: ModuleNotFoundError
+
+- Pastikan Anda menjalankan `uvicorn app.main:app --reload` dari **dalam folder `backend/`**, bukan dari root repo.
+- Menjalankan `uvicorn main:app --reload` akan gagal karena kode ada di package `backend/app/`.
+
+### OTP tidak ditemukan di inbox email
+
+- Periksa folder **Spam/Junk** di Gmail; email dari SMTP App biasanya terfilter di sana.
+- Pastikan variabel `SMTP_EMAIL` dan `SMTP_PASSWORD` sudah terisi dengan benar di `backend/.env`.
+- Subjek email yang dikirim oleh sistem adalah `Kode OTP {tujuan} - Graphhelp` (perlu dikonfirmasi apakah sudah diperbarui).
+
+## 7. FAQ Singkat
 
 ### Apakah saya bisa memakai aplikasi tanpa akun?
 
-Halaman analisis tersedia di routing frontend. Namun, akun diperlukan untuk alur login dan fitur UI khusus guru seperti halaman Student serta History.
+Halaman analisis (`/analyze`) dapat diakses tanpa login melalui URL langsung. Namun, menu **Analyze** di navbar hanya bisa diklik setelah login — sistem akan menampilkan toast error dan mengarahkan ke halaman login jika pengguna belum masuk. Halaman **Student** dan **History** memerlukan login dengan role `guru` (diverifikasi di sisi frontend).
 
 ### Apakah semua tab analisis sudah memberi hasil AI?
 
@@ -276,8 +269,30 @@ Belum. Saat ini hanya **Upload Foto** yang memanggil endpoint prediksi. Tab **Tu
 
 ### Database apa yang harus saya pakai?
 
-Gunakan URL SQLAlchemy pada `DATABASE_URL`. PostgreSQL cocok dengan driver yang sudah ada di `requirements.txt`; SQLite dapat digunakan untuk lokal. Pilihan database target proyek **perlu dikonfirmasi** karena tidak ditetapkan eksplisit oleh kode.
+Gunakan URL SQLAlchemy pada `DATABASE_URL`. PostgreSQL direkomendasikan dan driver-nya (`psycopg2-binary`) sudah tersedia di `requirements.txt`. SQLite dapat digunakan untuk lokal dengan URL `sqlite:///./graphelp.db`.
 
 ### Apakah hasil prediksi merupakan penilaian profesional?
 
 Kode menghasilkan probabilitas tipe dari model EfficientNet-B0. Hasil ini adalah keluaran model aplikasi dan tidak tercatat sebagai diagnosis atau penilaian psikologis profesional pada implementasi yang tersedia.
+
+## 8. Testing
+
+Saat ini **belum ada automated test** di repository ini (tidak ada folder `tests/`). Pengujian dilakukan secara manual.
+
+### Cara verifikasi manual
+
+| Skenario | Cara Uji |
+| --- | --- |
+| Backend berjalan | Buka `http://localhost:8000/docs` dan pastikan Swagger UI tampil. |
+| Endpoint analisis | Upload gambar di tab **Upload Foto** halaman Analyze, lalu periksa respons di tab Network browser. |
+| OTP registrasi | Daftar akun baru, periksa inbox email. |
+| Login & role guru | Login dengan akun guru, pastikan menu **Student** dan **History** muncul di navbar. |
+| Reset password | Jalani alur lupa password sampai selesai. |
+
+### Rencana Testing (mendatang)
+
+Beberapa area yang direkomendasikan untuk ditambahkan automated test:
+
+- **Unit test backend:** validasi schema Pydantic, logika OTP, hash/verify password — menggunakan `pytest` dan `httpx` sebagai async client.
+- **Integration test endpoint:** mock database dan SMTP agar test tidak memerlukan koneksi eksternal.
+- **Frontend test:** komponen React kritis seperti `AnalyzePage` dan alur registrasi — menggunakan Vitest atau React Testing Library.

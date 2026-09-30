@@ -11,12 +11,14 @@ Dokumen ini mencatat fitur berdasarkan kode yang tersedia saat ini. Status **✅
 | Reset kata sandi dengan OTP | ✅ Implemented | `auth.py`, `schemas.py`, `utils.py`, halaman lupa/reset password |
 | Peran `public` dan `guru` pada akun | ⚠️ Partial | `models.py`, `auth.py`, `RegisterPage.jsx`, `Navbar.jsx`, `StudentPage.jsx`, `HistoryPage.jsx` |
 | Upload dan analisis satu foto tulisan | ⚠️ Partial | `analyzepage.jsx`, `main.py`, `predict.py` |
+| Halaman hasil analisis (ResultsPage) | ⚠️ Partial | `resultspage.jsx`, `main.py`, `predict.py` |
 | Analisis batch tulisan siswa | ⚠️ Partial | `StudentPage.jsx`, `main.py`, `predict.py` |
 | Menggambar tulisan pada canvas | ⚠️ Partial | `analyzepage.jsx` (`SignaturePad`) |
 | Pemindaian dengan kamera | ⚠️ Partial | `analyzepage.jsx` (`CameraView`) |
 | Riwayat analisis guru | ❌ Referenced but not implemented | `HistoryPage.jsx` |
 | Halaman informasi aplikasi | ✅ Implemented | `homepage.jsx` |
-| Navigasi dan logout berbasis status user | ✅ Implemented di frontend | `App.jsx`, `Navbar.jsx`, `Header.jsx` |
+| Navigasi berbasis status user | ✅ Implemented | `App.jsx`, `Navbar.jsx`, `Header.jsx` |
+| Logout | ⚠️ Partial — hanya di sidebar mobile | `Navbar.jsx` |
 
 ## 2. Fitur Autentikasi dan User Management
 
@@ -58,7 +60,7 @@ Respons sukses berisi:
 
 Frontend menyimpan objek `user` tersebut di `localStorage`. Role dipakai oleh `Navbar`, `StudentPage`, dan `HistoryPage` untuk menampilkan menu serta membatasi akses UI guru.
 
-**Catatan:** backend tidak mengeluarkan token atau sesi autentikasi, dan endpoint analisis tidak memeriksa role. Karena itu, kontrol role yang terlihat saat ini terutama berada di sisi frontend; statusnya pada ringkasan ditandai **⚠️ Partial** untuk otorisasi sistem secara menyeluruh.
+**Catatan:** backend tidak mengeluarkan token atau sesi autentikasi, dan endpoint analisis tidak memeriksa role. Karena itu, kontrol role yang terlihat saat ini terutama berada di sisi frontend; statusnya pada ringkasan ditandai **⚠️ Partial** untuk otorisasi sistem secara menyeluruh. Fungsi logout (`handleLogout`) tersedia di `Navbar.jsx` dan bekerja dengan menghapus key `user` dari `localStorage`, mereset state, lalu mengarahkan pengguna ke `/login`. Tombol logout hanya muncul di **sidebar mobile**; tidak ada tombol logout di navbar desktop.
 
 ### Lupa password dengan OTP
 
@@ -131,8 +133,12 @@ Keluaran internal `predict_image()` adalah:
 | `description` | Deskripsi dari `ENNEAGRAM_INFO`; nilainya saat ini placeholder `"..."`. |
 | `confidence` | Probabilitas prediksi utama dalam persen. |
 | `top3` | Tiga kandidat teratas, masing-masing berisi `type`, `name`, dan `prob`. |
+| `features` | ❌ Tidak ada di output backend; diantisipasi oleh `ResultsPage` namun belum dikirim. |
+| `recommendations` | ❌ Tidak ada di output backend; `ResultsPage` menggunakan fallback `TYPE_INFO.tips` lokal. |
 
-**Catatan kontrak respons:** `main.py` hanya meneruskan `pred_type`, `confidence`, dan `top3` ke `details` respons endpoint. `type_name` dan `description` tidak dikirim, walaupun `AnalyzePage` dan `StudentPage` mencoba menampilkannya. Oleh sebab itu, penyajian hasil bernama/deskripsi di frontend ditandai **⚠️ Partial**.
+**Catatan kontrak respons:** `main.py` hanya meneruskan `pred_type`, `confidence`, dan `top3` ke `details` respons endpoint. `type_name` dan `description` tidak dikirim. `ResultsPage` mengatasi ini dengan fallback ke data `TYPE_INFO` lokal yang sudah ditulis lengkap (nama, label, tagline, traits, kekuatan, tantangan, rekomendasi) untuk semua 9 tipe Enneagram. Field `features` dan `recommendations` dari backend juga diantisipasi oleh `ResultsPage`, tetapi keduanya **❌ belum dikirim oleh `main.py`**.
+
+**Catatan typo:** Subjek email OTP yang dikirim `utils.py` adalah `"Kode OTP {tujuan} - Graphhelp"`. Nama proyek yang benar adalah `Graphelp`. Perbaikan kode belum dilakukan.
 
 ## 4. Fitur Riwayat Analisis (History)
 
@@ -159,7 +165,9 @@ Namun, endpoint `/analysis-history` tidak ditemukan pada `main.py` maupun `auth.
 - Bagian visi dan misi.
 - Efek masuk saat scroll melalui hook `useRevealOnScroll()` dan `IntersectionObserver` untuk elemen dengan class `reveal`.
 
-Halaman ini tidak mengirim request ke backend. Tombol “Mulai Analisis” ditampilkan, tetapi tidak memiliki `onClick`, tautan, atau navigasi pada file yang diperiksa. Oleh karena itu, konten dan animasinya tersedia, sedangkan tombol tersebut belum menjalankan aksi fungsional.
+Halaman ini tidak mengirim request ke backend. Tombol “Mulai Analisis” memiliki handler `handleMulaiAnalisis` yang memeriksa `localStorage` — jika pengguna belum login, menampilkan toast error dan mengarahkan ke `/login`; jika sudah login, mengarahkan ke `/analyze`.
+
+
 
 ## 6. Fitur yang Terlihat Direncanakan tetapi Belum Ada Implementasinya
 
