@@ -15,4 +15,5 @@ node_modules/
 backend/.env
 backend/*.db
 
-.agent
+.agents
+skills-lock.json
