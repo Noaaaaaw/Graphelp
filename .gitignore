@@ -16,3 +16,5 @@ backend/.env
 backend/*.db
 
 .agent
+
+backend/uploads/

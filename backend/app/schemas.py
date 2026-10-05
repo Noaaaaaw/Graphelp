@@ -34,3 +34,39 @@ class ResetPasswordRequest(BaseModel):
     email: EmailStr
     otp: str
     new_password: str
+
+class StudentResultResponse(BaseModel):
+    id: int
+    session_id: int
+    absence_number: Optional[str] = None
+    student_name: str
+    age: Optional[str] = None
+    gender: Optional[str] = None
+    pred_type: int
+    type_name: Optional[str] = None
+    confidence: float
+    top3: Optional[str] = None
+    description: Optional[str] = None
+    image_path: Optional[str] = None
+    created_at: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+class AnalysisSessionResponse(BaseModel):
+    id: int
+    user_id: int
+    school_name: str
+    grade_class: str
+    total_students: int
+    created_at: str
+    date: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+class AnalysisSessionDetailResponse(AnalysisSessionResponse):
+    student_results: list[StudentResultResponse] = []
+
+    class Config:
+        from_attributes = True
