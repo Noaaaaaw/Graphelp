@@ -33,3 +33,5 @@ dataset/
 # Local Research Notebooks & Models (Do Not Push)
 *.ipynb
 *.joblib
+
+backend/uploads/

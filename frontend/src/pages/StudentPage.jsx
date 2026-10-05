@@ -196,6 +196,9 @@ function StudentPage() {
         const formData = new FormData();
         formData.append("school_name", schoolName);
         formData.append("grade_class", gradeClass);
+        if (user && user.id) {
+            formData.append("user_id", user.id);
+        }
 
         students.forEach((student) => {
             formData.append(`absence_numbers`, student.absenceNumber);
