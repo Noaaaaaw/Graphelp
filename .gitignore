@@ -5,6 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
+
 # Virtual environments
 .venv
 
@@ -15,6 +16,22 @@ node_modules/
 backend/.env
 backend/*.db
 
-.agent
+# AI Agent private skills & customizations (local only)
+.agents/
+.agents
+.agent/
+_agents/
+_agent/
+skills-lock.json
+AGENTS.md
+GEMINI.md
+.claude*
+
+# Datasets
+dataset/
+
+# Local Research Notebooks & Models (Do Not Push)
+*.ipynb
+*.joblib
 
 backend/uploads/
