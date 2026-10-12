@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
 import { TYPE_INFO } from "../constants/typeInfo";
+import { getApiUrl } from "../config/api";
 
 function XIcon() {
     return (
@@ -188,7 +189,7 @@ function HistoryPage() {
 
         const fetchHistory = async () => {
             try {
-                const response = await fetch(`http://localhost:8000/analysis-history?user_id=${user.id}`);
+                const response = await fetch(getApiUrl(`/analysis-history?user_id=${user.id}`));
                 const data = await response.json();
                 if (response.ok) {
                     setHistoryList(data);
@@ -214,7 +215,7 @@ function HistoryPage() {
 
         setLoadingSessionModal(true);
         try {
-            const res = await fetch(`http://localhost:8000/analysis-history/${sessionItem.id}`);
+            const res = await fetch(getApiUrl(`/analysis-history/${sessionItem.id}`));
             const data = await res.json();
             if (res.ok) {
                 setSessionDetails((prev) => ({ ...prev, [sessionItem.id]: data }));
@@ -483,7 +484,7 @@ function HistoryPage() {
                                                         }}
                                                     >
                                                         <img
-                                                            src={`http://localhost:8000${currentStudent.image_path}`}
+                                                            src={getApiUrl(currentStudent.image_path)}
                                                             alt={`Tulisan tangan ${currentStudent.student_name}`}
                                                             style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
                                                         />

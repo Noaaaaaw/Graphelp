@@ -4,6 +4,7 @@ import uuid
 from typing import List, Optional
 from datetime import datetime
 from fastapi import FastAPI, UploadFile, File, Form, Depends, HTTPException
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
@@ -13,9 +14,15 @@ from .database import Base, engine, get_db
 from .predict import predict_image
 from .predict_motorik import predict_motorik_siswa
 
-Base.metadata.create_all(bind=engine)
-
 app = FastAPI()
+
+@app.on_event("startup")
+def on_startup():
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("Database tables verified/created successfully.")
+    except Exception as e:
+        print(f"Warning: Could not connect to database on startup: {e}")
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,11 +37,14 @@ HANDWRITING_DIR = os.path.join(UPLOAD_DIR, "handwriting")
 os.makedirs(HANDWRITING_DIR, exist_ok=True)
 
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+app.mount("/graphelp/uploads", StaticFiles(directory=UPLOAD_DIR), name="graphelp_uploads")
 
 app.include_router(auth.router)
+app.include_router(auth.router, prefix="/graphelp")
 
 
 @app.post("/analyze-handwriting")
+@app.post("/graphelp/analyze-handwriting")
 async def analyze_handwriting(
     school_name: str = Form(...),
     grade_class: str = Form(...),
@@ -120,6 +130,7 @@ async def analyze_handwriting(
 
 
 @app.post("/analyze-students")
+@app.post("/graphelp/analyze-students")
 async def analyze_students(
     school_name: str = Form(...),
     grade_class: str = Form(...),
@@ -163,6 +174,7 @@ async def analyze_students(
 
 
 @app.get("/analysis-history")
+@app.get("/graphelp/analysis-history")
 def get_analysis_history(user_id: Optional[int] = None, db: Session = Depends(get_db)):
     query = db.query(models.AnalysisSession)
     if user_id:
@@ -186,6 +198,7 @@ def get_analysis_history(user_id: Optional[int] = None, db: Session = Depends(ge
 
 
 @app.get("/analysis-history/{session_id}")
+@app.get("/graphelp/analysis-history/{session_id}")
 def get_analysis_history_detail(session_id: int, db: Session = Depends(get_db)):
     session_record = db.query(models.AnalysisSession).filter(models.AnalysisSession.id == session_id).first()
     if not session_record:
@@ -225,3 +238,42 @@ def get_analysis_history_detail(session_id: int, db: Session = Depends(get_db)):
         "date": session_record.created_at.strftime("%Y-%m-%d %H:%M") if session_record.created_at else "",
         "students": students
     }
+
+
+# ==========================================
+# Frontend React SPA Static Serving
+# ==========================================
+FRONTEND_DIST = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist"))
+
+if os.path.isdir(FRONTEND_DIST):
+    assets_dir = os.path.join(FRONTEND_DIST, "assets")
+    if os.path.isdir(assets_dir):
+        app.mount("/graphelp/assets", StaticFiles(directory=assets_dir), name="graphelp_assets")
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.get("/graphelp/{full_path:path}")
+    async def serve_graphelp_spa(full_path: str):
+        target = os.path.join(FRONTEND_DIST, full_path)
+        if os.path.isfile(target):
+            return FileResponse(target)
+        index_file = os.path.join(FRONTEND_DIST, "index.html")
+        if os.path.isfile(index_file):
+            return FileResponse(index_file)
+        return {"error": "Frontend build not found"}
+
+    @app.get("/{full_path:path}")
+    async def serve_root_spa(full_path: str):
+        target = os.path.join(FRONTEND_DIST, full_path)
+        if os.path.isfile(target):
+            return FileResponse(target)
+        index_file = os.path.join(FRONTEND_DIST, "index.html")
+        if os.path.isfile(index_file):
+            return FileResponse(index_file)
+        return {"error": "Frontend build not found"}
+
+    @app.get("/")
+    async def serve_root_index():
+        index_file = os.path.join(FRONTEND_DIST, "index.html")
+        if os.path.isfile(index_file):
+            return FileResponse(index_file)
+        return {"message": "Graphelp API is running"}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
+import { getApiUrl } from "../config/api";
 import "../style/auth.css";
 
 function LoginPage() {
@@ -22,7 +23,7 @@ function LoginPage() {
         formData.append("password", password);
 
         try {
-            const response = await fetch("http://localhost:8000/login", {
+            const response = await fetch(getApiUrl("/login"), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",

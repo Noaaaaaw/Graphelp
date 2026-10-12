@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
+import { getApiUrl } from "../config/api";
 import "../style/auth.css";
 
 function VerifyOtpPage() {
@@ -131,7 +132,7 @@ function VerifyOtpPage() {
         setIsLoading(true);
 
         try {
-            const response = await fetch(`http://localhost:8000/register-with-otp?otp=${otp}`, {
+            const response = await fetch(getApiUrl(`/register-with-otp?otp=${otp}`), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

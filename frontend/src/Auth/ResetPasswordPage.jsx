@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
+import { getApiUrl } from "../config/api";
 import "../style/auth.css";
 
 function ResetPasswordPage() {
@@ -142,7 +143,7 @@ function ResetPasswordPage() {
         setIsLoading(true);
 
         try {
-            const response = await fetch("http://localhost:8000/forgot-password/reset", {
+            const response = await fetch(getApiUrl("/forgot-password/reset"), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

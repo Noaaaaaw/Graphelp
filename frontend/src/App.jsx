@@ -20,7 +20,7 @@ import "./style/styles.css";
 function App() {
     return (
         <ToastProvider>
-            <BrowserRouter>
+            <BrowserRouter basename={import.meta.env.BASE_URL || "/graphelp"}>
                 <Routes>
                     {/* Halaman dengan Header, Navbar, Footer */}
                     <Route

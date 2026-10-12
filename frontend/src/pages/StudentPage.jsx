@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
+import { getApiUrl } from "../config/api";
 
 function BookIcon() {
     return (
@@ -462,7 +463,7 @@ function StudentPage() {
         });
 
         try {
-            const response = await fetch("http://localhost:8000/analyze-students", {
+            const response = await fetch(getApiUrl("/analyze-students"), {
                 method: "POST",
                 body: formData,
             });
