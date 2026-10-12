@@ -13,37 +13,18 @@ Dokumen ini bersanding langsung dengan [DEPLOYMENT_PLAN.md](file:///c:/Users/fai
 
 ## DAFTAR ISI
 
-1. [Fase 1: Command Eksekusi Internal Lokal (Komputer Anda)](#fase-1-command-eksekusi-internal-lokal-komputer-anda)
+1. [Fase 1: Command Eksekusi Internal Lokal (SELESAI - Commit ba7ab26)](#fase-1-command-eksekusi-internal-lokal-selesai)
 2. [Fase 2: Command Eksekusi di Server Trisakti Lab (Via SSH)](#fase-2-command-eksekusi-di-server-trisakti-lab-via-ssh)
 3. [Fase 3: Command Verifikasi & Testing](#fase-3-command-verifikasi--testing)
 4. [Fase 4: Command Maintenance & Update Cepat](#fase-4-command-maintenance--update-cepat)
 
 ---
 
-## Fase 1: Command Eksekusi Internal Lokal (Komputer Anda)
+## Fase 1: Command Eksekusi Internal Lokal (SELESAI)
 
-Perintah ini dijalankan di terminal lokal untuk menyiapkan kode sebelum dikirim ke server.
-
-### 1.1 Pastikan Berada di Branch `deployment-vps`
-```bash
-git branch
-# Harus bertanda: * deployment-vps
-```
-
-### 1.2 Uji Coba Build Frontend Lokal
-Setelah perubahan kode internal selesai, pastikan Vite berhasil mem-build frontend tanpa error:
-```bash
-cd frontend
-npm run build
-cd ..
-```
-
-### 1.3 Commit dan Push Seluruh Perubahan Internal
-```bash
-git add .
-git commit -m "feat(deploy): penyesuaian internal subpath graphelp, models mysql, requirements, dan spa routing"
-git push -u origin deployment-vps
-```
+*Status: Sudah selesai dieksekusi dan di-push ke remote repository pada commit `ba7ab26`.*
+* Branch remote: `origin/deployment-vps`
+* Hasil pengujian lokal: `npm run build` sukses, import PyTorch & FastAPI sukses.
 
 ---
 
@@ -61,14 +42,16 @@ ssh graphelp@103.28.161.35 -p 22007
 ---
 
 ### 2.2 Tarik (Pull / Clone) Kode Proyek ke `/home/graphelp/project`
-Di terminal server Trisakti:
+Karena di dalam folder `/home/graphelp/project` sudah ada file `.env` bawaan, gunakan perintah aman berikut agar tidak terjadi error *destination path already exists*:
 
 ```bash
 cd /home/graphelp/project
 
-# Inisialisasi git jika folder masih kosong:
 if [ ! -d ".git" ]; then
-    git clone -b deployment-vps https://github.com/Noaaaaaw/Graphelp.git .
+    git init
+    git remote add origin https://github.com/Noaaaaaw/Graphelp.git
+    git fetch origin deployment-vps
+    git checkout -f -b deployment-vps origin/deployment-vps
 else
     git fetch origin
     git checkout deployment-vps
@@ -78,7 +61,9 @@ fi
 
 ---
 
-### 2.3 Buat File `.env` di Server
+### 2.3 Perbarui File `.env` di Server
+Isi file environment dengan kredensial database `mysql-graphelp` dan SMTP Gmail:
+
 ```bash
 cat << 'EOF' > /home/graphelp/project/.env
 DATABASE_URL=mysql+pymysql://graphelp:a811f8bfcce050c424ac1fc0594fa907@mysql-graphelp:3306/graphelp?charset=utf8mb4
@@ -93,17 +78,17 @@ EOF
 ```bash
 cd /home/graphelp/project
 
-# 1. Buat venv Python 3.11
+# 1. Buat virtual environment Python 3.11 jika belum ada
 python3 -m venv .venv
 source .venv/bin/activate
 
 # 2. Upgrade pip
 pip install --upgrade pip
 
-# 3. Install PyTorch CPU (Wheel resmi CPU agar hemat disk & memori)
+# 3. Install PyTorch CPU (Wheel resmi CPU khusus Linux agar hemat disk & memori)
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
-# 4. Install dependensi lainnya (FastAPI, PyMySQL, OpenCV Headless, Scikit-learn, dll.)
+# 4. Install dependensi lainnya (FastAPI, PyMySQL, OpenCV Headless, Scikit-learn, joblib, dll.)
 pip install -r requirements.txt
 ```
 
@@ -119,16 +104,16 @@ cd /home/graphelp/project
 
 ---
 
-### 2.6 Buat Folder Upload Gambar
+### 2.6 Siapkan Folder Upload Gambar
 ```bash
 mkdir -p /home/graphelp/project/backend/uploads/handwriting
 ```
 
 ---
 
-### 2.7 Matikan Web Server Default dan Jalankan Graphelp di Port 3000
+### 2.7 Matikan Web Server Bawaan dan Jalankan Graphelp di Port 3000
 
-Karena port 3000 adalah port yang langsung terhubung ke publik `https://lab1.trisakti.ac.id/graphelp/`:
+Port 3000 adalah port yang langsung terhubung ke publik `https://lab1.trisakti.ac.id/graphelp/`:
 
 ```bash
 # 1. Matikan python http.server bawaan yang saat ini sedang memakai port 3000:
@@ -151,14 +136,14 @@ tail -n 30 /home/graphelp/backend.log
 ```
 
 ### 3.2 Uji Akses Website di Browser
-Buka browser Anda dan akses:
+Buka browser dan akses:
 👉 **`https://lab1.trisakti.ac.id/graphelp/`**
 
 Verifikasi:
 * [x] Halaman beranda Graphelp termuat lengkap dengan styling CSS.
 * [x] Navigasi ke halaman `/analyze`, `/student`, dan `/history`.
-* [x] Coba fitur registrasi / login (tabel database otomatis dibuat oleh SQLAlchemy).
-* [x] Coba unggah gambar tulisan tangan untuk analisis Enneagram & motorik.
+* [x] Coba fitur registrasi / login (tabel database otomatis dibuat oleh SQLAlchemy di MySQL `mysql-graphelp`).
+* [x] Coba unggah gambar tulisan tangan untuk analisis Enneagram & asesmen motorik halus siswa.
 
 ---
 
