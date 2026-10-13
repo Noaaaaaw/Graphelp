@@ -271,6 +271,8 @@ if os.path.isdir(FRONTEND_DIST):
             return FileResponse(index_file)
         return {"error": "Frontend build not found"}
 
+    @app.get("/graphelp")
+    @app.get("/graphelp/")
     @app.get("/")
     async def serve_root_index():
         index_file = os.path.join(FRONTEND_DIST, "index.html")
