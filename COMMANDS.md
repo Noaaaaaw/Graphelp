@@ -67,8 +67,8 @@ Isi file environment dengan kredensial database `mysql-graphelp` dan SMTP Gmail:
 ```bash
 cat << 'EOF' > /home/graphelp/project/.env
 DATABASE_URL=mysql+pymysql://graphelp:a811f8bfcce050c424ac1fc0594fa907@mysql-graphelp:3306/graphelp?charset=utf8mb4
-SMTP_EMAIL=faizfirdausp@gmail.com
-SMTP_PASSWORD=hagd wozq chbs yukz
+SMTP_EMAIL=graphelpusakti@gmail.com
+SMTP_PASSWORD=gggz btro sgvm pckz
 EOF
 ```
 
