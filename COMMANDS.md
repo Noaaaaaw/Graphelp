@@ -147,23 +147,51 @@ Verifikasi:
 
 ---
 
-## Fase 4: Command Maintenance & Update Cepat
+## Fase 4: Command Maintenance & Skrip Manajemen (Tersedia di Server)
 
-Jika di kemudian hari Anda melakukan update kode di GitHub:
+Di server `/home/graphelp/`, telah disiapkan skrip otomatis yang siap dijalankan langsung:
 
+### 4.1 Cek Status Aplikasi & Log Terbaru
 ```bash
-# 1. Masuk ke folder proyek dan tarik kode terbaru
-cd /home/graphelp/project
-git pull origin deployment-vps
-
-# 2. Re-build frontend jika ada perubahan UI
-cd frontend && npm run build && cd ..
-
-# 3. Restart backend FastAPI
-pkill -f "uvicorn backend.app.main:app"
-source .venv/bin/activate
-nohup uvicorn backend.app.main:app --host 0.0.0.0 --port 3000 > /home/graphelp/backend.log 2>&1 &
-
-# 4. Pantau log terbaru
-tail -f /home/graphelp/backend.log
+/home/graphelp/status_app.sh
 ```
+Skrip ini akan menampilkan status PID Uvicorn, port 3000, serta 15 baris terakhir dari `backend.log`.
+
+### 4.2 Restart Aplikasi
+```bash
+/home/graphelp/restart_app.sh
+```
+
+### 4.3 Menghentikan atau Memulai Manual
+```bash
+/home/graphelp/stop_app.sh
+/home/graphelp/start_app.sh
+```
+
+---
+
+## Fase 5: Alur Update / Perubahan Kode Selanjutnya
+
+Jika di kemudian hari Anda melakukan perubahan kode lokal:
+1. **Lakukan commit & push pada branch `deployment-vps`:**
+   ```bash
+   git add .
+   git commit -m "Deskripsi perubahan"
+   git push origin deployment-vps
+   ```
+2. **Jika ada perubahan pada Frontend:**
+   Karena server Lab menggunakan Node.js v18 (sementara Vite 8 membutuhkan Node.js 20+), lakukan build di komputer lokal:
+   ```bash
+   cd frontend
+   npm run build
+   ```
+   Lalu upload folder `frontend/dist` ke server `/home/graphelp/project/frontend/dist` (via SCP / SFTP).
+3. **Login ke Server via SSH dan Restart:**
+   ```bash
+   ssh graphelp@103.28.161.35 -p 22007
+   cd /home/graphelp/project
+   git pull origin deployment-vps
+   /home/graphelp/restart_app.sh
+   /home/graphelp/status_app.sh
+   ```
+
