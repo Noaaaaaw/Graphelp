@@ -26,9 +26,9 @@ def load_enneagram_model(model_path=None):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     if hasattr(models, 'EfficientNet_B0_Weights'):
-        model = models.efficientnet_b0(weights=models.EfficientNet_B0_Weights.DEFAULT)
+        model = models.efficientnet_b0(weights=None)
     else:
-        model = models.efficientnet_b0(pretrained=True)
+        model = models.efficientnet_b0(pretrained=False)
 
     in_features = model.classifier[1].in_features
     model.classifier[1] = nn.Sequential(
