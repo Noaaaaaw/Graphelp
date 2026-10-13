@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
+import { getApiUrl } from "../config/api";
 
 function BookIcon() {
     return (
@@ -127,6 +128,257 @@ function CameraIcon() {
     );
 }
 
+function handlePrintStudentPDF(res, schoolName, gradeClass) {
+    const isYa = res.kesimpulan?.includes("Ya");
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+        alert("Pop-up diblokir browser. Harap izinkan pop-up untuk mencetak atau menyimpan dokumen PDF.");
+        return;
+    }
+
+    const indTable = res.indikator_klinis_table || [
+        { no: 1, nama: "Kontrol Pegangan: kemampuan memegang alat tulis secara stabil", level: res.kategori || "MB" },
+        { no: 2, nama: "Kekuatan goresan konsisten (tidak terlalu tipis/gemetar dan tidak terlalu tebal)", level: res.kategori || "MB" },
+        { no: 3, nama: "Koordinasi mata: kemampuan menyalin atau menggambar pola geometri", level: res.kategori || "MB" },
+        { no: 4, nama: "Kemampuan menarik garis lurus secara kontinu tanpa banyak jeda", level: res.kategori || "MB" }
+    ];
+
+    const html = `<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Lembar Hasil Asesmen - ${res.student_name || "Siswa"}</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 15mm;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #1e293b;
+            margin: 0;
+            padding: 20px;
+            font-size: 11pt;
+            line-height: 1.5;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        .header h1 {
+            font-size: 15pt;
+            margin: 0 0 4px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #0f172a;
+        }
+        .header h2 {
+            font-size: 11.5pt;
+            font-weight: normal;
+            margin: 0;
+            color: #475569;
+        }
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 20px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-bottom: 18px;
+            font-size: 10pt;
+        }
+        .meta-grid strong {
+            color: #334155;
+        }
+        .section-title {
+            font-size: 10.5pt;
+            font-weight: bold;
+            color: #0f172a;
+            margin: 16px 0 8px 0;
+            text-transform: uppercase;
+            border-bottom: 1px solid #cbd5e1;
+            padding-bottom: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 14px;
+            font-size: 10pt;
+        }
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 6px 8px;
+            text-align: left;
+        }
+        th {
+            background: #f1f5f9;
+            font-weight: bold;
+            text-align: center;
+            color: #1e293b;
+        }
+        .center {
+            text-align: center;
+            font-weight: bold;
+            font-size: 12pt;
+        }
+        .q-box {
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+            background: #ffffff;
+            font-size: 10pt;
+        }
+        .q-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #1e293b;
+        }
+        .check-options {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .checked-yes {
+            color: #15803d;
+            font-weight: bold;
+        }
+        .checked-no {
+            color: #b91c1c;
+            font-weight: bold;
+        }
+        .reason {
+            color: #475569;
+            font-style: italic;
+            font-size: 9.5pt;
+        }
+        .saran-box {
+            background: #f0fdf4;
+            border-left: 4px solid #22c55e;
+            padding: 10px 12px;
+            border-radius: 4px;
+            font-size: 9.5pt;
+            margin-top: 10px;
+            margin-bottom: 24px;
+        }
+        .signature-area {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 36px;
+            text-align: center;
+            font-size: 10pt;
+        }
+        .sig-box {
+            width: 220px;
+        }
+        @media print {
+            body {
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>LEMBAR HASIL ASESMEN MOTORIK HALUS ANAK</h1>
+        <h2>${schoolName ? `Sekolah: ${schoolName}` : "KB AVICENNA"} ${gradeClass ? `• Kelas ${gradeClass}` : ""}</h2>
+    </div>
+
+    <div class="meta-grid">
+        <div><strong>Nama Siswa:</strong> ${res.student_name || "-"}</div>
+        <div><strong>Tanggal Asesmen:</strong> ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</div>
+        <div><strong>Usia:</strong> ${res.age ? `${res.age} Bulan` : "-"}</div>
+        <div><strong>Jenis Kelamin:</strong> ${res.gender === 'L' ? 'Laki-laki' : res.gender === 'P' ? 'Perempuan' : '-'}</div>
+        <div><strong>Status:</strong> ${res.status || "-"}</div>
+        <div><strong>Kesimpulan Klinis:</strong> ${res.kesimpulan || "-"} (${res.confidence || 0}%)</div>
+    </div>
+
+    <div class="section-title">I. ASESMEN 4 INDIKATOR KLINIS MOTORIK HALUS (BAGIAN I)</div>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 32px;">No</th>
+                <th>Indikator Klinis</th>
+                <th style="width: 50px;">BB (1)</th>
+                <th style="width: 50px;">MB (2)</th>
+                <th style="width: 50px;">BSH (3)</th>
+                <th style="width: 50px;">BSB (4)</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${indTable.map((item, i) => `
+                <tr>
+                    <td style="text-align: center;">${i + 1}</td>
+                    <td>${item.nama}</td>
+                    <td class="center">${item.level === 'BB' ? '✓' : ''}</td>
+                    <td class="center">${item.level === 'MB' ? '✓' : ''}</td>
+                    <td class="center">${item.level === 'BSH' ? '✓' : ''}</td>
+                    <td class="center">${item.level === 'BSB' ? '✓' : ''}</td>
+                </tr>
+            `).join('')}
+        </tbody>
+    </table>
+    <div style="font-size: 8.5pt; color: #64748b; margin-top: -8px; margin-bottom: 14px;">
+        *Keterangan: BB (Belum Berkembang), MB (Mulai Berkembang), BSH (Berkembang Sesuai Harapan), BSB (Berkembang Sangat Baik)
+    </div>
+
+    <div class="section-title">II. KESIMPULAN ASESMEN PERKEMBANGAN (BAGIAN III)</div>
+    
+    <div class="q-box">
+        <div class="q-title">1) Apakah kemampuan menulis anak sudah sesuai dengan perkembangan usianya?</div>
+        <div class="check-options">
+            <span class="${isYa ? 'checked-yes' : ''}">${isYa ? '[✓]' : '[  ]'} Sesuai Usia (Ya)</span>
+            <span class="${!isYa ? 'checked-no' : ''}">${!isYa ? '[✓]' : '[  ]'} Belum Sesuai (Tidak)</span>
+        </div>
+        <div class="reason">
+            <strong>Mohon sertakan alasannya:</strong> "${res.kesimpulan_menulis?.alasan || res.alasan_klinis || '-'}"
+        </div>
+    </div>
+
+    <div class="q-box">
+        <div class="q-title">2) Apakah kemampuan menggambar anak sudah sesuai dengan perkembangan usianya?</div>
+        <div class="check-options">
+            <span class="${isYa ? 'checked-yes' : ''}">${isYa ? '[✓]' : '[  ]'} Sesuai Usia (Ya)</span>
+            <span class="${!isYa ? 'checked-no' : ''}">${!isYa ? '[✓]' : '[  ]'} Belum Sesuai (Tidak)</span>
+        </div>
+        <div class="reason">
+            <strong>Mohon sertakan alasannya:</strong> "${res.kesimpulan_menggambar?.alasan || res.alasan_klinis || '-'}"
+        </div>
+    </div>
+
+    ${res.saran_guru ? `
+    <div class="section-title">III. REKOMENDASI STIMULASI GURU & ORANG TUA</div>
+    <div class="saran-box">
+        💡 <strong>Rekomendasi Stimulasi:</strong> ${res.saran_guru}
+    </div>
+    ` : ''}
+
+    <div class="signature-area">
+        <div class="sig-box">
+            <div>Mengetahui,</div>
+            <div style="font-size: 9pt; color: #64748b;">Guru Pembimbing / Asesor PAUD</div>
+            <div style="height: 60px;"></div>
+            <div style="font-weight: bold; border-top: 1px solid #94a3b8; padding-top: 4px;">
+                ( ........................................ )
+            </div>
+        </div>
+    </div>
+</body>
+</html>`;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+    }, 250);
+}
+
 function StudentPage() {
     const navigate = useNavigate();
     const toast = useToast();
@@ -211,7 +463,7 @@ function StudentPage() {
         });
 
         try {
-            const response = await fetch("http://localhost:8000/analyze-students", {
+            const response = await fetch(getApiUrl("/analyze-students"), {
                 method: "POST",
                 body: formData,
             });
@@ -549,77 +801,138 @@ function StudentPage() {
                                             <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
                                                 <span 
                                                     style={{
-                                                        padding: "4px 10px",
+                                                        padding: "5px 12px",
                                                         borderRadius: "6px",
                                                         fontSize: "0.85rem",
-                                                        fontWeight: "bold",
-                                                        background: res.kategori === "BSB" ? "#dbeafe" : res.kategori === "BSH" ? "#dcfce7" : res.kategori === "MB" ? "#fef3c7" : "#fee2e2",
-                                                        color: res.kategori === "BSB" ? "#1e40af" : res.kategori === "BSH" ? "#166534" : res.kategori === "MB" ? "#92400e" : "#991b1b",
-                                                        border: `1px solid ${res.kategori === "BSB" ? "#bfdbfe" : res.kategori === "BSH" ? "#bbf7d0" : res.kategori === "MB" ? "#fde68a" : "#fecaca"}`
-                                                    }}
-                                                >
-                                                    {res.kategori} - {res.kategori_label || res.kategori}
-                                                </span>
-                                                <span 
-                                                    style={{
-                                                        padding: "4px 10px",
-                                                        borderRadius: "6px",
-                                                        fontSize: "0.85rem",
-                                                        fontWeight: "600",
-                                                        background: res.kesimpulan?.includes("Ya") ? "rgba(34, 197, 94, 0.15)" : "rgba(239, 68, 68, 0.15)",
+                                                        fontWeight: "700",
+                                                        background: res.kesimpulan?.includes("Ya") ? "#dcfce7" : "#fee2e2",
                                                         color: res.kesimpulan?.includes("Ya") ? "#15803d" : "#b91c1c",
                                                         border: `1px solid ${res.kesimpulan?.includes("Ya") ? "#86efac" : "#fca5a5"}`
                                                     }}
                                                 >
-                                                    {res.kesimpulan} ({res.confidence}%)
+                                                    {res.kesimpulan?.includes("Ya") ? "✓ Sesuai Usia [Ya]" : "✗ Belum Sesuai [Tidak]"} ({res.confidence}%)
                                                 </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handlePrintStudentPDF(res, schoolName, gradeClass)}
+                                                    style={{
+                                                        display: "inline-flex",
+                                                        alignItems: "center",
+                                                        gap: "6px",
+                                                        padding: "5px 12px",
+                                                        borderRadius: "6px",
+                                                        fontSize: "0.83rem",
+                                                        fontWeight: "600",
+                                                        background: "#0284c7",
+                                                        color: "#ffffff",
+                                                        border: "none",
+                                                        cursor: "pointer",
+                                                        boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
+                                                        transition: "all 0.15s ease"
+                                                    }}
+                                                    title="Cetak atau simpan lembar laporan sebagai PDF"
+                                                >
+                                                    🖨️ Cetak / Unduh PDF
+                                                </button>
                                             </div>
                                         </div>
 
-                                        <div style={{ marginTop: "10px", marginBottom: "8px" }}>
-                                            <p style={{ margin: "4px 0", color: "#334155", fontSize: "0.95rem" }}>
-                                                <strong>Status Perkembangan:</strong> {res.status}
-                                            </p>
-                                            <p style={{ margin: "6px 0", color: "#475569", fontSize: "0.92rem", lineHeight: "1.5" }}>
-                                                <strong>Alasan Klinis:</strong> {res.alasan_klinis}
-                                            </p>
-                                            {res.saran_guru && (
-                                                <p style={{ margin: "8px 0 10px 0", fontSize: "0.9rem", color: "#1e3a8a", background: "#f0fdf4", padding: "8px 12px", borderRadius: "8px", borderLeft: "4px solid #22c55e", lineHeight: "1.4" }}>
-                                                    💡 <strong>Rekomendasi Stimulasi Guru:</strong> {res.saran_guru}
-                                                </p>
-                                            )}
+                                        {/* BAGIAN I: ASESMEN 4 INDIKATOR KLINIS */}
+                                        <div style={{ marginTop: "14px", marginBottom: "12px" }}>
+                                            <h4 style={{ margin: "0 0 6px 0", fontSize: "0.95rem", fontWeight: "700", color: "#0f172a", textTransform: "uppercase", letterSpacing: "0.3px" }}>
+                                                I. Asesmen 4 Indikator Klinis Motorik Halus (Bagian I)
+                                            </h4>
+                                            <div style={{ overflowX: "auto", border: "1px solid #cbd5e1", borderRadius: "6px", background: "#ffffff" }}>
+                                                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem", textAlign: "left" }}>
+                                                    <thead>
+                                                        <tr style={{ background: "#f1f5f9", borderBottom: "1px solid #cbd5e1", color: "#334155" }}>
+                                                            <th style={{ padding: "8px 10px", width: "36px", textAlign: "center" }}>No</th>
+                                                            <th style={{ padding: "8px 10px" }}>Indikator Klinis</th>
+                                                            <th style={{ padding: "8px 10px", width: "60px", textAlign: "center" }}>BB (1)</th>
+                                                            <th style={{ padding: "8px 10px", width: "60px", textAlign: "center" }}>MB (2)</th>
+                                                            <th style={{ padding: "8px 10px", width: "60px", textAlign: "center" }}>BSH (3)</th>
+                                                            <th style={{ padding: "8px 10px", width: "60px", textAlign: "center" }}>BSB (4)</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {(res.indikator_klinis_table || [
+                                                            { no: 1, nama: "Kontrol Pegangan: kemampuan memegang alat tulis secara stabil", level: res.kategori || "MB" },
+                                                            { no: 2, nama: "Kekuatan goresan konsisten (tidak terlalu tipis/gemetar dan tidak terlalu tebal)", level: res.kategori || "MB" },
+                                                            { no: 3, nama: "Koordinasi mata: kemampuan menyalin atau menggambar pola geometri", level: res.kategori || "MB" },
+                                                            { no: 4, nama: "Kemampuan menarik garis lurus secara kontinu tanpa banyak jeda", level: res.kategori || "MB" }
+                                                        ]).map((item, i) => (
+                                                            <tr key={i} style={{ borderBottom: i < 3 ? "1px solid #e2e8f0" : "none" }}>
+                                                                <td style={{ padding: "8px 10px", textAlign: "center", color: "#64748b" }}>{item.no || i + 1}</td>
+                                                                <td style={{ padding: "8px 10px", color: "#1e293b", fontWeight: "500" }}>{item.nama}</td>
+                                                                <td style={{ padding: "8px 10px", textAlign: "center", fontWeight: "bold", fontSize: "1.1rem", color: item.level === "BB" ? "#dc2626" : "#cbd5e1" }}>
+                                                                    {item.level === "BB" ? "✓" : "-"}
+                                                                </td>
+                                                                <td style={{ padding: "8px 10px", textAlign: "center", fontWeight: "bold", fontSize: "1.1rem", color: item.level === "MB" ? "#d97706" : "#cbd5e1" }}>
+                                                                    {item.level === "MB" ? "✓" : "-"}
+                                                                </td>
+                                                                <td style={{ padding: "8px 10px", textAlign: "center", fontWeight: "bold", fontSize: "1.1rem", color: item.level === "BSH" ? "#16a34a" : "#cbd5e1" }}>
+                                                                    {item.level === "BSH" ? "✓" : "-"}
+                                                                </td>
+                                                                <td style={{ padding: "8px 10px", textAlign: "center", fontWeight: "bold", fontSize: "1.1rem", color: item.level === "BSB" ? "#2563eb" : "#cbd5e1" }}>
+                                                                    {item.level === "BSB" ? "✓" : "-"}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <small style={{ color: "#64748b", fontSize: "0.78rem", display: "block", marginTop: "4px" }}>
+                                                *Keterangan: BB (Belum Berkembang), MB (Mulai Berkembang), BSH (Berkembang Sesuai Harapan), BSB (Berkembang Sangat Baik)
+                                            </small>
                                         </div>
 
-                                        {res.indikator && (
-                                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "8px", marginTop: "12px" }}>
-                                                <div style={{ padding: "8px", background: "#f8fafc", borderRadius: "6px", border: "1px solid #e2e8f0", fontSize: "0.8rem" }}>
-                                                    <span style={{ color: "#64748b", display: "block" }}>1. Kontrol Pegangan</span>
-                                                    <strong style={{ color: "#0f172a", fontSize: "0.95rem" }}>{res.indikator.kontrol_pegangan.value}</strong>
-                                                    <span style={{ display: "block", color: res.indikator.kontrol_pegangan.status.includes("Stabil") ? "#16a34a" : "#dc2626", fontWeight: "600", marginTop: "2px" }}>
-                                                        {res.indikator.kontrol_pegangan.status}
+                                        {/* BAGIAN III: KESIMPULAN PERKEMBANGAN */}
+                                        <div style={{ marginTop: "12px", marginBottom: "12px" }}>
+                                            <h4 style={{ margin: "0 0 8px 0", fontSize: "0.95rem", fontWeight: "700", color: "#0f172a", textTransform: "uppercase", letterSpacing: "0.3px" }}>
+                                                II. Kesimpulan Asesmen Perkembangan (Bagian III)
+                                            </h4>
+                                            
+                                            {/* Pertanyaan 1: Menulis */}
+                                            <div style={{ padding: "10px 12px", background: "#f8fafc", borderRadius: "6px", border: "1px solid #e2e8f0", marginBottom: "8px" }}>
+                                                <p style={{ margin: "0 0 6px 0", fontWeight: "600", fontSize: "0.88rem", color: "#1e293b" }}>
+                                                    1) Apakah kemampuan menulis anak sudah sesuai dengan perkembangan usianya?
+                                                </p>
+                                                <div style={{ display: "flex", gap: "20px", marginBottom: "6px", fontSize: "0.85rem", fontWeight: "600" }}>
+                                                    <span style={{ color: res.kesimpulan?.includes("Ya") ? "#15803d" : "#94a3b8" }}>
+                                                        {res.kesimpulan?.includes("Ya") ? "[✓]" : "[  ]"} Sesuai Usia (Ya)
+                                                    </span>
+                                                    <span style={{ color: !res.kesimpulan?.includes("Ya") ? "#b91c1c" : "#94a3b8" }}>
+                                                        {!res.kesimpulan?.includes("Ya") ? "[✓]" : "[  ]"} Belum Sesuai (Tidak)
                                                     </span>
                                                 </div>
-                                                <div style={{ padding: "8px", background: "#f8fafc", borderRadius: "6px", border: "1px solid #e2e8f0", fontSize: "0.8rem" }}>
-                                                    <span style={{ color: "#64748b", display: "block" }}>2. Kekuatan Tekanan</span>
-                                                    <strong style={{ color: "#0f172a", fontSize: "0.95rem" }}>{res.indikator.konsistensi_tekanan.value}</strong>
-                                                    <span style={{ display: "block", color: res.indikator.konsistensi_tekanan.status === "Konsisten" ? "#16a34a" : "#ea580c", fontWeight: "600", marginTop: "2px" }}>
-                                                        {res.indikator.konsistensi_tekanan.status}
+                                                <p style={{ margin: 0, fontSize: "0.82rem", color: "#475569", fontStyle: "italic" }}>
+                                                    <strong>Mohon sertakan alasannya:</strong> "{res.kesimpulan_menulis?.alasan || res.alasan_klinis || '-'}"
+                                                </p>
+                                            </div>
+
+                                            {/* Pertanyaan 2: Menggambar */}
+                                            <div style={{ padding: "10px 12px", background: "#f8fafc", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+                                                <p style={{ margin: "0 0 6px 0", fontWeight: "600", fontSize: "0.88rem", color: "#1e293b" }}>
+                                                    2) Apakah kemampuan menggambar anak sudah sesuai dengan perkembangan usianya?
+                                                </p>
+                                                <div style={{ display: "flex", gap: "20px", marginBottom: "6px", fontSize: "0.85rem", fontWeight: "600" }}>
+                                                    <span style={{ color: res.kesimpulan?.includes("Ya") ? "#15803d" : "#94a3b8" }}>
+                                                        {res.kesimpulan?.includes("Ya") ? "[✓]" : "[  ]"} Sesuai Usia (Ya)
+                                                    </span>
+                                                    <span style={{ color: !res.kesimpulan?.includes("Ya") ? "#b91c1c" : "#94a3b8" }}>
+                                                        {!res.kesimpulan?.includes("Ya") ? "[✓]" : "[  ]"} Belum Sesuai (Tidak)
                                                     </span>
                                                 </div>
-                                                <div style={{ padding: "8px", background: "#f8fafc", borderRadius: "6px", border: "1px solid #e2e8f0", fontSize: "0.8rem" }}>
-                                                    <span style={{ color: "#64748b", display: "block" }}>3. Pola Geometri</span>
-                                                    <strong style={{ color: "#0f172a", fontSize: "0.95rem" }}>{res.indikator.koordinasi_geometri.value}</strong>
-                                                    <span style={{ display: "block", color: res.indikator.koordinasi_geometri.status === "Terkoordinasi" ? "#16a34a" : "#dc2626", fontWeight: "600", marginTop: "2px" }}>
-                                                        {res.indikator.koordinasi_geometri.status}
-                                                    </span>
-                                                </div>
-                                                <div style={{ padding: "8px", background: "#f8fafc", borderRadius: "6px", border: "1px solid #e2e8f0", fontSize: "0.8rem" }}>
-                                                    <span style={{ color: "#64748b", display: "block" }}>4. Kontinuitas Garis</span>
-                                                    <strong style={{ color: "#0f172a", fontSize: "0.95rem" }}>{res.indikator.kontinuitas_garis.value}</strong>
-                                                    <span style={{ display: "block", color: res.indikator.kontinuitas_garis.status === "Kontinu" ? "#16a34a" : "#dc2626", fontWeight: "600", marginTop: "2px" }}>
-                                                        {res.indikator.kontinuitas_garis.status}
-                                                    </span>
-                                                </div>
+                                                <p style={{ margin: 0, fontSize: "0.82rem", color: "#475569", fontStyle: "italic" }}>
+                                                    <strong>Mohon sertakan alasannya:</strong> "{res.kesimpulan_menggambar?.alasan || res.alasan_klinis || '-'}"
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* REKOMENDASI STIMULASI GURU & ORANG TUA */}
+                                        {res.saran_guru && (
+                                            <div style={{ margin: "10px 0 4px 0", fontSize: "0.85rem", color: "#1e3a8a", background: "#f0fdf4", padding: "10px 14px", borderRadius: "8px", borderLeft: "4px solid #22c55e", lineHeight: "1.4" }}>
+                                                💡 <strong>Rekomendasi Stimulasi Guru & Orang Tua:</strong> {res.saran_guru}
                                             </div>
                                         )}
                                     </div>

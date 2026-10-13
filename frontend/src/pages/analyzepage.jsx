@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getApiUrl } from "../config/api";
 
 function CloudUploadIcon() {
     return (
@@ -626,7 +627,7 @@ function AnalyzePage() {
         formData.append("handwriting_images", fileObj);
 
         try {
-            const response = await fetch("http://localhost:8000/analyze-handwriting", {
+            const response = await fetch(getApiUrl("/analyze-handwriting"), {
                 method: "POST",
                 body: formData,
             });

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { getApiUrl } from "../config/api";
 import "../style/auth.css";
 
 function ForgotPasswordPage() {
@@ -14,7 +15,7 @@ function ForgotPasswordPage() {
         setIsLoading(true);
 
         try {
-            const response = await fetch("http://localhost:8000/forgot-password/send-otp", {
+            const response = await fetch(getApiUrl("/forgot-password/send-otp"), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email }),

@@ -95,6 +95,7 @@ def predict_motorik_siswa(image_bytes: bytes, usia_bulan: float = 45.0):
             "kesimpulan": "Belum Sesuai [Tidak]",
             "status": "Coretan Tidak Terdeteksi",
             "kategori": "BB",
+            "kategori_label": "Belum Berkembang",
             "confidence": 0.0,
             "alasan_klinis": "Gambar tidak memiliki kontras yang cukup atau tidak ada goresan tinta yang terdeteksi.",
             "saran_guru": "Pastikan hasil foto atau scan lembar kerja cukup terang dan goresan pensil terlihat jelas.",
@@ -103,6 +104,22 @@ def predict_motorik_siswa(image_bytes: bytes, usia_bulan: float = 45.0):
                 "konsistensi_tekanan": {"value": 0.0, "status": "Tidak Terdeteksi"},
                 "koordinasi_geometri": {"value": 0.0, "status": "Tidak Terdeteksi"},
                 "kontinuitas_garis": {"value": 0.0, "status": "Tidak Terdeteksi"}
+            },
+            "indikator_klinis_table": [
+                {"no": 1, "nama": "Kontrol Pegangan: kemampuan memegang alat tulis secara stabil", "level": "BB"},
+                {"no": 2, "nama": "Kekuatan goresan konsisten (tidak terlalu tipis/gemetar dan tidak terlalu tebal)", "level": "BB"},
+                {"no": 3, "nama": "Koordinasi mata: kemampuan menyalin atau menggambar pola geometri", "level": "BB"},
+                {"no": 4, "nama": "Kemampuan menarik garis lurus secara kontinu tanpa banyak jeda", "level": "BB"}
+            ],
+            "kesimpulan_menulis": {
+                "sesuai": False,
+                "jawaban": "Tidak",
+                "alasan": "Coretan lembar kerja tidak terdeteksi dengan jelas."
+            },
+            "kesimpulan_menggambar": {
+                "sesuai": False,
+                "jawaban": "Tidak",
+                "alasan": "Coretan lembar kerja tidak terdeteksi dengan jelas."
             }
         }
 
@@ -166,7 +183,83 @@ def predict_motorik_siswa(image_bytes: bytes, usia_bulan: float = 45.0):
 
         saran_guru = "Berikan stimulasi berupa latihan meremas playdough/plastisin, menghubungkan titik garis putus-putus, serta melatih koordinasi jemari."
 
-    # Breakdown 4 Indikator Fisik
+    # Penentuan level klinis 4 indikator (BB=1, MB=2, BSH=3, BSB=4)
+    # 1. Kontrol Pegangan (Tremor)
+    if feats['ind1_tremor'] <= 1.15:
+        ind1_level = "BSB"
+    elif feats['ind1_tremor'] <= 1.28:
+        ind1_level = "BSH"
+    elif feats['ind1_tremor'] <= 1.40:
+        ind1_level = "MB"
+    else:
+        ind1_level = "BB"
+
+    # 2. Kekuatan Goresan / Tekanan
+    if feats['ind2_stroke_cv'] <= 0.44:
+        ind2_level = "BSB"
+    elif feats['ind2_stroke_cv'] <= 0.52:
+        ind2_level = "BSH"
+    elif feats['ind2_stroke_cv'] <= 0.62:
+        ind2_level = "MB"
+    else:
+        ind2_level = "BB"
+
+    # 3. Koordinasi Pola Geometri (Compactness)
+    if feats['ind3_compactness'] >= 0.35:
+        ind3_level = "BSB"
+    elif feats['ind3_compactness'] >= 0.24:
+        ind3_level = "BSH"
+    elif feats['ind3_compactness'] >= 0.14:
+        ind3_level = "MB"
+    else:
+        ind3_level = "BB"
+
+    # 4. Kemampuan Menarik Garis Lurus (Fragmentasi)
+    if feats['ind4_fragmentation'] <= 0.40:
+        ind4_level = "BSB"
+    elif feats['ind4_fragmentation'] <= 0.70:
+        ind4_level = "BSH"
+    elif feats['ind4_fragmentation'] <= 1.25:
+        ind4_level = "MB"
+    else:
+        ind4_level = "BB"
+
+    indikator_klinis_table = [
+        {
+            "no": 1,
+            "nama": "Kontrol Pegangan: kemampuan memegang alat tulis secara stabil",
+            "level": ind1_level
+        },
+        {
+            "no": 2,
+            "nama": "Kekuatan goresan konsisten (tidak terlalu tipis/gemetar dan tidak terlalu tebal)",
+            "level": ind2_level
+        },
+        {
+            "no": 3,
+            "nama": "Koordinasi mata: kemampuan menyalin atau menggambar pola geometri",
+            "level": ind3_level
+        },
+        {
+            "no": 4,
+            "nama": "Kemampuan menarik garis lurus secara kontinu tanpa banyak jeda",
+            "level": ind4_level
+        }
+    ]
+
+    kesimpulan_menulis = {
+        "sesuai": bool(is_sesuai),
+        "jawaban": "Ya" if is_sesuai else "Tidak",
+        "alasan": "Anak sudah mampu mengontrol goresan alat tulis secara mandiri, stabil, dan tarikan garis kontinu sesuai tahapan usianya." if is_sesuai else alasan_klinis
+    }
+
+    kesimpulan_menggambar = {
+        "sesuai": bool(is_sesuai),
+        "jawaban": "Ya" if is_sesuai else "Tidak",
+        "alasan": "Koordinasi motorik visual dan kemampuan menggambar pola geometri sudah berkembang baik sesuai tahapan usianya." if is_sesuai else "Koordinasi kontrol motorik dan reproduksi pola geometri masih dalam tahap pembentukan dan memerlukan latihan terarah."
+    }
+
+    # Breakdown 4 Indikator Fisik (Tetap dipertahankan untuk kompatibilitas)
     indikator = {
         "kontrol_pegangan": {
             "value": round(feats['ind1_tremor'], 2),
@@ -194,5 +287,8 @@ def predict_motorik_siswa(image_bytes: bytes, usia_bulan: float = 45.0):
         "confidence": round(confidence, 1),
         "alasan_klinis": alasan_klinis,
         "saran_guru": saran_guru,
-        "indikator": indikator
+        "indikator": indikator,
+        "indikator_klinis_table": indikator_klinis_table,
+        "kesimpulan_menulis": kesimpulan_menulis,
+        "kesimpulan_menggambar": kesimpulan_menggambar
     }

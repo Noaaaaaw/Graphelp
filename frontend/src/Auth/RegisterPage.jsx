@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { getApiUrl } from "../config/api";
 import "../style/auth.css";
 
 function RegisterPage() {
@@ -43,7 +44,7 @@ function RegisterPage() {
 
         try {
             // Kirim OTP ke email
-            const response = await fetch("http://localhost:8000/send-otp-register", {
+            const response = await fetch(getApiUrl("/send-otp-register"), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email }),
