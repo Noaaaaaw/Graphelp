@@ -16,6 +16,8 @@ node_modules/
 backend/.env
 backend/*.db
 datavps.md
+auto_vps.md
+DEPLOYMENT_PLAN.md
 ANALISIS_*.md
 ANALISIS_ERROR_LOGIN_GURU.md
 
