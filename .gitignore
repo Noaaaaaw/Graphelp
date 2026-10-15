@@ -22,6 +22,7 @@ ANALISIS_*.md
 ANALISIS_ERROR_LOGIN_GURU.md
 
 # AI Agent private skills & customizations (local only)
+.archify/
 .agents/
 .agents
 .agent/
