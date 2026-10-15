@@ -48,15 +48,6 @@ function PencilTabIcon() {
     );
 }
 
-function CameraTabIcon() {
-    return (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z" />
-            <circle cx="12" cy="13" r="3.2" />
-        </svg>
-    );
-}
-
 function EraserIcon() {
     return (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -259,7 +250,6 @@ const PHOTO_TIPS = [
 const TABS = [
     { id: "foto", label: "Upload Foto", icon: <UploadTabIcon /> },
     { id: "manual", label: "Tulis Manual", icon: <PencilTabIcon /> },
-    { id: "kamera", label: "Scan Kamera", icon: <CameraTabIcon /> },
 ];
 
 const TAB_META = {
@@ -270,10 +260,6 @@ const TAB_META = {
     manual: {
         title: "Tulis Manual di Layar",
         hint: "Tulis kalimat langsung di area di bawah, seperti menulis di kertas",
-    },
-    kamera: {
-        title: "Scan Kamera",
-        hint: "Ambil foto langsung menggunakan kamera perangkat",
     },
 };
 
@@ -490,117 +476,6 @@ const SignaturePad = forwardRef(function SignaturePad({ onChangeHasDrawn }, ref)
     );
 });
 
-function CameraView({ onClose, onCapture }) {
-    const videoRef = useRef(null);
-    const streamRef = useRef(null);
-    const [captured, setCaptured] = useState(null);
-    const [error, setError] = useState("");
-
-    useEffect(() => {
-        let active = true;
-
-        async function startCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: "environment" },
-                    audio: false,
-                });
-                if (!active) {
-                    stream.getTracks().forEach((t) => t.stop());
-                    return;
-                }
-                streamRef.current = stream;
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                    await videoRef.current.play();
-                }
-            } catch (err) {
-                setError("Tidak bisa mengakses kamera. Periksa izin kamera di browser Anda.");
-            }
-        }
-
-        startCamera();
-
-        return () => {
-            active = false;
-            streamRef.current?.getTracks().forEach((t) => t.stop());
-        };
-    }, []);
-
-    function handleShutter() {
-        const video = videoRef.current;
-        if (!video || !video.videoWidth) return;
-        const size = Math.min(video.videoWidth, video.videoHeight);
-        const canvas = document.createElement("canvas");
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext("2d");
-        const sx = (video.videoWidth - size) / 2;
-        const sy = (video.videoHeight - size) / 2;
-        ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
-        setCaptured(canvas.toDataURL("image/png"));
-    }
-
-    return (
-        <div className="camera-card-wrap">
-            <div className="camera-card">
-
-                <button type="button" className="camera-close" onClick={onClose} aria-label="Tutup kamera">
-                    <XIcon />
-                </button>
-
-                {error && (
-                    <div className="camera-error">
-                        <CameraTabIcon />
-                        <p>{error}</p>
-                    </div>
-                )}
-
-                {!error && !captured && (
-                    <video ref={videoRef} className="camera-video" muted playsInline />
-                )}
-
-                {captured && (
-                    <img src={captured} alt="Hasil scan" className="camera-video" />
-                )}
-
-                {!error && (
-                    <div className="camera-controls">
-                        {!captured ? (
-                            <button
-                                type="button"
-                                className="camera-shutter"
-                                onClick={handleShutter}
-                                aria-label="Ambil foto"
-                            />
-                        ) : (
-                            <>
-                                <button
-                                    type="button"
-                                    className="camera-btn camera-btn-ghost"
-                                    onClick={() => setCaptured(null)}
-                                >
-                                    <RotateIcon />
-                                    Ulang
-                                </button>
-                                <button
-                                    type="button"
-                                    className="camera-btn camera-btn-solid"
-                                    onClick={() => onCapture(captured)}
-                                >
-                                    <CheckIcon />
-                                    Gunakan
-                                </button>
-                            </>
-                        )}
-                    </div>
-                )}
-
-            </div>
-        </div>
-    );
-}
-
 function fileToDataUrl(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -618,8 +493,6 @@ function AnalyzePage() {
     const [isLoading, setIsLoading] = useState(false);
     const [hasDrawn, setHasDrawn] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
-    const [cameraOpen, setCameraOpen] = useState(false);
-    const [capturedPhoto, setCapturedPhoto] = useState(null);
     const fileInputRef = useRef(null);
     const signaturePadRef = useRef(null);
 
@@ -646,7 +519,9 @@ function AnalyzePage() {
     }
 
     async function handleAnalyze(customFile = null) {
-        const fileToProcess = customFile || fileObj;
+        const fileToProcess = (customFile instanceof Blob || customFile instanceof File)
+            ? customFile
+            : fileObj;
         if (!fileToProcess) return;
         setIsLoading(true);
 
@@ -674,7 +549,14 @@ function AnalyzePage() {
                     navigate("/analyze/result", { state: { result, image } });
                 }
             } else {
-                alert(data.detail || "Gagal memproses analisis.");
+                const errorMsg = typeof data.detail === "string"
+                    ? data.detail
+                    : Array.isArray(data.detail)
+                        ? data.detail.map((e) => e.msg || JSON.stringify(e)).join(", ")
+                        : typeof data.detail === "object"
+                            ? JSON.stringify(data.detail)
+                            : "Gagal memproses analisis.";
+                alert(errorMsg);
             }
         } catch (error) {
             console.error("Error:", error);
@@ -821,7 +703,7 @@ function AnalyzePage() {
                                     type="button"
                                     className="analyze-submit"
                                     disabled={!fileName || isLoading}
-                                    onClick={handleAnalyze}
+                                    onClick={() => handleAnalyze()}
                                 >
                                     {isLoading ? "Menganalisis..." : "Lanjut ke Hasil Analisis"}
                                 </button>
@@ -840,60 +722,6 @@ function AnalyzePage() {
                                 >
                                     {isLoading ? "Menganalisis..." : "Lanjut ke Hasil Analisis"}
                                 </button>
-                            </div>
-                        )}
-
-                        {/* ---------- Tab: Scan Kamera ---------- */}
-                        {activeTab === "kamera" && (
-                            <div className="analyze-panel">
-                                {!cameraOpen && !capturedPhoto && (
-                                    <>
-                                        <div className="dropzone dropzone-camera">
-                                            <span className="dropzone-icon">
-                                                <CameraIcon />
-                                            </span>
-                                            <p className="dropzone-text">
-                                                Aktifkan kamera untuk mulai scan
-                                            </p>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            className="analyze-submit"
-                                            onClick={() => setCameraOpen(true)}
-                                        >
-                                            Buka Kamera
-                                        </button>
-                                    </>
-                                )}
-                                {cameraOpen && (
-                                    <CameraView
-                                        onClose={() => setCameraOpen(false)}
-                                        onCapture={(img) => {
-                                            setCapturedPhoto(img);
-                                            setCameraOpen(false);
-                                        }}
-                                    />
-                                )}
-                                {capturedPhoto && !cameraOpen && (
-                                    <>
-                                        <div className="camera-card-wrap">
-                                            <div className="camera-card camera-card-static">
-                                                <img src={capturedPhoto} alt="Hasil scan" className="camera-video" />
-                                                <button
-                                                    type="button"
-                                                    className="camera-close"
-                                                    onClick={() => setCapturedPhoto(null)}
-                                                    aria-label="Hapus foto"
-                                                >
-                                                    <XIcon />
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <button type="button" className="analyze-submit" disabled={!capturedPhoto}>
-                                            Lanjut ke Hasil Analisis
-                                        </button>
-                                    </>
-                                )}
                             </div>
                         )}
                     </section>
