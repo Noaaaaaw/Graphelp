@@ -79,8 +79,13 @@ async def analyze_handwriting(
         with open(filepath, "wb") as f:
             f.write(content)
 
-        with open(filepath, "rb") as f:
-            result = predict_image(f)
+        # Memproses analisis kematangan motorik halus siswa
+        try:
+            usia_val = float(ages[i]) if i < len(ages) and float(ages[i]) > 0 else 45.0
+        except (ValueError, IndexError):
+            usia_val = 45.0
+
+        result = predict_motorik_siswa(content, usia_bulan=usia_val)
 
         image_url = f"/uploads/handwriting/{filename}"
 
@@ -89,6 +94,15 @@ async def analyze_handwriting(
         st_age = ages[i] if i < len(ages) else "0"
         st_gender = genders[i] if i < len(genders) else "L"
 
+        is_sesuai = "Ya" in result.get("kesimpulan", "")
+        pred_type_val = 1 if is_sesuai else 0
+        type_name_val = result.get("kesimpulan", "Sesuai Usia [Ya]" if is_sesuai else "Belum Sesuai [Tidak]")
+        confidence_val = float(result.get("confidence", 85.0))
+        top3_data = [
+            {"type": "Ya", "name": "Sesuai Usia", "prob": confidence_val if is_sesuai else round(100.0 - confidence_val, 1)},
+            {"type": "Tidak", "name": "Belum Sesuai", "prob": round(100.0 - confidence_val, 1) if is_sesuai else confidence_val}
+        ]
+
         if session_record:
             student_res = models.StudentAnalysisResult(
                 session_id=session_record.id,
@@ -96,11 +110,11 @@ async def analyze_handwriting(
                 student_name=st_name,
                 age=st_age,
                 gender=st_gender,
-                pred_type=result["pred_type"],
-                type_name=result["type_name"],
-                confidence=result["confidence"],
-                top3=json.dumps(result["top3"]),
-                description=result["description"],
+                pred_type=pred_type_val,
+                type_name=type_name_val,
+                confidence=confidence_val,
+                top3=json.dumps(top3_data),
+                description=result.get("alasan_klinis", ""),
                 image_path=image_url,
                 created_at=datetime.utcnow()
             )
@@ -110,11 +124,21 @@ async def analyze_handwriting(
             "absence_number": absence_num,
             "student_name": st_name,
             "name": f"No. {absence_num} - {st_name}",
-            "pred_type": result["pred_type"],
-            "type_name": result["type_name"],
+            "kesimpulan": result["kesimpulan"],
+            "status": result["status"],
+            "kategori": result.get("kategori", ""),
+            "kategori_label": result.get("kategori_label", ""),
             "confidence": result["confidence"],
-            "description": result["description"],
-            "top3": result["top3"],
+            "alasan_klinis": result["alasan_klinis"],
+            "saran_guru": result["saran_guru"],
+            "indikator": result.get("indikator", {}),
+            "indikator_klinis_table": result.get("indikator_klinis_table", []),
+            "kesimpulan_menulis": result.get("kesimpulan_menulis", {}),
+            "kesimpulan_menggambar": result.get("kesimpulan_menggambar", {}),
+            "pred_type": pred_type_val,
+            "type_name": type_name_val,
+            "description": result.get("alasan_klinis", ""),
+            "top3": top3_data,
             "image_url": image_url
         })
 

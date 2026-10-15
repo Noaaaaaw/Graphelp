@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useToast } from "../components/Toast";
-import { TYPE_INFO } from "../constants/typeInfo";
 import "../style/results.css";
 
 function CheckIcon({ size = 26 }) {
@@ -90,36 +88,6 @@ function FileIcon() {
     );
 }
 
-function DownloadIcon() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 3v12" />
-            <path d="m7 10 5 5 5-5" />
-            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
-        </svg>
-    );
-}
-
-function ShareIcon() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="18" cy="5" r="3" />
-            <circle cx="6" cy="12" r="3" />
-            <circle cx="18" cy="19" r="3" />
-            <path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4" />
-        </svg>
-    );
-}
-
-function CircleCheckIcon() {
-    return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21.8 10A10 10 0 1 1 17 3.3" />
-            <path d="m9 11 3 3L22 4" />
-        </svg>
-    );
-}
-
 const RING_R = 50;
 const RING_C = 2 * Math.PI * RING_R;
 
@@ -127,11 +95,7 @@ function ResultsPage() {
     const { state } = useLocation();
     const result = state?.result;
     const image = state?.image;
-    const [shareLabel, setShareLabel] = useState("Share Result");
     const [ready, setReady] = useState(false);
-    // toast opsional: kalau provider-nya nggak ada, tetap aman
-    let toast = null;
-    try { toast = useToast(); } catch { toast = null; }
 
     // animasi ring & bar setelah halaman tampil
     useEffect(() => {
@@ -156,74 +120,57 @@ function ResultsPage() {
 
     const confidence = Math.max(0, Math.min(100, Number(result.confidence) || 0));
     const confidenceText = confidence.toFixed(1);
-    const info = TYPE_INFO[Number(result.pred_type)];
-    const top3 = Array.isArray(result.top3) ? result.top3 : [];
-    const typeName = result.type_name || info?.name || top3[0]?.name || "";
-    const typeLabel = info?.label;
-    const tagline = info?.tagline;
-    const traits = info?.traits ?? [];
-    const interpretation = result.interpretation || result.description || info?.description;
-    const features = Array.isArray(result.features) ? result.features : [];
-    const recommendations =
-        Array.isArray(result.recommendations) && result.recommendations.length
-            ? result.recommendations
-            : info?.tips ?? [];
+    const isSesuai = result.kesimpulan?.includes("Ya") || result.pred_type === 1;
 
-    const probs = top3.length
-        ? top3
-        : [{ type: result.pred_type, name: typeName, prob: confidence }];
+    const kesimpulanJudul = isSesuai ? "Sesuai Usia [Ya]" : "Belum Sesuai [Tidak]";
+    const statusLabel = result.status || (isSesuai ? "Perkembangan Sesuai / Mandiri" : "Perlu Stimulasi Tambahan");
+    const interpretation = result.alasan_klinis || result.description || "Hasil evaluasi kematangan motorik halus berdasarkan goresan tulisan tangan anak.";
+
+    // Evaluasi Menulis & Menggambar (Bagian III)
+    const evaluasiMenulis = result.kesimpulan_menulis?.alasan || (isSesuai ? "Anak sudah mampu mengontrol goresan alat tulis secara mandiri, stabil, dan tarikan garis kontinu sesuai tahapan usianya." : interpretation);
+    const evaluasiMenggambar = result.kesimpulan_menggambar?.alasan || (isSesuai ? "Koordinasi motorik visual dan kemampuan menggambar pola geometri sudah berkembang baik sesuai tahapan usianya." : "Koordinasi kontrol motorik dan reproduksi pola geometri masih dalam tahap pembentukan dan memerlukan latihan terarah.");
+
+    // Indikator Klinis (4 Fitur Fisik)
+    const indikator = result.indikator || {};
+    const features = [
+        {
+            icon: "✍️",
+            label: "Kontrol Pegangan",
+            value: indikator.kontrol_pegangan?.status || (isSesuai ? "Stabil" : "Kurang Stabil (Tremor)"),
+            desc: "Kestabilan memegang alat tulis (terdeteksi dari tingkat getaran/tremor goresan).",
+            badge: result.indikator_klinis_table?.[0]?.level || (isSesuai ? "BSH" : "MB")
+        },
+        {
+            icon: "📏",
+            label: "Konsistensi Tekanan",
+            value: indikator.konsistensi_tekanan?.status || (isSesuai ? "Konsisten" : "Belum Merata"),
+            desc: "Kekuatan tekanan goresan pensil pada kertas (tidak terlalu tipis/tebal).",
+            badge: result.indikator_klinis_table?.[1]?.level || (isSesuai ? "BSH" : "MB")
+        },
+        {
+            icon: "📐",
+            label: "Koordinasi Geometri",
+            value: indikator.koordinasi_geometri?.status || (isSesuai ? "Terkoordinasi" : "Perlu Latihan"),
+            desc: "Kemampuan menyalin atau mereproduksi bentuk/pola geometri visual.",
+            badge: result.indikator_klinis_table?.[2]?.level || (isSesuai ? "BSH" : "MB")
+        },
+        {
+            icon: "〰️",
+            label: "Kontinuitas Garis",
+            value: indikator.kontinuitas_garis?.status || (isSesuai ? "Kontinu" : "Sering Terputus"),
+            desc: "Kelancaran menarik garis lurus secara utuh tanpa banyak jeda atau terangkat.",
+            badge: result.indikator_klinis_table?.[3]?.level || (isSesuai ? "BSH" : "MB")
+        }
+    ];
+
+    // Distribusi Probabilitas
+    const probSesuai = isSesuai ? confidence : Math.max(0, 100 - confidence);
+    const probBelum = isSesuai ? Math.max(0, 100 - confidence) : confidence;
+    const probs = [
+        { type: "Ya", name: "Sesuai Usia", prob: probSesuai },
+        { type: "Tidak", name: "Belum Sesuai", prob: probBelum }
+    ];
     const maxProb = Math.max(...probs.map((p) => Number(p.prob) || 0), 1);
-
-    function buildText() {
-        const lines = [
-            "HASIL ANALISIS TULISAN TANGAN",
-            "==============================",
-            `Tipe ${result.pred_type}: ${typeName}${typeLabel ? ` (${typeLabel})` : ""}`,
-            `Tingkat keyakinan AI: ${confidenceText}%`,
-            "",
-            "Interpretasi Kepribadian",
-            interpretation || "-",
-        ];
-        if (info) {
-            lines.push("", `Kekuatan: ${info.strengths}`, `Tantangan: ${info.challenges}`);
-        }
-        if (features.length) {
-            lines.push("", "Analisis Fitur Grafologi");
-            features.forEach((f) => lines.push(`- ${f.label}: ${f.value}${f.desc ? ` (${f.desc})` : ""}`));
-        }
-        if (recommendations.length) {
-            lines.push("", "Rekomendasi Pengembangan Diri");
-            recommendations.forEach((r, i) => lines.push(`${i + 1}. ${r}`));
-        }
-        return lines.join("\n");
-    }
-
-    function handleDownloadTxt() {
-        const blob = new Blob([buildText()], { type: "text/plain;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `hasil-analisis-tipe-${result.pred_type}.txt`;
-        a.click();
-        URL.revokeObjectURL(url);
-        toast?.success?.("File TXT berhasil diunduh");
-    }
-
-    async function handleShare() {
-        const text = `Hasil analisis tulisan tanganku: Tipe ${result.pred_type} - ${typeName} (${confidenceText}%)`;
-        try {
-            if (navigator.share) {
-                await navigator.share({ title: "Hasil Analisis Tulisan Tangan", text });
-            } else {
-                await navigator.clipboard.writeText(text);
-                setShareLabel("Tersalin!");
-                toast?.success?.("Hasil disalin ke clipboard");
-                setTimeout(() => setShareLabel("Share Result"), 2000);
-            }
-        } catch {
-            /* dibatalkan user */
-        }
-    }
 
     return (
         <main className="result-page">
@@ -248,7 +195,7 @@ function ResultsPage() {
                 <span className="hero-ring-b"></span>
                 <h1>Hasil Analisis Selesai</h1>
                 <p>
-                    Berikut karakteristik kepribadian Anda berdasarkan tulisan tangan yang telah dianalisis oleh AI.
+                    Berikut hasil evaluasi kematangan motorik halus anak berdasarkan sampel tulisan tangan yang telah dianalisis oleh AI.
                 </p>
                 <div className="hero-flow">
                     <span className="hero-flow-icon hero-flow-icon-done">
@@ -280,28 +227,36 @@ function ResultsPage() {
                         </figure>
 
                         <div className="result-predict">
-                            <span className="result-predict-label">HASIL PREDIKSI AI</span>
+                            <span className="result-predict-label">HASIL ASESMEN MOTORIK HALUS</span>
 
                             <div className="result-type-row">
-                                <span className="result-type-badge">{result.pred_type}</span>
+                                <span 
+                                    className="result-type-badge"
+                                    style={{
+                                        background: isSesuai ? "#22c55e" : "#ef4444",
+                                        color: "#ffffff",
+                                        fontSize: "1.4rem",
+                                        fontWeight: "bold",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center"
+                                    }}
+                                >
+                                    {isSesuai ? "✓" : "✗"}
+                                </span>
                                 <div>
-                                    <h2>Tipe {result.pred_type}</h2>
+                                    <h2>{kesimpulanJudul}</h2>
                                     <p className="result-predict-name">
-                                        {typeName}
-                                        {typeLabel && <em> · {typeLabel}</em>}
+                                        {statusLabel}
                                     </p>
                                 </div>
                             </div>
 
-                            {tagline && <p className="result-predict-tagline">{tagline}</p>}
-
-                            {traits.length > 0 && (
-                                <div className="result-trait-list">
-                                    {traits.map((t) => (
-                                        <span key={t} className="result-trait">{t}</span>
-                                    ))}
-                                </div>
-                            )}
+                            <p className="result-predict-tagline">
+                                {isSesuai 
+                                    ? "Kontrol motorik visual dan stabilitas goresan tangan anak sudah matang sesuai usianya."
+                                    : "Perkembangan motorik halus anak membutuhkan latihan dan stimulasi tambahan secara berkala."}
+                            </p>
 
                             <div className="result-confidence">
                                 <div className="result-ring">
@@ -317,7 +272,7 @@ function ResultsPage() {
                                 </div>
                                 <div className="result-confidence-text">
                                     <strong>Tingkat Keyakinan AI</strong>
-                                    <span>*Probabilitas output model</span>
+                                    <span>*Probabilitas kematangan model</span>
                                 </div>
                             </div>
                         </div>
@@ -326,35 +281,33 @@ function ResultsPage() {
                     {/* Interpretasi */}
                     {interpretation && (
                         <div className="result-interpret">
-                            <h3>Interpretasi Kepribadian</h3>
+                            <h3>Alasan Klinis & Interpretasi AI</h3>
                             <p>{interpretation}</p>
                         </div>
                     )}
 
-                    {/* Kekuatan & tantangan */}
-                    {info && (
-                        <div className="result-sc">
-                            <div className="result-sc-card result-sc-good">
-                                <span className="result-sc-icon">✓</span>
-                                <div>
-                                    <h4>Kekuatan</h4>
-                                    <p>{info.strengths}</p>
-                                </div>
-                            </div>
-                            <div className="result-sc-card result-sc-warn">
-                                <span className="result-sc-icon">!</span>
-                                <div>
-                                    <h4>Tantangan</h4>
-                                    <p>{info.challenges}</p>
-                                </div>
+                    {/* Evaluasi Menulis & Menggambar */}
+                    <div className="result-sc">
+                        <div className="result-sc-card result-sc-good">
+                            <span className="result-sc-icon">✓</span>
+                            <div>
+                                <h4>Evaluasi Menulis</h4>
+                                <p>{evaluasiMenulis}</p>
                             </div>
                         </div>
-                    )}
+                        <div className={`result-sc-card ${isSesuai ? "result-sc-good" : "result-sc-warn"}`}>
+                            <span className="result-sc-icon">{isSesuai ? "✓" : "!"}</span>
+                            <div>
+                                <h4>Evaluasi Menggambar</h4>
+                                <p>{evaluasiMenggambar}</p>
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Peringkat kemungkinan tipe */}
                     <div className="result-panel">
-                        <h3 className="result-panel-title">Peringkat Kemungkinan Tipe</h3>
-                        <p className="result-panel-sub">Tiga tipe dengan probabilitas tertinggi menurut model.</p>
+                        <h3 className="result-panel-title">Distribusi Probabilitas Model</h3>
+                        <p className="result-panel-sub">Tingkat keyakinan klasifikasi kematangan motorik halus anak oleh model AI.</p>
                         <div className="result-probs">
                             {probs.map((t, i) => {
                                 const prob = Number(t.prob) || 0;
@@ -363,7 +316,7 @@ function ResultsPage() {
                                         <span className="result-prob-rank">#{i + 1}</span>
                                         <div className="result-prob-main">
                                             <div className="result-prob-head">
-                                                <strong>Tipe {t.type}{t.name ? ` · ${t.name}` : ""}</strong>
+                                                <strong>{t.name} [{t.type}]</strong>
                                                 <span>{prob.toFixed(1)}%</span>
                                             </div>
                                             <div className="result-prob-bar">
@@ -376,11 +329,11 @@ function ResultsPage() {
                         </div>
                     </div>
 
-                    {/* Fitur grafologi (muncul kalau backend mengirim `features`) */}
+                    {/* Fitur motorik halus */}
                     {features.length > 0 && (
                         <div className="result-panel">
-                            <h3 className="result-panel-title">Analisis Fitur Grafologi</h3>
-                            <p className="result-panel-sub">Penjelasan karakteristik visual berdasarkan literatur.</p>
+                            <h3 className="result-panel-title">Analisis 4 Indikator Klinis PAUD</h3>
+                            <p className="result-panel-sub">Parameter fisik goresan berdasarkan instrumen asesmen perkembangan anak.</p>
                             <div className="result-features">
                                 {features.map((f, i) => (
                                     <div key={i} className="result-feature">
@@ -397,34 +350,11 @@ function ResultsPage() {
                         </div>
                     )}
 
-                    {/* Rekomendasi */}
-                    {recommendations.length > 0 && (
-                        <div className="result-panel">
-                            <h3 className="result-panel-title result-panel-title-icon">
-                                <CircleCheckIcon /> Rekomendasi Pengembangan Diri
-                            </h3>
-                            <ol className="result-recs">
-                                {recommendations.map((r, i) => (
-                                    <li key={i}>
-                                        <span className="result-rec-num">{i + 1}</span>
-                                        {r}
-                                    </li>
-                                ))}
-                            </ol>
-                        </div>
-                    )}
-
                     {/* Aksi */}
                     <div className="result-actions">
-                        <button type="button" className="result-btn result-btn-primary" onClick={() => window.print()}>
-                            <FileIcon /> Download PDF
-                        </button>
-                        <button type="button" className="result-btn result-btn-soft" onClick={handleDownloadTxt}>
-                            <DownloadIcon /> Download TXT
-                        </button>
-                        <button type="button" className="result-btn result-btn-ghost" onClick={handleShare}>
-                            <ShareIcon /> {shareLabel}
-                        </button>
+                        <Link to="/analyze" className="result-btn result-btn-primary">
+                            🔄 Analisis Gambar Lain
+                        </Link>
                     </div>
                 </section>
             </div>

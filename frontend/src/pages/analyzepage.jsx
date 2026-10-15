@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getApiUrl } from "../config/api";
 
@@ -306,7 +306,7 @@ const TIPS = [
 
 const STAR_COUNT = 24;
 
-function SignaturePad({ onChangeHasDrawn }) {
+const SignaturePad = forwardRef(function SignaturePad({ onChangeHasDrawn }, ref) {
     const containerRef = useRef(null);
     const canvasRef = useRef(null);
     const ctxRef = useRef(null);
@@ -314,6 +314,37 @@ function SignaturePad({ onChangeHasDrawn }) {
     const [hasDrawn, setHasDrawn] = useState(false);
     const [tool, setTool] = useState("pen");
     const [lineWidth, setLineWidth] = useState(3);
+
+    useImperativeHandle(ref, () => ({
+        getImageFile: () => {
+            const canvas = canvasRef.current;
+            if (!canvas) return Promise.resolve(null);
+
+            // Buat canvas sementara berlatar belakang putih solid (menyerupai kertas HVS)
+            const exportCanvas = document.createElement("canvas");
+            exportCanvas.width = canvas.width;
+            exportCanvas.height = canvas.height;
+            const expCtx = exportCanvas.getContext("2d");
+
+            // 1. Latar belakang putih
+            expCtx.fillStyle = "#ffffff";
+            expCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+            // 2. Gambar goresan tinta di atas kertas putih
+            expCtx.drawImage(canvas, 0, 0);
+
+            return new Promise((resolve) => {
+                exportCanvas.toBlob((blob) => {
+                    if (blob) {
+                        const file = new File([blob], "tulis_manual.png", { type: "image/png" });
+                        resolve(file);
+                    } else {
+                        resolve(null);
+                    }
+                }, "image/png");
+            });
+        }
+    }));
 
     useEffect(() => {
         const container = containerRef.current;
@@ -457,7 +488,7 @@ function SignaturePad({ onChangeHasDrawn }) {
             </div>
         </>
     );
-}
+});
 
 function CameraView({ onClose, onCapture }) {
     const videoRef = useRef(null);
@@ -590,6 +621,7 @@ function AnalyzePage() {
     const [cameraOpen, setCameraOpen] = useState(false);
     const [capturedPhoto, setCapturedPhoto] = useState(null);
     const fileInputRef = useRef(null);
+    const signaturePadRef = useRef(null);
 
     function handleFileSelect(file) {
         if (file) {
@@ -613,8 +645,9 @@ function AnalyzePage() {
         );
     }
 
-    async function handleAnalyze() {
-        if (!fileObj) return;
+    async function handleAnalyze(customFile = null) {
+        const fileToProcess = customFile || fileObj;
+        if (!fileToProcess) return;
         setIsLoading(true);
 
         const formData = new FormData();
@@ -624,7 +657,7 @@ function AnalyzePage() {
         formData.append("student_names", "Anda");
         formData.append("ages", "0");
         formData.append("genders", "L");
-        formData.append("handwriting_images", fileObj);
+        formData.append("handwriting_images", fileToProcess);
 
         try {
             const response = await fetch(getApiUrl("/analyze-handwriting"), {
@@ -637,7 +670,7 @@ function AnalyzePage() {
                 if (!result) {
                     alert("Hasil analisis kosong.");
                 } else {
-                    const image = await fileToDataUrl(fileObj);
+                    const image = await fileToDataUrl(fileToProcess);
                     navigate("/analyze/result", { state: { result, image } });
                 }
             } else {
@@ -647,6 +680,24 @@ function AnalyzePage() {
             console.error("Error:", error);
             alert("Tidak bisa terhubung ke server.");
         } finally {
+            setIsLoading(false);
+        }
+    }
+
+    async function handleAnalyzeManual() {
+        if (!signaturePadRef.current) return;
+        setIsLoading(true);
+        try {
+            const file = await signaturePadRef.current.getImageFile();
+            if (!file) {
+                alert("Goresan belum terdeteksi. Silakan tulis atau gambar di canvas terlebih dahulu.");
+                setIsLoading(false);
+                return;
+            }
+            await handleAnalyze(file);
+        } catch (err) {
+            console.error("Gagal memproses canvas:", err);
+            alert("Terjadi kendala saat memproses gambar canvas.");
             setIsLoading(false);
         }
     }
@@ -780,9 +831,14 @@ function AnalyzePage() {
                         {/* ---------- Tab: Tulis Manual ---------- */}
                         {activeTab === "manual" && (
                             <div className="analyze-panel">
-                                <SignaturePad onChangeHasDrawn={setHasDrawn} />
-                                <button type="button" className="analyze-submit" disabled={!hasDrawn}>
-                                    Lanjut ke Hasil Analisis
+                                <SignaturePad ref={signaturePadRef} onChangeHasDrawn={setHasDrawn} />
+                                <button
+                                    type="button"
+                                    className="analyze-submit"
+                                    disabled={!hasDrawn || isLoading}
+                                    onClick={handleAnalyzeManual}
+                                >
+                                    {isLoading ? "Menganalisis..." : "Lanjut ke Hasil Analisis"}
                                 </button>
                             </div>
                         )}
