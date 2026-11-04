@@ -21,6 +21,7 @@ function Navbar({ isMenuOpen, onCloseMenu }) {
 
     const handleLogout = () => {
         localStorage.removeItem("user");
+        localStorage.removeItem("token");
         setUser(null);
         onCloseMenu();
         navigate("/login");
@@ -46,6 +47,10 @@ function Navbar({ isMenuOpen, onCloseMenu }) {
             ? [
                 { href: "/student", label: "Student" },
                 { href: "/history", label: "History" }
+              ]
+            : user
+            ? [
+                { href: "/my-children", label: "Anak Saya" }
               ]
             : []),
     ];

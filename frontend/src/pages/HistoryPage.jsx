@@ -2,6 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
 import { TYPE_INFO } from "../constants/typeInfo";
+<<<<<<< Updated upstream
+=======
+import { getApiUrl, authFetch } from "../config/api";
+>>>>>>> Stashed changes
 
 function XIcon() {
     return (
@@ -188,7 +192,11 @@ function HistoryPage() {
 
         const fetchHistory = async () => {
             try {
+<<<<<<< Updated upstream
                 const response = await fetch(`http://localhost:8000/analysis-history?user_id=${user.id}`);
+=======
+                const response = await authFetch("/analysis-history");
+>>>>>>> Stashed changes
                 const data = await response.json();
                 if (response.ok) {
                     setHistoryList(data);
@@ -214,7 +222,11 @@ function HistoryPage() {
 
         setLoadingSessionModal(true);
         try {
+<<<<<<< Updated upstream
             const res = await fetch(`http://localhost:8000/analysis-history/${sessionItem.id}`);
+=======
+            const res = await authFetch(`/analysis-history/${sessionItem.id}`);
+>>>>>>> Stashed changes
             const data = await res.json();
             if (res.ok) {
                 setSessionDetails((prev) => ({ ...prev, [sessionItem.id]: data }));

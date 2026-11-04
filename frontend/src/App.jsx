@@ -8,7 +8,11 @@ import ForgotPasswordPage from "./Auth/ForgotPasswordPage";
 import VerifyOtpForgotPage from "./Auth/VerifyOtpForgotPage";
 import ResetPasswordPage from "./Auth/ResetPasswordPage";
 import AnalyzePage from "./pages/analyzepage";
-import StudentPage from "./pages/StudentPage";
+import ClassListPage from "./pages/ClassListPage";
+import ClassDetailPage from "./pages/ClassDetailPage";
+import StudentProgressPage from "./pages/StudentProgressPage";
+import ParentChildrenPage from "./pages/ParentChildrenPage";
+import ParentChildProgressPage from "./pages/ParentChildProgressPage";
 import HistoryPage from "./pages/HistoryPage";
 import ResultsPage from "./pages/resultspage";
 import { ToastProvider } from "./components/Toast";
@@ -63,7 +67,43 @@ function App() {
                         path="/student"
                         element={
                             <Layout>
-                                <StudentPage />
+                                <ClassListPage />
+                            </Layout>
+                        }
+                    />
+
+                    <Route
+                        path="/student/:classId"
+                        element={
+                            <Layout>
+                                <ClassDetailPage />
+                            </Layout>
+                        }
+                    />
+
+                    <Route
+                        path="/student/:classId/siswa/:studentId"
+                        element={
+                            <Layout>
+                                <StudentProgressPage />
+                            </Layout>
+                        }
+                    />
+
+                    <Route
+                        path="/my-children"
+                        element={
+                            <Layout>
+                                <ParentChildrenPage />
+                            </Layout>
+                        }
+                    />
+
+                    <Route
+                        path="/my-children/:studentId"
+                        element={
+                            <Layout>
+                                <ParentChildProgressPage />
                             </Layout>
                         }
                     />

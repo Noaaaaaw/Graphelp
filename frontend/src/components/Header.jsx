@@ -32,6 +32,7 @@ function Header({ isMenuOpen, onToggleMenu }) {
 
     const handleLogout = () => {
         localStorage.removeItem("user");
+        localStorage.removeItem("token");
         setUser(null);
         setIsDropdownOpen(false);
         navigate("/login");
