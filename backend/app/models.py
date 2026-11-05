@@ -46,13 +46,8 @@ class StudentAnalysisResult(Base):
     confidence = Column(Float, nullable=False)
     top3 = Column(Text, nullable=True)
     description = Column(Text, nullable=True)
-<<<<<<< Updated upstream
-    image_path = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-=======
     image_path = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
->>>>>>> Stashed changes
 
     session = relationship("AnalysisSession", back_populates="student_results")
 

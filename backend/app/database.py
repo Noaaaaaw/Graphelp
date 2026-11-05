@@ -6,12 +6,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-<<<<<<< Updated upstream
-=======
 if not DATABASE_URL or DATABASE_URL == "sqlite:///./graphelp.db":
     backend_db = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "graphelp.db"))
     DATABASE_URL = f"sqlite:///{backend_db}"
->>>>>>> Stashed changes
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

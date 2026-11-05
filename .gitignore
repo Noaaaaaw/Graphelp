@@ -14,7 +14,19 @@ node_modules/
 
 # Env & database
 backend/.env
+*.db
 backend/*.db
+
+# Deployment & Server Config Notes (Do Not Push)
+[Dd]eployment*.md
+[Dd]eploy*.md
+auto_vps.md
+datavps.md
+ANALISIS_*.md
+
+# Local artifacts
+.archify/
+!backend/ml_models/*.joblib
 
 # AI Agent private skills & customizations (local only)
 .agents/

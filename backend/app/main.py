@@ -1,24 +1,6 @@
 import os
 import json
 import uuid
-<<<<<<< Updated upstream
-from typing import List, Optional
-from datetime import datetime
-from fastapi import FastAPI, UploadFile, File, Form, Depends, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from sqlalchemy.orm import Session
-
-from . import auth, models, schemas
-from .database import Base, engine, get_db
-from .predict import predict_image
-from .predict_motorik import predict_motorik_siswa
-
-Base.metadata.create_all(bind=engine)
-
-app = FastAPI()
-
-=======
 import secrets
 from typing import List, Optional
 from datetime import datetime, date, timedelta, timezone
@@ -150,8 +132,6 @@ def on_startup():
         print("Database tables verified/created successfully.")
     except Exception as e:
         print(f"Warning: Could not connect to database on startup: {e}")
-
->>>>>>> Stashed changes
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -165,13 +145,6 @@ HANDWRITING_DIR = os.path.join(UPLOAD_DIR, "handwriting")
 os.makedirs(HANDWRITING_DIR, exist_ok=True)
 
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
-<<<<<<< Updated upstream
-
-app.include_router(auth.router)
-
-
-@app.post("/analyze-handwriting")
-=======
 app.mount("/graphelp/uploads", StaticFiles(directory=UPLOAD_DIR), name="graphelp_uploads")
 
 app.include_router(auth.router)
@@ -180,7 +153,6 @@ app.include_router(auth.router, prefix="/graphelp")
 
 @app.post("/analyze-handwriting")
 @app.post("/graphelp/analyze-handwriting")
->>>>>>> Stashed changes
 async def analyze_handwriting(
     school_name: str = Form(...),
     grade_class: str = Form(...),
@@ -199,11 +171,7 @@ async def analyze_handwriting(
             school_name=school_name,
             grade_class=grade_class,
             total_students=len(handwriting_images),
-<<<<<<< Updated upstream
-            created_at=datetime.utcnow()
-=======
             created_at=datetime.now(timezone.utc)
->>>>>>> Stashed changes
         )
         db.add(session_record)
         db.commit()
@@ -219,10 +187,6 @@ async def analyze_handwriting(
         with open(filepath, "wb") as f:
             f.write(content)
 
-<<<<<<< Updated upstream
-        with open(filepath, "rb") as f:
-            result = predict_image(f)
-=======
         # Memproses analisis kematangan motorik halus siswa
         try:
             usia_val = float(ages[i]) if i < len(ages) and float(ages[i]) > 0 else 45.0
@@ -230,7 +194,6 @@ async def analyze_handwriting(
             usia_val = 45.0
 
         result = predict_motorik_siswa(content, usia_bulan=usia_val)
->>>>>>> Stashed changes
 
         image_url = f"/uploads/handwriting/{filename}"
 
@@ -239,8 +202,6 @@ async def analyze_handwriting(
         st_age = ages[i] if i < len(ages) else "0"
         st_gender = genders[i] if i < len(genders) else "L"
 
-<<<<<<< Updated upstream
-=======
         is_sesuai = "Ya" in result.get("kesimpulan", "")
         pred_type_val = 1 if is_sesuai else 0
         type_name_val = result.get("kesimpulan", "Sesuai Usia [Ya]" if is_sesuai else "Belum Sesuai [Tidak]")
@@ -249,8 +210,6 @@ async def analyze_handwriting(
             {"type": "Ya", "name": "Sesuai Usia", "prob": confidence_val if is_sesuai else round(100.0 - confidence_val, 1)},
             {"type": "Tidak", "name": "Belum Sesuai", "prob": round(100.0 - confidence_val, 1) if is_sesuai else confidence_val}
         ]
-
->>>>>>> Stashed changes
         if session_record:
             student_res = models.StudentAnalysisResult(
                 session_id=session_record.id,
@@ -258,15 +217,6 @@ async def analyze_handwriting(
                 student_name=st_name,
                 age=st_age,
                 gender=st_gender,
-<<<<<<< Updated upstream
-                pred_type=result["pred_type"],
-                type_name=result["type_name"],
-                confidence=result["confidence"],
-                top3=json.dumps(result["top3"]),
-                description=result["description"],
-                image_path=image_url,
-                created_at=datetime.utcnow()
-=======
                 pred_type=pred_type_val,
                 type_name=type_name_val,
                 confidence=confidence_val,
@@ -274,7 +224,6 @@ async def analyze_handwriting(
                 description=result.get("alasan_klinis", ""),
                 image_path=image_url,
                 created_at=datetime.now(timezone.utc)
->>>>>>> Stashed changes
             )
             db.add(student_res)
 
@@ -282,13 +231,6 @@ async def analyze_handwriting(
             "absence_number": absence_num,
             "student_name": st_name,
             "name": f"No. {absence_num} - {st_name}",
-<<<<<<< Updated upstream
-            "pred_type": result["pred_type"],
-            "type_name": result["type_name"],
-            "confidence": result["confidence"],
-            "description": result["description"],
-            "top3": result["top3"],
-=======
             "kesimpulan": result["kesimpulan"],
             "status": result["status"],
             "kategori": result.get("kategori", ""),
@@ -304,7 +246,6 @@ async def analyze_handwriting(
             "type_name": type_name_val,
             "description": result.get("alasan_klinis", ""),
             "top3": top3_data,
->>>>>>> Stashed changes
             "image_url": image_url
         })
 
@@ -319,9 +260,6 @@ async def analyze_handwriting(
     }
 
 
-<<<<<<< Updated upstream
-@app.post("/analyze-students")
-=======
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp"}
@@ -665,7 +603,6 @@ def build_student_progress_payload(student: models.Student) -> dict:
 
 @app.post("/analyze-students")
 @app.post("/graphelp/analyze-students")
->>>>>>> Stashed changes
 async def analyze_students(
     school_name: str = Form(...),
     grade_class: str = Form(...),
@@ -674,16 +611,6 @@ async def analyze_students(
     ages: List[str] = Form(...),
     genders: List[str] = Form(...),
     handwriting_images: List[UploadFile] = File(...),
-<<<<<<< Updated upstream
-):
-    details = []
-    for i, image in enumerate(handwriting_images):
-        file_bytes = await image.read()
-        try:
-            usia = float(ages[i])
-        except (IndexError, ValueError):
-            usia = 45.0
-=======
     current_user: models.User = Depends(auth.require_role("guru")),
 ):
     if len(handwriting_images) == 0:
@@ -710,16 +637,11 @@ async def analyze_students(
 
         file_bytes = await image.read()
         validate_uploaded_image(image, file_bytes, f"siswa '{st_name}'")
->>>>>>> Stashed changes
 
         result = predict_motorik_siswa(file_bytes, usia_bulan=usia)
         details.append({
             "absence_number": absence_numbers[i] if i < len(absence_numbers) else str(i + 1),
-<<<<<<< Updated upstream
-            "student_name": student_names[i] if i < len(student_names) else f"Siswa {i + 1}",
-=======
             "student_name": st_name,
->>>>>>> Stashed changes
             "gender": genders[i] if i < len(genders) else "-",
             "age": usia,
             "kesimpulan": result["kesimpulan"],
@@ -729,14 +651,10 @@ async def analyze_students(
             "confidence": result["confidence"],
             "alasan_klinis": result["alasan_klinis"],
             "saran_guru": result["saran_guru"],
-<<<<<<< Updated upstream
-            "indikator": result["indikator"]
-=======
             "indikator": result["indikator"],
             "indikator_klinis_table": result.get("indikator_klinis_table", []),
             "kesimpulan_menulis": result.get("kesimpulan_menulis", {}),
             "kesimpulan_menggambar": result.get("kesimpulan_menggambar", {}),
->>>>>>> Stashed changes
         })
 
     return {
@@ -749,14 +667,6 @@ async def analyze_students(
 
 
 @app.get("/analysis-history")
-<<<<<<< Updated upstream
-def get_analysis_history(user_id: Optional[int] = None, db: Session = Depends(get_db)):
-    query = db.query(models.AnalysisSession)
-    if user_id:
-        query = query.filter(models.AnalysisSession.user_id == user_id)
-
-    sessions = query.order_by(models.AnalysisSession.created_at.desc()).all()
-=======
 @app.get("/graphelp/analysis-history")
 def get_analysis_history(
     current_user: models.User = Depends(auth.require_role("guru")),
@@ -768,7 +678,6 @@ def get_analysis_history(
         .order_by(models.AnalysisSession.created_at.desc())
         .all()
     )
->>>>>>> Stashed changes
 
     result = []
     for s in sessions:
@@ -786,26 +695,18 @@ def get_analysis_history(
 
 
 @app.get("/analysis-history/{session_id}")
-<<<<<<< Updated upstream
-def get_analysis_history_detail(session_id: int, db: Session = Depends(get_db)):
-=======
 @app.get("/graphelp/analysis-history/{session_id}")
 def get_analysis_history_detail(
     session_id: int,
     current_user: models.User = Depends(auth.require_role("guru")),
     db: Session = Depends(get_db)
 ):
->>>>>>> Stashed changes
     session_record = db.query(models.AnalysisSession).filter(models.AnalysisSession.id == session_id).first()
     if not session_record:
         raise HTTPException(status_code=404, detail="Sesi analisis tidak ditemukan.")
 
-<<<<<<< Updated upstream
-=======
     if session_record.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Akses ditolak: Sesi analisis ini bukan milik Anda.")
-
->>>>>>> Stashed changes
     students = []
     for st in session_record.student_results:
         top3_parsed = []
@@ -839,9 +740,6 @@ def get_analysis_history_detail(
         "created_at": session_record.created_at.isoformat() if session_record.created_at else "",
         "date": session_record.created_at.strftime("%Y-%m-%d %H:%M") if session_record.created_at else "",
         "students": students
-<<<<<<< Updated upstream
-    }
-=======
     }
 
 
@@ -1422,4 +1320,3 @@ if os.path.isdir(FRONTEND_DIST):
         if os.path.isfile(index_file):
             return FileResponse(index_file)
         return {"message": "Graphelp API is running"}
->>>>>>> Stashed changes
