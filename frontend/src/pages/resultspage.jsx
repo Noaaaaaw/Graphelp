@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useToast } from "../components/Toast";
 import { TYPE_INFO } from "../constants/typeInfo";
 import "../style/results.css";
@@ -124,10 +125,11 @@ const RING_R = 50;
 const RING_C = 2 * Math.PI * RING_R;
 
 function ResultsPage() {
+    const { t } = useTranslation();
     const { state } = useLocation();
     const result = state?.result;
     const image = state?.image;
-    const [shareLabel, setShareLabel] = useState("Share Result");
+    const [copied, setCopied] = useState(false);
     const [ready, setReady] = useState(false);
     // toast opsional: kalau provider-nya nggak ada, tetap aman
     let toast = null;
@@ -135,8 +137,8 @@ function ResultsPage() {
 
     // animasi ring & bar setelah halaman tampil
     useEffect(() => {
-        const t = setTimeout(() => setReady(true), 150);
-        return () => clearTimeout(t);
+        const timer = setTimeout(() => setReady(true), 150);
+        return () => clearTimeout(timer);
     }, []);
 
     // Dibuka langsung / di-refresh tanpa data
@@ -145,9 +147,9 @@ function ResultsPage() {
             <main className="result-page">
                 <div className="result-body result-body-empty">
                     <section className="result-card result-empty">
-                        <h1>Belum ada hasil analisis</h1>
-                        <p>Upload tulisan tangan dulu untuk melihat hasilnya di sini.</p>
-                        <Link to="/analyze" className="result-btn result-btn-primary">Mulai Analisis</Link>
+                        <h1>{t("results.emptyTitle")}</h1>
+                        <p>{t("results.emptyDesc")}</p>
+                        <Link to="/analyze" className="result-btn result-btn-primary">{t("results.emptyBtn")}</Link>
                     </section>
                 </div>
             </main>
@@ -176,23 +178,23 @@ function ResultsPage() {
 
     function buildText() {
         const lines = [
-            "HASIL ANALISIS TULISAN TANGAN",
+            t("results.txt.header"),
             "==============================",
-            `Tipe ${result.pred_type}: ${typeName}${typeLabel ? ` (${typeLabel})` : ""}`,
-            `Tingkat keyakinan AI: ${confidenceText}%`,
+            `${t("results.type", { type: result.pred_type })}: ${typeName}${typeLabel ? ` (${typeLabel})` : ""}`,
+            `${t("results.txt.confidence")}: ${confidenceText}%`,
             "",
-            "Interpretasi Kepribadian",
+            t("results.interpretTitle"),
             interpretation || "-",
         ];
         if (info) {
-            lines.push("", `Kekuatan: ${info.strengths}`, `Tantangan: ${info.challenges}`);
+            lines.push("", `${t("results.strengths")}: ${info.strengths}`, `${t("results.challenges")}: ${info.challenges}`);
         }
         if (features.length) {
-            lines.push("", "Analisis Fitur Grafologi");
+            lines.push("", t("results.featuresTitle"));
             features.forEach((f) => lines.push(`- ${f.label}: ${f.value}${f.desc ? ` (${f.desc})` : ""}`));
         }
         if (recommendations.length) {
-            lines.push("", "Rekomendasi Pengembangan Diri");
+            lines.push("", t("results.recsTitle"));
             recommendations.forEach((r, i) => lines.push(`${i + 1}. ${r}`));
         }
         return lines.join("\n");
@@ -206,19 +208,23 @@ function ResultsPage() {
         a.download = `hasil-analisis-tipe-${result.pred_type}.txt`;
         a.click();
         URL.revokeObjectURL(url);
-        toast?.success?.("File TXT berhasil diunduh");
+        toast?.success?.(t("results.toastTxt"));
     }
 
     async function handleShare() {
-        const text = `Hasil analisis tulisan tanganku: Tipe ${result.pred_type} - ${typeName} (${confidenceText}%)`;
+        const text = t("results.shareText", {
+            type: result.pred_type,
+            name: typeName,
+            confidence: confidenceText,
+        });
         try {
             if (navigator.share) {
-                await navigator.share({ title: "Hasil Analisis Tulisan Tangan", text });
+                await navigator.share({ title: t("results.shareTitle"), text });
             } else {
                 await navigator.clipboard.writeText(text);
-                setShareLabel("Tersalin!");
-                toast?.success?.("Hasil disalin ke clipboard");
-                setTimeout(() => setShareLabel("Share Result"), 2000);
+                setCopied(true);
+                toast?.success?.(t("results.toastCopied"));
+                setTimeout(() => setCopied(false), 2000);
             }
         } catch {
             /* dibatalkan user */
@@ -246,10 +252,8 @@ function ResultsPage() {
                 <span className="az-meteor az-meteor-3"><span className="az-meteor-line"></span></span>
                 <span className="hero-ring-a"></span>
                 <span className="hero-ring-b"></span>
-                <h1>Hasil Analisis Selesai</h1>
-                <p>
-                    Berikut karakteristik kepribadian Anda berdasarkan tulisan tangan yang telah dianalisis oleh AI.
-                </p>
+                <h1>{t("results.heroTitle")}</h1>
+                <p>{t("results.heroDesc")}</p>
                 <div className="hero-flow">
                     <span className="hero-flow-icon hero-flow-icon-done">
                         <CheckIcon />
@@ -263,29 +267,29 @@ function ResultsPage() {
 
             <div className="result-body">
                 <section className="result-card">
-                    <h1 className="result-title">Hasil Analisis Lengkap</h1>
+                    <h1 className="result-title">{t("results.cardTitle")}</h1>
 
                     {/* Gambar + prediksi */}
                     <div className="result-top">
                         <figure className="result-image-card">
-                            <figcaption>CITRA TULISAN TANGAN</figcaption>
+                            <figcaption>{t("results.imageLabel")}</figcaption>
                             <div className="result-photo">
                                 {image ? (
-                                    <img src={image} alt="Tulisan tangan yang dianalisis" />
+                                    <img src={image} alt={t("results.imageAlt")} />
                                 ) : (
-                                    <div className="result-image-empty">Gambar tidak tersedia</div>
+                                    <div className="result-image-empty">{t("results.imageEmpty")}</div>
                                 )}
                             </div>
-                            <p>Foto tulisan yang dianalisis</p>
+                            <p>{t("results.imageCaption")}</p>
                         </figure>
 
                         <div className="result-predict">
-                            <span className="result-predict-label">HASIL PREDIKSI AI</span>
+                            <span className="result-predict-label">{t("results.predictLabel")}</span>
 
                             <div className="result-type-row">
                                 <span className="result-type-badge">{result.pred_type}</span>
                                 <div>
-                                    <h2>Tipe {result.pred_type}</h2>
+                                    <h2>{t("results.type", { type: result.pred_type })}</h2>
                                     <p className="result-predict-name">
                                         {typeName}
                                         {typeLabel && <em> · {typeLabel}</em>}
@@ -297,8 +301,8 @@ function ResultsPage() {
 
                             {traits.length > 0 && (
                                 <div className="result-trait-list">
-                                    {traits.map((t) => (
-                                        <span key={t} className="result-trait">{t}</span>
+                                    {traits.map((trait) => (
+                                        <span key={trait} className="result-trait">{trait}</span>
                                     ))}
                                 </div>
                             )}
@@ -316,8 +320,8 @@ function ResultsPage() {
                                     <span className="result-ring-center">{confidenceText}<small>%</small></span>
                                 </div>
                                 <div className="result-confidence-text">
-                                    <strong>Tingkat Keyakinan AI</strong>
-                                    <span>*Probabilitas output model</span>
+                                    <strong>{t("results.confidenceTitle")}</strong>
+                                    <span>{t("results.confidenceNote")}</span>
                                 </div>
                             </div>
                         </div>
@@ -326,7 +330,7 @@ function ResultsPage() {
                     {/* Interpretasi */}
                     {interpretation && (
                         <div className="result-interpret">
-                            <h3>Interpretasi Kepribadian</h3>
+                            <h3>{t("results.interpretTitle")}</h3>
                             <p>{interpretation}</p>
                         </div>
                     )}
@@ -337,14 +341,14 @@ function ResultsPage() {
                             <div className="result-sc-card result-sc-good">
                                 <span className="result-sc-icon">✓</span>
                                 <div>
-                                    <h4>Kekuatan</h4>
+                                    <h4>{t("results.strengths")}</h4>
                                     <p>{info.strengths}</p>
                                 </div>
                             </div>
                             <div className="result-sc-card result-sc-warn">
                                 <span className="result-sc-icon">!</span>
                                 <div>
-                                    <h4>Tantangan</h4>
+                                    <h4>{t("results.challenges")}</h4>
                                     <p>{info.challenges}</p>
                                 </div>
                             </div>
@@ -353,17 +357,17 @@ function ResultsPage() {
 
                     {/* Peringkat kemungkinan tipe */}
                     <div className="result-panel">
-                        <h3 className="result-panel-title">Peringkat Kemungkinan Tipe</h3>
-                        <p className="result-panel-sub">Tiga tipe dengan probabilitas tertinggi menurut model.</p>
+                        <h3 className="result-panel-title">{t("results.rankTitle")}</h3>
+                        <p className="result-panel-sub">{t("results.rankSub")}</p>
                         <div className="result-probs">
-                            {probs.map((t, i) => {
-                                const prob = Number(t.prob) || 0;
+                            {probs.map((p, i) => {
+                                const prob = Number(p.prob) || 0;
                                 return (
                                     <div key={i} className={`result-prob-row ${i === 0 ? "is-top" : ""}`}>
                                         <span className="result-prob-rank">#{i + 1}</span>
                                         <div className="result-prob-main">
                                             <div className="result-prob-head">
-                                                <strong>Tipe {t.type}{t.name ? ` · ${t.name}` : ""}</strong>
+                                                <strong>{t("results.type", { type: p.type })}{p.name ? ` · ${p.name}` : ""}</strong>
                                                 <span>{prob.toFixed(1)}%</span>
                                             </div>
                                             <div className="result-prob-bar">
@@ -379,8 +383,8 @@ function ResultsPage() {
                     {/* Fitur grafologi (muncul kalau backend mengirim `features`) */}
                     {features.length > 0 && (
                         <div className="result-panel">
-                            <h3 className="result-panel-title">Analisis Fitur Grafologi</h3>
-                            <p className="result-panel-sub">Penjelasan karakteristik visual berdasarkan literatur.</p>
+                            <h3 className="result-panel-title">{t("results.featuresTitle")}</h3>
+                            <p className="result-panel-sub">{t("results.featuresSub")}</p>
                             <div className="result-features">
                                 {features.map((f, i) => (
                                     <div key={i} className="result-feature">
@@ -401,7 +405,7 @@ function ResultsPage() {
                     {recommendations.length > 0 && (
                         <div className="result-panel">
                             <h3 className="result-panel-title result-panel-title-icon">
-                                <CircleCheckIcon /> Rekomendasi Pengembangan Diri
+                                <CircleCheckIcon /> {t("results.recsTitle")}
                             </h3>
                             <ol className="result-recs">
                                 {recommendations.map((r, i) => (
@@ -417,13 +421,13 @@ function ResultsPage() {
                     {/* Aksi */}
                     <div className="result-actions">
                         <button type="button" className="result-btn result-btn-primary" onClick={() => window.print()}>
-                            <FileIcon /> Download PDF
+                            <FileIcon /> {t("results.downloadPdf")}
                         </button>
                         <button type="button" className="result-btn result-btn-soft" onClick={handleDownloadTxt}>
-                            <DownloadIcon /> Download TXT
+                            <DownloadIcon /> {t("results.downloadTxt")}
                         </button>
                         <button type="button" className="result-btn result-btn-ghost" onClick={handleShare}>
-                            <ShareIcon /> {shareLabel}
+                            <ShareIcon /> {copied ? t("results.copied") : t("results.share")}
                         </button>
                     </div>
                 </section>

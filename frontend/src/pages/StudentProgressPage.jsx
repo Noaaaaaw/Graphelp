@@ -204,7 +204,7 @@ export default function StudentProgressPage() {
                     <h1>{student ? `Rapor Berkala: ${student.name}` : "Perkembangan Motorik Siswa"}</h1>
                     <p>
                         {classInfo
-                            ? `Kelas ${classInfo.name} • Tahun Ajaran ${classInfo.academic_year} • ${classInfo.school_name}`
+                            ? `Kelas ${classInfo.name} - Tahun Ajaran ${classInfo.academic_year} - ${classInfo.school_name}`
                             : "Pantau grafik perkembangan bulanan, riwayat asesmen, dan jadwal evaluasi berikutnya."}
                     </p>
                 </div>

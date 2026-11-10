@@ -1,8 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/Graphelp.png";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 function Header({ isMenuOpen, onToggleMenu }) {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -39,12 +42,12 @@ function Header({ isMenuOpen, onToggleMenu }) {
     };
 
     return (
-        <header 
-            className="header" 
-            style={{ 
-                display: "flex", 
-                justifyContent: "space-between", 
-                alignItems: "center", 
+        <header
+            className="header"
+            style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
                 position: "relative",
                 zIndex: 1005
             }}
@@ -92,24 +95,27 @@ function Header({ isMenuOpen, onToggleMenu }) {
                                 padding: "12px 16px",
                                 borderRadius: "8px",
                                 boxShadow: "0 4px 12px rgba(0, 0, 0, 0.25)",
-                                minWidth: "140px",
+                                minWidth: "230px",
+                                boxSizing: "border-box",
                                 zIndex: 10000,
                                 display: "flex",
                                 flexDirection: "column",
                                 gap: "12px"
                             }}>
-                                <p style={{ 
-                                    margin: 0, 
-                                    fontWeight: "bold", 
-                                    fontSize: "15px", 
-                                    borderBottom: "1px solid #eee", 
+                                <p style={{
+                                    margin: 0,
+                                    fontWeight: "bold",
+                                    fontSize: "15px",
+                                    borderBottom: "1px solid #eee",
                                     paddingBottom: "8px",
-                                    overflow: "hidden", 
+                                    overflow: "hidden",
                                     textOverflow: "ellipsis",
                                     whiteSpace: "nowrap"
                                 }}>
-                                    Hi, {user.username}
+                                    {t("profile.greeting", { name: user.username })}
                                 </p>
+
+                                <LanguageSwitcher />
 
                                 <button
                                     onClick={handleLogout}
@@ -124,7 +130,7 @@ function Header({ isMenuOpen, onToggleMenu }) {
                                         fontSize: "13px"
                                     }}
                                 >
-                                    Logout
+                                    {t("profile.logout")}
                                 </button>
                             </div>
                         )}

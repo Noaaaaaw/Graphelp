@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 function CloudUploadIcon() {
     return (
@@ -7,14 +8,6 @@ function CloudUploadIcon() {
             <path d="M16 16l-4-4-4 4" />
             <path d="M12 12v9" />
             <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
-        </svg>
-    );
-}
-
-function MoonIcon() {
-    return (
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
         </svg>
     );
 }
@@ -249,63 +242,29 @@ function photoTipIcon(type) {
 }
 
 const PHOTO_TIPS = [
-    { icon: "pencil", color: "photo-tip-pencil", title: "Tulis dengan ukuran & tekanan bervariasi", desc: "Seperti menulis biasa di kertas" },
-    { icon: "ruler", color: "photo-tip-ruler", title: "Buat minimal 3-5 baris kalimat lengkap", desc: "Agar analisis lebih akurat" },
-    { icon: "phone", color: "photo-tip-phone", title: "Gunakan stylus jika ada", desc: "Hasil lebih natural dan presisi" },
-    { icon: "sun", color: "photo-tip-sun", title: "Pilih ukuran pena yang nyaman", desc: "Klik ikon pensil untuk mengatur" },
+    { icon: "pencil", color: "photo-tip-pencil", key: "pencil" },
+    { icon: "ruler", color: "photo-tip-ruler", key: "ruler" },
+    { icon: "phone", color: "photo-tip-phone", key: "phone" },
+    { icon: "sun", color: "photo-tip-sun", key: "sun" },
 ];
 
 const TABS = [
-    { id: "foto", label: "Upload Foto", icon: <UploadTabIcon /> },
-    { id: "manual", label: "Tulis Manual", icon: <PencilTabIcon /> },
-    { id: "kamera", label: "Scan Kamera", icon: <CameraTabIcon /> },
+    { id: "foto", icon: <UploadTabIcon /> },
+    { id: "manual", icon: <PencilTabIcon /> },
+    { id: "kamera", icon: <CameraTabIcon /> },
 ];
 
-const TAB_META = {
-    foto: {
-        title: "Upload Foto Tulisan",
-        hint: "Foto Tulisan dengan Jelas",
-    },
-    manual: {
-        title: "Tulis Manual di Layar",
-        hint: "Tulis kalimat langsung di area di bawah, seperti menulis di kertas",
-    },
-    kamera: {
-        title: "Scan Kamera",
-        hint: "Ambil foto langsung menggunakan kamera perangkat",
-    },
-};
-
 const TIPS = [
-    {
-        icon: "sun",
-        color: "tip-green",
-        title: "Pencahayaan terang & merata",
-        desc: "Hindari bayangan atau cahaya langsung dari atas",
-    },
-    {
-        icon: "paper",
-        color: "tip-coral",
-        title: "Letakkan kertas rata di meja",
-        desc: "Foto dari atas atau tegak lurus, jangan miring",
-    },
-    {
-        icon: "pencil",
-        color: "tip-yellow",
-        title: "Tulis 3-5 baris kalimat lengkap",
-        desc: "Gunakan pulpen hitam/biru, tinta pekat",
-    },
-    {
-        icon: "focus",
-        color: "tip-navy",
-        title: "Pastikan tulisan jelas & tidak terpotong",
-        desc: "Fokus tajam, tidak buram",
-    },
+    { icon: "sun", color: "tip-green", key: "light" },
+    { icon: "paper", color: "tip-coral", key: "paper" },
+    { icon: "pencil", color: "tip-yellow", key: "lines" },
+    { icon: "focus", color: "tip-navy", key: "clear" },
 ];
 
 const STAR_COUNT = 24;
 
 function SignaturePad({ onChangeHasDrawn }) {
+    const { t } = useTranslation();
     const containerRef = useRef(null);
     const canvasRef = useRef(null);
     const ctxRef = useRef(null);
@@ -398,7 +357,7 @@ function SignaturePad({ onChangeHasDrawn }) {
                 />
                 {!hasDrawn && (
                     <div className="signature-placeholder">
-                        Mulai menulis di sini...
+                        {t("analyze.pad.placeholder")}
                     </div>
                 )}
             </div>
@@ -409,8 +368,8 @@ function SignaturePad({ onChangeHasDrawn }) {
                     type="button"
                     className={`tool-btn ${tool === "pen" ? "active" : ""}`}
                     onClick={() => setTool("pen")}
-                    aria-label="Pena"
-                    title="Pena"
+                    aria-label={t("analyze.pad.pen")}
+                    title={t("analyze.pad.pen")}
                 >
                     <PencilTabIcon />
                 </button>
@@ -419,8 +378,8 @@ function SignaturePad({ onChangeHasDrawn }) {
                     type="button"
                     className={`tool-btn ${tool === "eraser" ? "active" : ""}`}
                     onClick={() => setTool("eraser")}
-                    aria-label="Penghapus goresan"
-                    title="Penghapus"
+                    aria-label={t("analyze.pad.eraser")}
+                    title={t("analyze.pad.eraser")}
                 >
                     <EraserIcon />
                 </button>
@@ -435,7 +394,7 @@ function SignaturePad({ onChangeHasDrawn }) {
                         value={lineWidth}
                         onChange={(e) => setLineWidth(Number(e.target.value))}
                         className="size-slider"
-                        aria-label="Ukuran goresan"
+                        aria-label={t("analyze.pad.size")}
                     />
                     <span className="size-dot size-dot-lg" />
                 </div>
@@ -447,8 +406,8 @@ function SignaturePad({ onChangeHasDrawn }) {
                     className="tool-btn tool-btn-danger"
                     onClick={handleClear}
                     disabled={!hasDrawn}
-                    aria-label="Hapus semua coretan"
-                    title="Hapus semua"
+                    aria-label={t("analyze.pad.clearAll")}
+                    title={t("analyze.pad.clearAll")}
                 >
                     <TrashIcon />
                 </button>
@@ -459,6 +418,7 @@ function SignaturePad({ onChangeHasDrawn }) {
 }
 
 function CameraView({ onClose, onCapture }) {
+    const { t } = useTranslation();
     const videoRef = useRef(null);
     const streamRef = useRef(null);
     const [captured, setCaptured] = useState(null);
@@ -474,7 +434,7 @@ function CameraView({ onClose, onCapture }) {
                     audio: false,
                 });
                 if (!active) {
-                    stream.getTracks().forEach((t) => t.stop());
+                    stream.getTracks().forEach((track) => track.stop());
                     return;
                 }
                 streamRef.current = stream;
@@ -483,7 +443,7 @@ function CameraView({ onClose, onCapture }) {
                     await videoRef.current.play();
                 }
             } catch (err) {
-                setError("Tidak bisa mengakses kamera. Periksa izin kamera di browser Anda.");
+                setError(t("analyze.camera.error"));
             }
         }
 
@@ -491,8 +451,9 @@ function CameraView({ onClose, onCapture }) {
 
         return () => {
             active = false;
-            streamRef.current?.getTracks().forEach((t) => t.stop());
+            streamRef.current?.getTracks().forEach((track) => track.stop());
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     function handleShutter() {
@@ -513,7 +474,7 @@ function CameraView({ onClose, onCapture }) {
         <div className="camera-card-wrap">
             <div className="camera-card">
 
-                <button type="button" className="camera-close" onClick={onClose} aria-label="Tutup kamera">
+                <button type="button" className="camera-close" onClick={onClose} aria-label={t("analyze.camera.close")}>
                     <XIcon />
                 </button>
 
@@ -529,7 +490,7 @@ function CameraView({ onClose, onCapture }) {
                 )}
 
                 {captured && (
-                    <img src={captured} alt="Hasil scan" className="camera-video" />
+                    <img src={captured} alt={t("analyze.camera.scanAlt")} className="camera-video" />
                 )}
 
                 {!error && (
@@ -539,7 +500,7 @@ function CameraView({ onClose, onCapture }) {
                                 type="button"
                                 className="camera-shutter"
                                 onClick={handleShutter}
-                                aria-label="Ambil foto"
+                                aria-label={t("analyze.camera.shutter")}
                             />
                         ) : (
                             <>
@@ -549,7 +510,7 @@ function CameraView({ onClose, onCapture }) {
                                     onClick={() => setCaptured(null)}
                                 >
                                     <RotateIcon />
-                                    Ulang
+                                    {t("analyze.camera.retake")}
                                 </button>
                                 <button
                                     type="button"
@@ -557,7 +518,7 @@ function CameraView({ onClose, onCapture }) {
                                     onClick={() => onCapture(captured)}
                                 >
                                     <CheckIcon />
-                                    Gunakan
+                                    {t("analyze.camera.use")}
                                 </button>
                             </>
                         )}
@@ -579,6 +540,7 @@ function fileToDataUrl(file) {
 }
 
 function AnalyzePage() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("foto");
     const [fileName, setFileName] = useState("");
@@ -634,17 +596,17 @@ function AnalyzePage() {
             if (response.ok) {
                 const result = data.details?.[0];
                 if (!result) {
-                    alert("Hasil analisis kosong.");
+                    alert(t("analyze.errEmpty"));
                 } else {
                     const image = await fileToDataUrl(fileObj);
                     navigate("/analyze/result", { state: { result, image } });
                 }
             } else {
-                alert(data.detail || "Gagal memproses analisis.");
+                alert(data.detail || t("analyze.errFailed"));
             }
         } catch (error) {
             console.error("Error:", error);
-            alert("Tidak bisa terhubung ke server.");
+            alert(t("analyze.errServer"));
         } finally {
             setIsLoading(false);
         }
@@ -683,12 +645,8 @@ function AnalyzePage() {
                 {/* orbit rings */}
                 <span className="hero-ring-a"></span>
                 <span className="hero-ring-b"></span>
-                <h1>
-                    Mulai Analisis Tulisan Tangan dengan bantuan AI
-                </h1>
-                <p>
-                    Ungkap karakteristik kepribadian Anda melalui tulisan tangan, teknologi AI yang canggih untuk insight mendalam.
-                </p>
+                <h1>{t("analyze.heroTitle")}</h1>
+                <p>{t("analyze.heroDesc")}</p>
                 <div className="hero-flow">
                     <span className="hero-flow-icon">
                         <CloudUploadIcon />
@@ -709,14 +667,14 @@ function AnalyzePage() {
                 {/* Input card */}
                 <section className="analyze-card analyze-card-main">
                     <span className="analyze-card-badge">
-                        Input Tulisan Tangan
+                        {t("analyze.inputBadge")}
                     </span>
                     <section className="analyzed-doom">
 
                         {/* Judul + hint (ikut tab aktif), di ATAS tab bar */}
                         <div className="analyze-panel" key={activeTab}>
-                            <h2>{TAB_META[activeTab].title}</h2>
-                            <p className="analyze-panel-hint">{TAB_META[activeTab].hint}</p>
+                            <h2>{t(`analyze.tabMeta.${activeTab}.title`)}</h2>
+                            <p className="analyze-panel-hint">{t(`analyze.tabMeta.${activeTab}.hint`)}</p>
                         </div>
 
                         {/* Tab bar horizontal */}
@@ -729,7 +687,7 @@ function AnalyzePage() {
                                     onClick={() => setActiveTab(tab.id)}
                                 >
                                     {tab.icon}
-                                    {tab.label}
+                                    {t(`analyze.tabs.${tab.id}`)}
                                 </button>
                             ))}
                         </div>
@@ -754,7 +712,7 @@ function AnalyzePage() {
                                         {fileName ? (
                                             <span className="dropzone-filename">{fileName}</span>
                                         ) : (
-                                            "Tarik foto atau klik untuk pilih"
+                                            t("analyze.dropHint")
                                         )}
                                     </p>
                                     <input
@@ -771,7 +729,7 @@ function AnalyzePage() {
                                     disabled={!fileName || isLoading}
                                     onClick={handleAnalyze}
                                 >
-                                    {isLoading ? "Menganalisis..." : "Lanjut ke Hasil Analisis"}
+                                    {isLoading ? t("analyze.analyzing") : t("analyze.continue")}
                                 </button>
                             </div>
                         )}
@@ -781,7 +739,7 @@ function AnalyzePage() {
                             <div className="analyze-panel">
                                 <SignaturePad onChangeHasDrawn={setHasDrawn} />
                                 <button type="button" className="analyze-submit" disabled={!hasDrawn}>
-                                    Lanjut ke Hasil Analisis
+                                    {t("analyze.continue")}
                                 </button>
                             </div>
                         )}
@@ -796,7 +754,7 @@ function AnalyzePage() {
                                                 <CameraIcon />
                                             </span>
                                             <p className="dropzone-text">
-                                                Aktifkan kamera untuk mulai scan
+                                                {t("analyze.camera.enable")}
                                             </p>
                                         </div>
                                         <button
@@ -804,7 +762,7 @@ function AnalyzePage() {
                                             className="analyze-submit"
                                             onClick={() => setCameraOpen(true)}
                                         >
-                                            Buka Kamera
+                                            {t("analyze.camera.open")}
                                         </button>
                                     </>
                                 )}
@@ -821,19 +779,19 @@ function AnalyzePage() {
                                     <>
                                         <div className="camera-card-wrap">
                                             <div className="camera-card camera-card-static">
-                                                <img src={capturedPhoto} alt="Hasil scan" className="camera-video" />
+                                                <img src={capturedPhoto} alt={t("analyze.camera.scanAlt")} className="camera-video" />
                                                 <button
                                                     type="button"
                                                     className="camera-close"
                                                     onClick={() => setCapturedPhoto(null)}
-                                                    aria-label="Hapus foto"
+                                                    aria-label={t("analyze.camera.removePhoto")}
                                                 >
                                                     <XIcon />
                                                 </button>
                                             </div>
                                         </div>
                                         <button type="button" className="analyze-submit" disabled={!capturedPhoto}>
-                                            Lanjut ke Hasil Analisis
+                                            {t("analyze.continue")}
                                         </button>
                                     </>
                                 )}
@@ -848,17 +806,17 @@ function AnalyzePage() {
                     {/* Tips hasil akurat */}
                     <aside className="analyze-card">
                         <span className="analyze-card-badge">
-                            Tips untuk hasil yang akurat
+                            {t("analyze.tipsBadge")}
                         </span>
                         <div className="tip-grid">
                             {TIPS.map((tip) => (
-                                <div key={tip.title} className={`tip-box ${tip.color}`}>
+                                <div key={tip.key} className={`tip-box ${tip.color}`}>
                                     <span className="tip-icon">
                                         {tipIcon(tip.icon)}
                                     </span>
                                     <div>
-                                        <h3>{tip.title}</h3>
-                                        <p>{tip.desc}</p>
+                                        <h3>{t(`analyze.tips.${tip.key}.title`)}</h3>
+                                        <p>{t(`analyze.tips.${tip.key}.desc`)}</p>
                                     </div>
                                 </div>
                             ))}
@@ -868,17 +826,17 @@ function AnalyzePage() {
                     {/* Tips foto tulisan tangan */}
                     <aside className="analyze-card">
                         <span className="analyze-card-badge">
-                            Tips Tulisan Tangan untuk Analisis Akurat
+                            {t("analyze.photoTipsBadge")}
                         </span>
                         <div className="photo-tip-grid">
                             {PHOTO_TIPS.map((tip) => (
-                                <div key={tip.title} className={`photo-tip ${tip.color}`}>
+                                <div key={tip.key} className={`photo-tip ${tip.color}`}>
                                     <span className="photo-tip-icon">
                                         {photoTipIcon(tip.icon)}
                                     </span>
                                     <div>
-                                        <h3>{tip.title}</h3>
-                                        <p>{tip.desc}</p>
+                                        <h3>{t(`analyze.photoTips.${tip.key}.title`)}</h3>
+                                        <p>{t(`analyze.photoTips.${tip.key}.desc`)}</p>
                                     </div>
                                 </div>
                             ))}

@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useToast } from "./Toast";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 function Navbar({ isMenuOpen, onCloseMenu }) {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const toast = useToast();
     const [user, setUser] = useState(null);
@@ -31,7 +34,7 @@ function Navbar({ isMenuOpen, onCloseMenu }) {
     const handleAnalyzeClick = (e, callback) => {
         e.preventDefault();
         if (!user) {
-            toast.error("Silakan login terlebih dahulu untuk mengakses fitur Analyze.");
+            toast.error(t("nav.loginRequired"));
             navigate("/login");
         } else {
             navigate("/analyze");
@@ -39,18 +42,17 @@ function Navbar({ isMenuOpen, onCloseMenu }) {
         if (callback) callback();
     };
 
-    // Daftar link navigasi (menu "Learn More" sudah dihapus)
     const links = [
-        { href: "/", label: "Home" },
-        { href: "/analyze", label: "Analyze", isProtected: true },
+        { href: "/", labelKey: "nav.home" },
+        { href: "/analyze", labelKey: "nav.analyze", isProtected: true },
         ...(user?.role === "guru"
             ? [
-                { href: "/student", label: "Student" },
-                { href: "/history", label: "History" }
+                { href: "/student", labelKey: "nav.student" },
+                { href: "/history", labelKey: "nav.history" }
               ]
             : user
             ? [
-                { href: "/my-children", label: "Anak Saya" }
+                { href: "/my-children", labelKey: "nav.monitoring" }
               ]
             : []),
     ];
@@ -67,16 +69,16 @@ function Navbar({ isMenuOpen, onCloseMenu }) {
                                 onClick={(e) => handleAnalyzeClick(e)}
                                 style={{ cursor: "pointer" }}
                             >
-                                {link.label}
+                                {t(link.labelKey)}
                             </a>
                         ) : (
                             <Link key={link.href} to={link.href}>
-                                {link.label}
+                                {t(link.labelKey)}
                             </Link>
                         )
                     ))}
 
-                    {!user && <Link to="/login">Login</Link>}
+                    {!user && <Link to="/login">{t("nav.login")}</Link>}
                 </div>
             </nav>
 
@@ -92,9 +94,10 @@ function Navbar({ isMenuOpen, onCloseMenu }) {
                         <div className="mobile-avatar">
                             {user.username ? user.username.charAt(0).toUpperCase() : "U"}
                         </div>
-                        <p className="mobile-username">Hi, {user.username}</p>
+                        <p className="mobile-username">{t("profile.greeting", { name: user.username })}</p>
+                        <LanguageSwitcher />
                         <button onClick={handleLogout} className="mobile-logout-btn">
-                            Logout
+                            {t("profile.logout")}
                         </button>
                     </div>
                 )}
@@ -109,7 +112,7 @@ function Navbar({ isMenuOpen, onCloseMenu }) {
                                 onClick={(e) => handleAnalyzeClick(e, onCloseMenu)}
                                 style={{ transitionDelay: `${i * 40}ms`, cursor: "pointer" }}
                             >
-                                {link.label}
+                                {t(link.labelKey)}
                             </a>
                         ) : (
                             <Link
@@ -118,14 +121,14 @@ function Navbar({ isMenuOpen, onCloseMenu }) {
                                 onClick={onCloseMenu}
                                 style={{ transitionDelay: `${i * 40}ms` }}
                             >
-                                {link.label}
+                                {t(link.labelKey)}
                             </Link>
                         )
                     ))}
 
                     {!user && (
                         <Link to="/login" onClick={onCloseMenu}>
-                            Login
+                            {t("nav.login")}
                         </Link>
                     )}
                 </div>

@@ -123,11 +123,12 @@
     left: 0;
     bottom: 0;
     width: 190px;
-    background: linear-gradient(180deg, #8c793e 0%, #7a6832 100%);
+    background: linear-gradient(180deg, #1c3446 0%, #16293a 100%);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
     transform: translateX(-100%);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 999;
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
     border-radius: 0;
     padding: 18px 12px;
     overflow-y: auto;
@@ -153,9 +154,9 @@
     text-align: center;
     padding: 11px 12px;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease, opacity 0.3s ease;
     opacity: 0;
     transform: translateX(-12px);
 }
@@ -166,10 +167,10 @@
 }
 
 .sidebar-links a:hover {
-    background: #ed6f50;
-    border-color: #ed6f50;
+    background: #2f6f6b;
+    border-color: #3d8783;
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .sidebar-links a:active {
@@ -230,6 +231,142 @@
     transform: translateY(-1px);
 }
 
+/* === LANGUAGE DROPDOWN === */
+.lang-dd {
+    position: relative;
+    width: 100%;
+}
+
+.lang-dd-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border: 1.5px solid #e2ddd0;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #1c3446;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.lang-dd-trigger:hover {
+    border-color: #2f6f6b;
+    background: #f4faf9;
+}
+
+.lang-dd-trigger.open {
+    border-color: #2f6f6b;
+    box-shadow: 0 0 0 3px rgba(47, 111, 107, 0.15);
+}
+
+.lang-dd-globe {
+    display: flex;
+    color: #2f6f6b;
+}
+
+.lang-dd-name {
+    flex: 1;
+    text-align: left;
+}
+
+.lang-dd-code {
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: #eaf4f2;
+    color: #2f6f6b;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+
+.lang-dd-chevron {
+    display: flex;
+    color: #94a3b8;
+    transition: transform 0.2s ease;
+}
+
+.lang-dd-trigger.open .lang-dd-chevron {
+    transform: rotate(180deg);
+}
+
+.lang-dd-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 5px;
+    list-style: none;
+    background: #ffffff;
+    border: 1px solid #e2ddd0;
+    border-radius: 12px;
+    box-shadow: 0 12px 28px rgba(28, 52, 70, 0.22);
+    z-index: 10;
+    animation: langMenuIn 0.16s ease both;
+}
+
+@keyframes langMenuIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.lang-dd-option {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #334155;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.14s ease;
+}
+
+.lang-dd-option:hover {
+    background: #f4efe1;
+}
+
+.lang-dd-option.selected {
+    background: #eaf4f2;
+    color: #1e4c48;
+    font-weight: 800;
+}
+
+.lang-dd-option-code {
+    min-width: 28px;
+    padding: 2px 0;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 10.5px;
+    font-weight: 800;
+    text-align: center;
+}
+
+.lang-dd-option.selected .lang-dd-option-code {
+    background: #2f6f6b;
+    color: #ffffff;
+}
+
+.lang-dd-option-label {
+    flex: 1;
+}
+
+.lang-dd-option.selected svg {
+    color: #2f6f6b;
+}
+
 /* === FOOTER === */
 .footer {
     min-height: 50px;
@@ -250,7 +387,7 @@
 /* === TOAST NOTIFICATIONS === */
 .toast-stack {
     position: fixed;
-    top: 20px;   
+    top: 20px;
     right: 20px;
     z-index: 9999;
     display: flex;
@@ -416,7 +553,8 @@
 
 @media (prefers-reduced-motion: reduce) {
     .toast-card,
-    .toast-progress {
+    .toast-progress,
+    .lang-dd-menu {
         animation: none;
     }
 }

@@ -132,10 +132,10 @@ export default function StudentProgressView({
                         <div>
                             <span className="gc-progress-eyebrow">PROFIL SISWA</span>
                             <h3 style={{ margin: "4px 0 6px", fontSize: "1.28rem", color: "#0f172a", fontWeight: "800" }}>
-                                No. {student.absence_number} — {student.name}
+                                No. {student.absence_number} - {student.name}
                             </h3>
                             <p style={{ margin: 0, fontSize: "0.88rem", color: "#475569" }}>
-                                Kelas: <strong>{classInfo.name || "-"}</strong> ({classInfo.academic_year || "-"}) • Sekolah: <strong>{classInfo.school_name || "-"}</strong>
+                                Kelas: <strong>{classInfo.name || "-"}</strong> ({classInfo.academic_year || "-"}) - Sekolah: <strong>{classInfo.school_name || "-"}</strong>
                             </p>
                         </div>
                         <span className={`gc-gender-pill ${student.gender === "P" ? "gc-gender-p" : "gc-gender-l"}`}>

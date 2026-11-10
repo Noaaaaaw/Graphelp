@@ -43,7 +43,7 @@ export default function AssessmentResult({ result, schoolName, gradeClass }) {
                     <span style={{ fontWeight: "700", fontSize: "1.05rem", color: "#1e293b" }}>
                         {result.absence_number ? `No. ${result.absence_number} - ` : ""}{studentName}
                         <small style={{ marginLeft: "8px", color: "#64748b", fontWeight: "normal", fontSize: "0.85em" }}>
-                            ({ageVal ? `${ageVal} bln` : ""}{result.gender ? ` • ${result.gender === "L" ? "Laki-laki" : "Perempuan"}` : ""})
+                            ({ageVal ? `${ageVal} bln` : ""}{result.gender ? ` - ${result.gender === "L" ? "Laki-laki" : "Perempuan"}` : ""})
                         </small>
                     </span>
                     {result.tanggal && (

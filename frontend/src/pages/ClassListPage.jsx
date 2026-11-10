@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation, Trans } from "react-i18next";
 import { useToast } from "../components/Toast";
 import { authFetch, extractErrorMessage } from "../config/api";
 
@@ -12,9 +13,9 @@ const BANNER_GRADIENTS = [
     "linear-gradient(135deg, #b45309, #e8734a)",
 ];
 
-function PlusIcon() {
+function PlusIcon({ size = 16 }) {
     return (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 5v14M5 12h14" />
         </svg>
     );
@@ -38,10 +39,30 @@ function TrashIcon() {
     );
 }
 
-function FolderIcon() {
+function FolderIcon({ size = 36 }) {
     return (
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+        </svg>
+    );
+}
+
+function SchoolIcon() {
+    return (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 21h18" />
+            <path d="M5 21V7l7-4 7 4v14" />
+            <path d="M9 9h.01M15 9h.01M9 13h.01M15 13h.01" />
+            <path d="M10 21v-4h4v4" />
+        </svg>
+    );
+}
+
+function ArrowRightIcon() {
+    return (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
         </svg>
     );
 }
@@ -83,16 +104,9 @@ export function SpaceHero({ title, subtitle }) {
             <span className="space-star star-9">✧</span>
             <span className="space-star star-10">✦</span>
 
-            <span className="tiny-star tiny-star-1" />
-            <span className="tiny-star tiny-star-2" />
-            <span className="tiny-star tiny-star-3" />
-            <span className="tiny-star tiny-star-4" />
-            <span className="tiny-star tiny-star-5" />
-            <span className="tiny-star tiny-star-6" />
-            <span className="tiny-star tiny-star-7" />
-            <span className="tiny-star tiny-star-8" />
-            <span className="tiny-star tiny-star-9" />
-            <span className="tiny-star tiny-star-10" />
+            {Array.from({ length: 10 }, (_, i) => (
+                <span key={i} className={`tiny-star tiny-star-${i + 1}`} />
+            ))}
 
             <div className="space-moon">
                 <span className="moon-crater moon-crater-1" />
@@ -147,10 +161,11 @@ export function SpaceHero({ title, subtitle }) {
 }
 
 export default function ClassListPage() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const toast = useToast();
     const user = useMemo(() => JSON.parse(localStorage.getItem("user") || "{}"), []);
-    const schoolName = user?.school_name || "Sekolah Belum Diatur";
+    const schoolName = user?.school_name || t("classList.schoolNotSet");
 
     const [classes, setClasses] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -173,19 +188,19 @@ export default function ClassListPage() {
             if (res.ok) {
                 setClasses(Array.isArray(data) ? data : []);
             } else {
-                toast.error(extractErrorMessage(data, `Gagal memuat daftar kelas (HTTP ${res.status}).`));
+                toast.error(extractErrorMessage(data, t("classList.errLoad", { status: res.status })));
             }
         } catch (error) {
             console.error("Error fetching classes:", error);
-            toast.error("Tidak dapat terhubung ke server.");
+            toast.error(t("classList.errConnect"));
         } finally {
             setLoading(false);
         }
-    }, [toast]);
+    }, [toast, t]);
 
     useEffect(() => {
         if (!user || user.role !== "guru") {
-            toast.error("Akses ditolak. Halaman ini hanya untuk guru.");
+            toast.error(t("classList.accessDenied"));
             navigate("/");
             return;
         }
@@ -198,12 +213,12 @@ export default function ClassListPage() {
                 if (res.ok) {
                     setClasses(Array.isArray(data) ? data : []);
                 } else {
-                    toast.error(extractErrorMessage(data, `Gagal memuat daftar kelas (HTTP ${res.status}).`));
+                    toast.error(extractErrorMessage(data, t("classList.errLoad", { status: res.status })));
                 }
             } catch (error) {
                 if (active) {
                     console.error("Error fetching classes:", error);
-                    toast.error("Tidak dapat terhubung ke server.");
+                    toast.error(t("classList.errConnect"));
                 }
             } finally {
                 if (active) setLoading(false);
@@ -243,11 +258,11 @@ export default function ClassListPage() {
         const trimmedYear = academicYear.trim();
 
         if (!trimmedName) {
-            toast.error("Nama kelas tidak boleh kosong.");
+            toast.error(t("classList.errNameEmpty"));
             return;
         }
         if (!trimmedYear) {
-            toast.error("Tahun ajaran tidak boleh kosong.");
+            toast.error(t("classList.errYearEmpty"));
             return;
         }
 
@@ -267,16 +282,16 @@ export default function ClassListPage() {
 
             const data = await res.json().catch(() => ({}));
             if (res.ok) {
-                toast.success(editingClass ? "Data kelas berhasil diperbarui." : "Kelas baru berhasil dibuat.");
+                toast.success(editingClass ? t("classList.updated") : t("classList.created"));
                 setIsFormModalOpen(false);
                 setEditingClass(null);
                 reloadClasses();
             } else {
-                toast.error(extractErrorMessage(data, `Gagal menyimpan data kelas (HTTP ${res.status}).`));
+                toast.error(extractErrorMessage(data, t("classList.errSave", { status: res.status })));
             }
         } catch (error) {
             console.error("Error saving class:", error);
-            toast.error("Gagal menghubungi server.");
+            toast.error(t("classList.errServer"));
         } finally {
             setSubmitting(false);
         }
@@ -296,25 +311,27 @@ export default function ClassListPage() {
             });
             const data = await res.json().catch(() => ({}));
             if (res.ok) {
-                toast.success(data.message || "Kelas berhasil dihapus.");
+                toast.success(data.message || t("classList.deleted"));
                 setClassToDelete(null);
                 reloadClasses();
             } else {
-                toast.error(extractErrorMessage(data, `Gagal menghapus kelas (HTTP ${res.status}).`));
+                toast.error(extractErrorMessage(data, t("classList.errDelete", { status: res.status })));
             }
         } catch (error) {
             console.error("Error deleting class:", error);
-            toast.error("Gagal menghubungi server.");
+            toast.error(t("classList.errServer"));
         } finally {
             setDeleting(false);
         }
     };
 
+    const totalDue = classes.reduce((acc, c) => acc + (c.due_assessment_count || 0), 0);
+
     return (
         <main className="student-page">
             <SpaceHero
-                title="Kelas Saya"
-                subtitle="Kelola folder kelas dan pantau hasil asesmen motorik halus siswa."
+                title={t("classList.heroTitle")}
+                subtitle={t("classList.heroDesc")}
             />
 
             <section className="student-cardz">
@@ -322,32 +339,23 @@ export default function ClassListPage() {
                     {/* Header Kartu Putih: Folder Kelas Anda */}
                     <div className="gc-folder-header">
                         <div>
-                            <h2 className="gc-folder-title">Folder Kelas Anda</h2>
-                            <p className="gc-folder-subtitle">Sekolah: {schoolName}</p>
+                            <h2 className="gc-folder-title">{t("classList.folderTitle")}</h2>
+                            <p className="gc-folder-subtitle">{t("classList.schoolLabel")}: {schoolName}</p>
                         </div>
-
-                        <button
-                            type="button"
-                            onClick={handleOpenCreateModal}
-                            className="gc-navy-btn"
-                        >
-                            <PlusIcon />
-                            <span>+ Buat Kelas Baru</span>
-                        </button>
                     </div>
 
-                    {!loading && classes.some((c) => (c.due_assessment_count || 0) > 0) && (
+                    {!loading && totalDue > 0 && (
                         <div className="gc-reminder-banner">
                             <div className="gc-reminder-banner-icon">🔔</div>
                             <div className="gc-reminder-banner-content">
-                                <strong>Pengingat Evaluasi Berkala:</strong> Terdapat{" "}
-                                <strong>
-                                    {classes.reduce((acc, c) => acc + (c.due_assessment_count || 0), 0)} siswa
-                                </strong>{" "}
-                                di kelas Anda yang sudah memasuki atau mendekati jadwal asesmen ulang bulanan.{" "}
-                                <span style={{ color: "#64748b", fontWeight: "500" }}>
-                                    (Sistem tetap berjalan normal kapan pun asesmen dilakukan).
-                                </span>
+                                <Trans
+                                    i18nKey="classList.banner"
+                                    values={{ n: totalDue }}
+                                    components={{
+                                        strong: <strong />,
+                                        muted: <span style={{ color: "#64748b", fontWeight: "500" }} />,
+                                    }}
+                                />
                             </div>
                         </div>
                     )}
@@ -355,16 +363,19 @@ export default function ClassListPage() {
                     {loading ? (
                         <div className="gc-state-box">
                             <span className="history-spinner" />
-                            <p>Memuat daftar kelas...</p>
+                            <p>{t("classList.loading")}</p>
                         </div>
                     ) : classes.length === 0 ? (
                         <div className="gc-state-box">
                             <div className="gc-empty-icon">
                                 <FolderIcon />
                             </div>
-                            <h3>Belum ada kelas yang dibuat</h3>
+                            <h3>{t("classList.emptyTitle")}</h3>
                             <p>
-                                Klik tombol <strong>+ Buat Kelas Baru</strong> di kanan atas untuk membuat folder kelas pertama Anda.
+                                <Trans
+                                    i18nKey="classList.emptyDesc"
+                                    components={{ strong: <strong /> }}
+                                />
                             </p>
                         </div>
                     ) : (
@@ -386,24 +397,39 @@ export default function ClassListPage() {
                                         }}
                                     >
                                         <div className="gc-class-banner" style={{ background: bannerBg }}>
-                                            <h3 className="gc-class-name">{cls.name}</h3>
-                                            <span className="gc-class-year">Tahun Ajaran {cls.academic_year}</span>
+                                            <div className="gc-class-banner-top">
+                                                <span className="gc-class-folder">
+                                                    <FolderIcon size={20} />
+                                                </span>
+                                                <span className="gc-class-go" aria-hidden="true">
+                                                    <ArrowRightIcon />
+                                                </span>
+                                            </div>
+                                            <div className="gc-class-banner-text">
+                                                <h3 className="gc-class-name" title={cls.name}>{cls.name}</h3>
+                                                <span className="gc-class-year">
+                                                    {t("classList.academicYearShort", { year: cls.academic_year })}
+                                                </span>
+                                            </div>
                                         </div>
 
                                         <div className="gc-class-body">
                                             <p className="gc-class-school">
-                                                Sekolah: <strong>{cls.school_name || schoolName}</strong>
+                                                <SchoolIcon />
+                                                <span>
+                                                    {t("classList.schoolLabel")}: <strong>{cls.school_name || schoolName}</strong>
+                                                </span>
                                             </p>
 
                                             <div className="gc-class-footer">
-                                                <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", alignItems: "center" }}>
+                                                <div className="gc-class-badges">
                                                     <span className="gc-student-count-badge">
                                                         <UsersIcon />
-                                                        <span>{cls.student_count ?? 0} Siswa</span>
+                                                        <span>{t("classList.studentCount", { n: cls.student_count ?? 0 })}</span>
                                                     </span>
                                                     {(cls.due_assessment_count || 0) > 0 && (
-                                                        <span className="gc-due-pill" title="Jumlah siswa yang mendekati atau memasuki jadwal asesmen ulang">
-                                                            🔔 {cls.due_assessment_count} Perlu Asesmen
+                                                        <span className="gc-due-pill" title={t("classList.dueTitle")}>
+                                                            🔔 {t("classList.dueCount", { n: cls.due_assessment_count })}
                                                         </span>
                                                     )}
                                                 </div>
@@ -413,8 +439,8 @@ export default function ClassListPage() {
                                                         type="button"
                                                         className="gc-icon-btn gc-icon-btn-edit"
                                                         onClick={(e) => handleOpenEditModal(e, cls)}
-                                                        title="Ubah Kelas"
-                                                        aria-label={`Ubah ${cls.name}`}
+                                                        title={t("classList.editTitle")}
+                                                        aria-label={t("classList.editAria", { name: cls.name })}
                                                     >
                                                         <EditIcon />
                                                     </button>
@@ -422,8 +448,8 @@ export default function ClassListPage() {
                                                         type="button"
                                                         className="gc-icon-btn gc-icon-btn-delete"
                                                         onClick={(e) => handleOpenDeleteModal(e, cls)}
-                                                        title="Hapus Kelas"
-                                                        aria-label={`Hapus ${cls.name}`}
+                                                        title={t("classList.deleteTitle")}
+                                                        aria-label={t("classList.deleteAria", { name: cls.name })}
                                                     >
                                                         <TrashIcon />
                                                     </button>
@@ -433,6 +459,18 @@ export default function ClassListPage() {
                                     </div>
                                 );
                             })}
+
+                            {/* Kartu tambah kelas */}
+                            <button
+                                type="button"
+                                className="gc-class-add"
+                                onClick={handleOpenCreateModal}
+                            >
+                                <span className="gc-class-add-icon">
+                                    <PlusIcon size={20} />
+                                </span>
+                                <span>{t("classList.newClass")}</span>
+                            </button>
                         </div>
                     )}
                 </section>
@@ -443,12 +481,12 @@ export default function ClassListPage() {
                 <div className="gc-modal-overlay" onClick={handleCloseFormModal}>
                     <div className="gc-modal-card" onClick={(e) => e.stopPropagation()}>
                         <div className="gc-modal-header">
-                            <h3>{editingClass ? "Ubah Kelas" : "Buat Kelas Baru"}</h3>
+                            <h3>{editingClass ? t("classList.editTitle") : t("classList.newClass2")}</h3>
                             <button
                                 type="button"
                                 className="gc-modal-close"
                                 onClick={handleCloseFormModal}
-                                aria-label="Tutup"
+                                aria-label={t("common.close")}
                             >
                                 <XIcon />
                             </button>
@@ -456,11 +494,11 @@ export default function ClassListPage() {
 
                         <form onSubmit={handleSaveClass} className="gc-modal-form">
                             <div className="student-field">
-                                <label htmlFor="class-name-input">Nama Kelas</label>
+                                <label htmlFor="class-name-input">{t("classList.nameLabel")}</label>
                                 <input
                                     id="class-name-input"
                                     type="text"
-                                    placeholder="Contoh: Kelas TK A"
+                                    placeholder={t("classList.namePh")}
                                     value={className}
                                     onChange={(e) => setClassName(e.target.value)}
                                     required
@@ -469,11 +507,11 @@ export default function ClassListPage() {
                             </div>
 
                             <div className="student-field">
-                                <label htmlFor="academic-year-input">Tahun Ajaran</label>
+                                <label htmlFor="academic-year-input">{t("classList.yearLabel")}</label>
                                 <input
                                     id="academic-year-input"
                                     type="text"
-                                    placeholder="Contoh: 2026/2027"
+                                    placeholder={t("classList.yearPh")}
                                     value={academicYear}
                                     onChange={(e) => setAcademicYear(e.target.value)}
                                     required
@@ -488,14 +526,18 @@ export default function ClassListPage() {
                                     className="gc-secondary-btn"
                                     disabled={submitting}
                                 >
-                                    Batal
+                                    {t("common.cancel")}
                                 </button>
                                 <button
                                     type="submit"
                                     className="gc-navy-btn"
                                     disabled={submitting}
                                 >
-                                    {submitting ? "Menyimpan..." : editingClass ? "Simpan Perubahan" : "Buat Kelas"}
+                                    {submitting
+                                        ? t("classList.saving")
+                                        : editingClass
+                                        ? t("classList.saveChanges")
+                                        : t("classList.createBtn")}
                                 </button>
                             </div>
                         </form>
@@ -508,12 +550,12 @@ export default function ClassListPage() {
                 <div className="gc-modal-overlay" onClick={() => !deleting && setClassToDelete(null)}>
                     <div className="gc-modal-card" onClick={(e) => e.stopPropagation()}>
                         <div className="gc-modal-header">
-                            <h3>Hapus Kelas</h3>
+                            <h3>{t("classList.deleteTitle")}</h3>
                             <button
                                 type="button"
                                 className="gc-modal-close"
                                 onClick={() => !deleting && setClassToDelete(null)}
-                                aria-label="Tutup"
+                                aria-label={t("common.close")}
                             >
                                 <XIcon />
                             </button>
@@ -521,10 +563,19 @@ export default function ClassListPage() {
 
                         <div className="gc-modal-body">
                             <p style={{ margin: "0 0 12px", color: "#1e293b", fontSize: "0.95rem", lineHeight: "1.5" }}>
-                                Apakah Anda yakin ingin menghapus kelas <strong>{classToDelete.name}</strong> (Tahun Ajaran {classToDelete.academic_year})?
+                                <Trans
+                                    i18nKey="classList.deleteConfirm"
+                                    values={{ name: classToDelete.name, year: classToDelete.academic_year }}
+                                    components={{ strong: <strong /> }}
+                                />
                             </p>
                             <div className="gc-danger-alert">
-                                ⚠️ <strong>Peringatan:</strong> Menghapus kelas ini akan menghapus seluruh data siswa ({classToDelete.student_count ?? 0} siswa) beserta seluruh riwayat asesmen motorik halus di dalamnya secara permanen.
+                                ⚠️{" "}
+                                <Trans
+                                    i18nKey="classList.deleteWarning"
+                                    values={{ n: classToDelete.student_count ?? 0 }}
+                                    components={{ strong: <strong /> }}
+                                />
                             </div>
 
                             <div className="gc-modal-actions">
@@ -534,7 +585,7 @@ export default function ClassListPage() {
                                     className="gc-secondary-btn"
                                     disabled={deleting}
                                 >
-                                    Batal
+                                    {t("common.cancel")}
                                 </button>
                                 <button
                                     type="button"
@@ -542,7 +593,7 @@ export default function ClassListPage() {
                                     className="gc-danger-btn"
                                     disabled={deleting}
                                 >
-                                    {deleting ? "Menghapus..." : "Ya, Hapus Kelas"}
+                                    {deleting ? t("classList.deleting") : t("classList.confirmDelete")}
                                 </button>
                             </div>
                         </div>

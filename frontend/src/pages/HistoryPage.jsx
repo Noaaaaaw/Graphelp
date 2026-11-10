@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useToast } from "../components/Toast";
 import { TYPE_INFO } from "../constants/typeInfo";
 import { getApiUrl, authFetch } from "../config/api";
@@ -167,6 +168,7 @@ function AlienIcon() {
 const STAR_COUNT = 24;
 
 function HistoryPage() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const toast = useToast();
     const user = useMemo(() => JSON.parse(localStorage.getItem("user") || "{}"), []);
@@ -182,7 +184,7 @@ function HistoryPage() {
 
     useEffect(() => {
         if (!user || user.role !== "guru") {
-            toast.error("Akses ditolak. Halaman ini hanya untuk guru.");
+            toast.error(t("history.accessDenied"));
             navigate("/");
             return;
         }
@@ -202,6 +204,7 @@ function HistoryPage() {
         };
 
         fetchHistory();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, navigate, toast]);
 
     const handleOpenSessionModal = async (sessionItem) => {
@@ -221,12 +224,12 @@ function HistoryPage() {
                 setSessionDetails((prev) => ({ ...prev, [sessionItem.id]: data }));
                 setActiveModalStudents(data.students || []);
             } else {
-                toast.error(data.detail || "Gagal memuat detail sesi analisis.");
+                toast.error(data.detail || t("history.errDetail"));
                 setActiveModalSession(null);
             }
         } catch (err) {
             console.error("Gagal memuat detail sesi:", err);
-            toast.error("Tidak dapat terhubung ke server.");
+            toast.error(t("history.errConnect"));
             setActiveModalSession(null);
         } finally {
             setLoadingSessionModal(false);
@@ -276,8 +279,8 @@ function HistoryPage() {
                 <span className="hero-ring-a"></span>
                 <span className="hero-ring-b"></span>
 
-                <h1>Riwayat Analisis Tulisan Tangan</h1>
-                <p>Daftar hasil analisis kelas yang pernah di-generate sebelumnya.</p>
+                <h1>{t("history.heroTitle")}</h1>
+                <p>{t("history.heroDesc")}</p>
             </section>
 
             <section className="history-container">
@@ -285,32 +288,32 @@ function HistoryPage() {
                 {loading ? (
                     <div className="history-loading">
                         <span className="history-spinner" />
-                        <p>Memuat riwayat...</p>
+                        <p>{t("history.loading")}</p>
                     </div>
                 ) : historyList.length === 0 ? (
                     <div className="history-empty">
-                        <p>Belum ada riwayat analisis yang tersimpan.</p>
+                        <p>{t("history.empty")}</p>
                     </div>
                 ) : (
                     <div className="history-list">
                         {historyList.map((item) => (
                             <div key={item.id} className="history-item">
                                 <div className="history-item-info">
-                                    <h3>Kelas: {item.grade_class}</h3>
-                                    <p className="history-item-school">Sekolah: {item.school_name}</p>
-                                    <p className="history-item-date">Waktu: {item.date}</p>
+                                    <h3>{t("history.classLabel")}: {item.grade_class}</h3>
+                                    <p className="history-item-school">{t("history.schoolLabel")}: {item.school_name}</p>
+                                    <p className="history-item-date">{t("history.timeLabel")}: {item.date}</p>
                                 </div>
 
                                 <div className="history-item-side">
                                     <span className="history-badge">
-                                        {item.total_students} Siswa
+                                        {t("history.studentsCount", { n: item.total_students })}
                                     </span>
                                     <button
                                         type="button"
                                         className="history-detail-btn"
                                         onClick={() => handleOpenSessionModal(item)}
                                     >
-                                        Lihat Detail Sesi
+                                        {t("history.viewDetail")}
                                     </button>
                                 </div>
                             </div>
@@ -359,7 +362,10 @@ function HistoryPage() {
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
                             <div>
                                 <span style={{ fontSize: "0.78rem", color: "#6fe0bc", textTransform: "uppercase", letterSpacing: "1.2px", fontWeight: "700" }}>
-                                    DETAIL ANALISIS SISWA · {activeModalSession.grade_class} ({activeModalSession.school_name})
+                                    {t("history.modalHeader", {
+                                        cls: activeModalSession.grade_class,
+                                        school: activeModalSession.school_name,
+                                    })}
                                 </span>
                                 {currentStudent && (
                                     <h2 style={{ margin: "6px 0 0 0", fontSize: "1.45rem", color: "#fff", fontWeight: "700" }}>
@@ -383,7 +389,7 @@ function HistoryPage() {
                                     cursor: "pointer",
                                     transition: "background 0.2s"
                                 }}
-                                aria-label="Tutup"
+                                aria-label={t("common.close")}
                             >
                                 <XIcon />
                             </button>
@@ -392,11 +398,11 @@ function HistoryPage() {
                         {loadingSessionModal ? (
                             <div style={{ textAlign: "center", padding: "40px 0" }}>
                                 <span className="history-spinner" style={{ margin: "0 auto 12px auto" }} />
-                                <p style={{ color: "#94a3b8", margin: 0 }}>Memuat detail analisis siswa...</p>
+                                <p style={{ color: "#94a3b8", margin: 0 }}>{t("history.loadingDetail")}</p>
                             </div>
                         ) : activeModalStudents.length === 0 ? (
                             <div style={{ textAlign: "center", padding: "30px 0", color: "#94a3b8" }}>
-                                <p>Tidak ada data siswa dalam sesi ini.</p>
+                                <p>{t("history.noStudents")}</p>
                             </div>
                         ) : (
                             <>
@@ -404,7 +410,7 @@ function HistoryPage() {
                                 {activeModalStudents.length > 1 && (
                                     <div style={{ marginBottom: "22px" }}>
                                         <div style={{ fontSize: "0.8rem", color: "#94a3b8", marginBottom: "8px", fontWeight: "600" }}>
-                                            Pilih Siswa ({activeModalStudents.length} Siswa):
+                                            {t("history.pickStudent", { n: activeModalStudents.length })}
                                         </div>
                                         <div
                                             style={{
@@ -469,7 +475,7 @@ function HistoryPage() {
                                                     }}
                                                 >
                                                     <span style={{ fontSize: "0.74rem", color: "#94a3b8", letterSpacing: "1px", textTransform: "uppercase", fontWeight: "700", marginBottom: "10px", alignSelf: "flex-start" }}>
-                                                        SAMPEL TULISAN TANGAN
+                                                        {t("history.sampleLabel")}
                                                     </span>
                                                     <div
                                                         style={{
@@ -484,13 +490,13 @@ function HistoryPage() {
                                                         }}
                                                     >
                                                         <img
-                                                            src={`http://localhost:8000${currentStudent.image_path}`}
-                                                            alt={`Tulisan tangan ${currentStudent.student_name}`}
+                                                            src={getApiUrl(currentStudent.image_path)}
+                                                            alt={t("history.sampleAlt", { name: currentStudent.student_name })}
                                                             style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
                                                         />
                                                     </div>
                                                     <span style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "8px" }}>
-                                                        Sampel foto yang dianalisis oleh AI
+                                                        {t("history.sampleCaption")}
                                                     </span>
                                                 </div>
                                             )}
@@ -509,7 +515,7 @@ function HistoryPage() {
                                             >
                                                 <div>
                                                     <span style={{ fontSize: "0.74rem", color: "#ffaa8a", letterSpacing: "1px", textTransform: "uppercase", fontWeight: "700" }}>
-                                                        HASIL PREDIKSI AI
+                                                        {t("results.predictLabel")}
                                                     </span>
 
                                                     <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "8px" }}>
@@ -528,7 +534,7 @@ function HistoryPage() {
                                                         </span>
                                                         <div>
                                                             <h3 style={{ margin: 0, fontSize: "1.25rem", color: "#fff", fontWeight: "700" }}>
-                                                                Tipe {currentStudent.pred_type}
+                                                                {t("results.type", { type: currentStudent.pred_type })}
                                                             </h3>
                                                             <p style={{ margin: "2px 0 0 0", color: "#cbd5e1", fontSize: "0.95rem" }}>
                                                                 {currentStudent.type_name || info?.name}
@@ -577,7 +583,7 @@ function HistoryPage() {
                                                         alignItems: "center"
                                                     }}
                                                 >
-                                                    <span style={{ fontSize: "0.82rem", color: "#94a3b8" }}>Tingkat Keyakinan AI:</span>
+                                                    <span style={{ fontSize: "0.82rem", color: "#94a3b8" }}>{t("results.confidenceTitle")}:</span>
                                                     <strong style={{ color: "#6fe0bc", fontSize: "1.15rem" }}>
                                                         {confidence.toFixed(1)}%
                                                     </strong>
@@ -597,7 +603,7 @@ function HistoryPage() {
                                                 }}
                                             >
                                                 <h4 style={{ margin: "0 0 8px 0", color: "#6fe0bc", fontSize: "0.95rem", fontWeight: "700" }}>
-                                                    Interpretasi Kepribadian
+                                                    {t("results.interpretTitle")}
                                                 </h4>
                                                 <p style={{ margin: 0, color: "#e2e8f0", fontSize: "0.9rem", lineHeight: "1.6" }}>
                                                     {interpretation}
@@ -644,7 +650,7 @@ function HistoryPage() {
                                                     </span>
                                                     <div>
                                                         <h5 style={{ margin: "0 0 4px 0", color: "#34d399", fontSize: "0.92rem", fontWeight: "700" }}>
-                                                            Kekuatan
+                                                            {t("results.strengths")}
                                                         </h5>
                                                         <p style={{ margin: 0, color: "#cbd5e1", fontSize: "0.86rem", lineHeight: "1.5" }}>
                                                             {info.strengths}
@@ -681,7 +687,7 @@ function HistoryPage() {
                                                     </span>
                                                     <div>
                                                         <h5 style={{ margin: "0 0 4px 0", color: "#fb923c", fontSize: "0.92rem", fontWeight: "700" }}>
-                                                            Tantangan
+                                                            {t("results.challenges")}
                                                         </h5>
                                                         <p style={{ margin: 0, color: "#cbd5e1", fontSize: "0.86rem", lineHeight: "1.5" }}>
                                                             {info.challenges}
@@ -703,14 +709,14 @@ function HistoryPage() {
                                                 }}
                                             >
                                                 <h4 style={{ margin: "0 0 2px 0", color: "#fff", fontSize: "0.95rem", fontWeight: "700" }}>
-                                                    Peringkat Kemungkinan Tipe
+                                                    {t("results.rankTitle")}
                                                 </h4>
                                                 <p style={{ margin: "0 0 14px 0", color: "#94a3b8", fontSize: "0.8rem" }}>
-                                                    Tiga tipe dengan probabilitas tertinggi menurut model AI.
+                                                    {t("history.rankSub")}
                                                 </p>
                                                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                                                    {top3.map((t, idx) => {
-                                                        const prob = Number(t.prob) || 0;
+                                                    {top3.map((p, idx) => {
+                                                        const prob = Number(p.prob) || 0;
                                                         const isTop = idx === 0;
                                                         return (
                                                             <div key={idx} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -731,7 +737,7 @@ function HistoryPage() {
                                                                 <div style={{ flex: 1 }}>
                                                                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", marginBottom: "4px" }}>
                                                                         <strong style={{ color: isTop ? "#fff" : "#cbd5e1" }}>
-                                                                            Tipe {t.type} {t.name ? `· ${t.name}` : ""}
+                                                                            {t("results.type", { type: p.type })} {p.name ? `· ${p.name}` : ""}
                                                                         </strong>
                                                                         <span style={{ color: isTop ? "#6fe0bc" : "#94a3b8", fontWeight: "600" }}>
                                                                             {prob.toFixed(1)}%
@@ -775,7 +781,7 @@ function HistoryPage() {
                                                 }}
                                             >
                                                 <h4 style={{ margin: "0 0 12px 0", color: "#6fe0bc", fontSize: "0.95rem", fontWeight: "700" }}>
-                                                    Rekomendasi Pengembangan Diri
+                                                    {t("results.recsTitle")}
                                                 </h4>
                                                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                                                     {recommendations.map((rec, i) => (
@@ -836,7 +842,7 @@ function HistoryPage() {
                                                 }}
                                             >
                                                 <FileTextIcon />
-                                                Download PDF
+                                                {t("results.downloadPdf")}
                                             </button>
                                         </div>
                                     </>

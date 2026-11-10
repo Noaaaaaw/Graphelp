@@ -5235,8 +5235,9 @@ body {
 
 .gc-folder-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    text-align: center;
     gap: 16px;
     flex-wrap: wrap;
     padding-bottom: 20px;
@@ -5332,79 +5333,257 @@ body {
 /* Grid Kartu Kelas */
 .gc-class-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 22px;
 }
-
+ 
 .gc-class-card {
-    border-radius: 16px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-radius: 18px;
     background: #ffffff;
-    border: 1px solid #e2ddd0;
+    border: 1px solid #e7e1d3;
     overflow: hidden;
     cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    box-shadow: 0 2px 10px rgba(28, 52, 70, 0.06);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 22px rgba(28, 52, 70, 0.07);
     transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
 }
-
+ 
 .gc-class-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 26px rgba(28, 52, 70, 0.13);
-    border-color: #2f6f6b;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05), 0 16px 32px rgba(28, 52, 70, 0.14);
+    border-color: #cfc6b0;
 }
-
+ 
+.gc-class-card:focus-visible {
+    outline: 3px solid rgba(47, 111, 107, 0.4);
+    outline-offset: 2px;
+}
+ 
+/* Banner */
 .gc-class-banner {
-    padding: 20px 20px 18px;
-    color: #ffffff;
     position: relative;
-}
-
-.gc-class-name {
-    margin: 0 0 6px 0;
-    font-size: 19px;
-    font-weight: 800;
-    color: #ffffff;
-    line-height: 1.25;
-}
-
-.gc-class-year {
-    display: inline-block;
-    font-size: 12.5px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(255, 255, 255, 0.16);
-    padding: 3px 10px;
-    border-radius: 999px;
-}
-
-.gc-class-body {
-    padding: 16px 20px 18px;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    background: #fbf9f4;
-    flex: 1;
+    justify-content: space-between;
+    gap: 18px;
+    min-height: 140px;
+    padding: 16px 20px 20px;
+    color: #ffffff;
+}
+ 
+/* lingkaran dekoratif halus */
+.gc-class-banner::before,
+.gc-class-banner::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+ 
+.gc-class-banner::before {
+    width: 170px;
+    height: 170px;
+    right: -46px;
+    top: -64px;
+    background: rgba(255, 255, 255, 0.1);
+}
+ 
+.gc-class-banner::after {
+    width: 120px;
+    height: 120px;
+    right: 36px;
+    bottom: -78px;
+    background: rgba(255, 255, 255, 0.07);
+}
+ 
+.gc-class-banner > * {
+    position: relative;
+    z-index: 1;
+}
+ 
+.gc-class-banner-top {
+    display: flex;
+    align-items: center;
     justify-content: space-between;
 }
-
+ 
+.gc-class-folder {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+}
+ 
+.gc-class-go {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.16);
+    opacity: 0.75;
+    transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+}
+ 
+.gc-class-card:hover .gc-class-go {
+    opacity: 1;
+    transform: translateX(3px);
+    background: rgba(255, 255, 255, 0.28);
+}
+ 
+.gc-class-banner-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    min-width: 0;
+}
+ 
+.gc-class-name {
+    margin: 0;
+    max-width: 100%;
+    font-size: 21px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #ffffff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+ 
+.gc-class-year {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.92);
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 3px 11px;
+    border-radius: 999px;
+}
+ 
+/* Body */
+.gc-class-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+    flex: 1;
+    padding: 16px 20px 18px;
+    background: #fbf9f4;
+}
+ 
 .gc-class-school {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin: 0;
     font-size: 13px;
     color: #64748b;
 }
-
+ 
+.gc-class-school svg {
+    flex: 0 0 auto;
+    color: #94a3b8;
+}
+ 
 .gc-class-school strong {
     color: #334155;
+    font-weight: 700;
 }
-
+ 
 .gc-class-footer {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding-top: 12px;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 14px;
     border-top: 1px solid #ece6d8;
+}
+ 
+.gc-class-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+ 
+.gc-student-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: #eaf4f2;
+    color: #2f6f6b;
+    border: 1px solid #cfe6e2;
+    font-size: 12.5px;
+    font-weight: 700;
+}
+ 
+.gc-card-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+ 
+/* Kartu "Buat kelas baru" */
+.gc-class-add {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 240px;
+    padding: 20px;
+    border-radius: 18px;
+    border: 1.5px dashed #d6cfbd;
+    background: transparent;
+    color: #6b6b64;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+ 
+.gc-class-add-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #eaf4f2;
+    color: #2f6f6b;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+ 
+.gc-class-add:hover {
+    border-color: #2f6f6b;
+    background: #fbf9f4;
+    color: #1c3446;
+}
+ 
+.gc-class-add:hover .gc-class-add-icon {
+    background: #2f6f6b;
+    color: #ffffff;
+    transform: scale(1.06);
+}
+ 
+.gc-class-add:focus-visible {
+    outline: 3px solid rgba(47, 111, 107, 0.4);
+    outline-offset: 2px;
 }
 
 .gc-student-count-badge {
@@ -5572,164 +5751,421 @@ body {
     background: #ffffff;
 }
 
-/* Tabel Daftar Siswa */
+/* ===== Tabel Daftar Siswa ===== */
 .gc-table-wrapper {
     width: 100%;
     overflow-x: auto;
-    border: 1px solid #e2ddd0;
-    border-radius: 14px;
+    border: 1px solid #e7e1d3;
+    border-radius: 16px;
     background: #ffffff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.05);
 }
 
 .gc-students-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 13.5px;
     text-align: left;
-    min-width: 780px;
+    min-width: 1080px;
 }
 
-.gc-students-table thead tr {
-    background: #f4efe1;
-    border-bottom: 1px solid #e2ddd0;
-    color: #334155;
-}
-
-.gc-students-table th {
-    padding: 12px 14px;
-    font-size: 12px;
+.gc-students-table thead th {
+    padding: 13px 16px;
+    background: #faf6ee;
+    font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
-    color: #475569;
+    letter-spacing: 0.08em;
+    color: #64748b;
     white-space: nowrap;
+    border-bottom: 1px solid #e7e1d3;
 }
 
 .gc-students-table td {
-    padding: 12px 14px;
-    border-bottom: 1px solid #f1ede4;
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1eee6;
     color: #1e293b;
     vertical-align: middle;
+    background: #ffffff;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .gc-students-table tbody tr:last-child td {
     border-bottom: none;
 }
 
-.gc-students-table tbody tr:hover {
-    background: #fdfcf9;
+.gc-students-table tbody tr:hover td {
+    background: #fbf9f4;
 }
 
-.gc-td-name {
+/* aksen biru di sisi kiri saat hover */
+.gc-students-table tbody tr:hover td:first-child {
+    box-shadow: inset 3px 0 0 #0284c7;
+}
+
+/* Nomor absen */
+.gc-no {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #475569;
+    font-weight: 800;
+    font-size: 12.5px;
+}
+
+/* Nama siswa + avatar */
+.gc-student-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.gc-avatar {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.gc-avatar-l { background: #dbeafe; color: #1d4ed8; }
+.gc-avatar-p { background: #fce7f3; color: #be185d; }
+
+.gc-student-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.gc-student-name {
     font-weight: 700;
     color: #0f172a;
+    font-size: 14px;
+    transition: color 0.15s ease;
 }
 
+.gc-student-cell:hover .gc-student-name {
+    color: #0284c7;
+}
+
+.gc-student-born {
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+/* Gender */
 .gc-gender-pill {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 800;
 }
 
-.gc-gender-l {
-    background: #dbeafe;
-    color: #1d4ed8;
+.gc-gender-l { background: #dbeafe; color: #1d4ed8; }
+.gc-gender-p { background: #fce7f3; color: #be185d; }
+
+/* Kode anak */
+.gc-code-inline {
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 5px 9px;
+    border-radius: 8px;
+    background: #f0f9ff;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
 }
 
-.gc-gender-p {
-    background: #fce7f3;
-    color: #be185d;
+.gc-copy-mini-btn {
+    height: 26px;
+    padding: 0 9px;
+    border-radius: 7px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #64748b;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
 }
 
-/* Badge Kategori Terakhir (BB merah, MB oranye, BSH hijau, BSB biru) */
+.gc-copy-mini-btn:hover {
+    background: #0284c7;
+    border-color: #0284c7;
+    color: #ffffff;
+}
+
+/* Badge kategori */
 .gc-kat-badge {
     display: inline-block;
-    padding: 4px 10px;
+    padding: 4px 11px;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 700;
     white-space: nowrap;
 }
 
-.gc-kat-bb {
-    background: #fee2e2;
-    color: #b91c1c;
-    border: 1px solid #fca5a5;
-}
+.gc-kat-bb  { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+.gc-kat-mb  { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+.gc-kat-bsh { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.gc-kat-bsb { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.gc-kat-empty { background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; font-weight: 600; }
 
-.gc-kat-mb {
-    background: #ffedd5;
-    color: #c2410c;
-    border: 1px solid #fdba74;
-}
-
-.gc-kat-bsh {
-    background: #dcfce7;
-    color: #15803d;
-    border: 1px solid #86efac;
-}
-
-.gc-kat-bsb {
-    background: #dbeafe;
-    color: #1d4ed8;
-    border: 1px solid #93c5fd;
-}
-
-.gc-kat-empty {
-    background: #f1f5f9;
-    color: #64748b;
-    border: 1px solid #e2e8f0;
+/* Status perubahan (delta) */
+.gc-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
     font-weight: 600;
+    color: #64748b;
 }
 
-/* Kolom Aksi Tabel */
-.gc-row-actions {
-    display: flex;
+.gc-delta-ico {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 800;
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.gc-delta-up .gc-delta-ico      { background: #dcfce7; color: #15803d; }
+.gc-delta-up                    { color: #15803d; }
+.gc-delta-down .gc-delta-ico    { background: #fee2e2; color: #b91c1c; }
+.gc-delta-down                  { color: #b91c1c; }
+.gc-delta-initial .gc-delta-ico { background: #e0f2fe; color: #0369a1; }
+
+/* Badge pengingat (dengan titik status) */
+.gc-rem-badge {
+    display: inline-flex;
+    align-items: center;
     gap: 6px;
-    flex-wrap: nowrap;
+    padding: 4px 11px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.gc-rem-badge::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.gc-rem-due  { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+.gc-rem-soon { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+.gc-rem-ok   { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.gc-rem-none { background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; }
+
+/* Kolom Aksi: ukuran tombol dikunci, tidak berubah saat ganti bahasa */
+.gc-students-table th:last-child,
+.gc-students-table td:last-child {
+    text-align: center;
+    min-width: 380px;
+}
+
+.gc-row-actions {
+    display: inline-grid;
+    grid-template-columns: 130px 130px 34px 34px;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+}
+
+.gc-students-table .gc-assess-btn,
+.gc-students-table .gc-history-btn,
+.gc-students-table .gc-icon-btn {
+    box-sizing: border-box;
+    height: 34px;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    font-size: 12.5px;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    transition: all 0.16s ease;
+}
+
+.gc-students-table .gc-assess-btn,
+.gc-students-table .gc-history-btn {
+    width: 130px;
+    padding: 0 10px;
+}
+
+.gc-students-table .gc-icon-btn {
+    width: 34px;
+    padding: 0;
+    background: #ffffff;
 }
 
 .gc-assess-btn {
-    padding: 7px 12px;
-    border-radius: 8px;
-    border: none;
+    border: 1px solid #0284c7;
     background: #0284c7;
     color: #ffffff;
-    font-size: 12.5px;
     font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background 0.16s ease, transform 0.16s ease;
+    box-shadow: 0 1px 2px rgba(2, 132, 199, 0.25);
 }
 
 .gc-assess-btn:hover {
     background: #0369a1;
+    border-color: #0369a1;
     transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(2, 132, 199, 0.28);
 }
 
 .gc-history-btn {
-    padding: 7px 12px;
-    border-radius: 8px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #e2e8f0;
     background: #ffffff;
-    color: #334155;
-    font-size: 12.5px;
+    color: #475569;
     font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background 0.16s ease, border-color 0.16s ease;
 }
 
 .gc-history-btn:hover {
-    background: #f1f5f9;
-    border-color: #94a3b8;
+    background: #f8fafc;
+    border-color: #0284c7;
+    color: #0284c7;
+}
+
+/* === Kartu anak (halaman orang tua) === */
+.gc-child-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.gc-child-info {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.gc-child-info li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #64748b;
+}
+
+.gc-child-info strong {
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.gc-child-info-ico {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #eaf4f2;
+    color: #2f6f6b;
+}
+
+.gc-child-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.gc-child-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 11px 13px;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid #ece6d8;
+}
+
+.gc-child-section-label {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #8a8478;
+}
+
+.gc-child-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.gc-icon-btn-edit   { border: 1px solid #bae6fd; color: #0284c7; }
+.gc-icon-btn-edit:hover   { background: #0284c7 !important; border-color: #0284c7; color: #ffffff; }
+
+.gc-icon-btn-delete { border: 1px solid #fecaca; color: #dc2626; }
+.gc-icon-btn-delete:hover { background: #dc2626 !important; border-color: #dc2626; color: #ffffff; }
+
+/* ===== Rata tengah + pembatas vertikal ===== */
+.gc-students-table thead th,
+.gc-students-table td {
+    text-align: center;
+}
+
+/* Garis vertikal antar kolom */
+.gc-students-table thead th:not(:last-child),
+.gc-students-table td:not(:last-child) {
+    border-right: 1px solid #eee9dc;
+}
+
+.gc-students-table thead th:not(:last-child) {
+    border-right-color: #e7e0cf;
+}
+
+/* Nama + avatar: satu grup, ditengahkan; teks nama tetap rata kiri di sebelah avatar */
+.gc-student-cell {
+    justify-content: center;
+}
+
+.gc-student-info {
+    align-items: flex-start;
+    text-align: left;
+}
+
+/* Kode + tombol Copy */
+.gc-students-table td > div[style*="inline-flex"] {
+    justify-content: center;
 }
 
 /* Modal Umum */
@@ -5886,6 +6322,189 @@ body {
     .gc-modal-form,
     .gc-modal-body {
         padding: 16px;
+    }
+}
+
+.gc-modal-card-assess {
+    max-width: 580px;
+}
+ 
+.gc-assess-table-wrap {
+    border: 1.5px solid #d6cdb6;
+    border-radius: 12px;
+    background: #ffffff;
+    overflow: hidden;
+}
+ 
+.gc-assess-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+ 
+.gc-assess-table th,
+.gc-assess-table td {
+    padding: 8px 12px;
+    text-align: center;
+    vertical-align: middle;
+    border-right: 1.5px solid #d6cdb6;
+}
+ 
+.gc-assess-table th:last-child,
+.gc-assess-table td:last-child {
+    border-right: none;
+}
+ 
+/* Lebar kolom */
+.gc-assess-table th:nth-child(1) { width: 34%; }
+.gc-assess-table th:nth-child(2) { width: 27%; }
+.gc-assess-table th:nth-child(3) { width: 39%; }
+ 
+/* Baris judul */
+.gc-assess-table thead th {
+    background: #f6f1e5;
+    border-bottom: 1.5px solid #d6cdb6;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6f6a5c;
+    white-space: nowrap;
+}
+ 
+/* Baris isi */
+.gc-assess-table td {
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #0f172a;
+    overflow-wrap: anywhere;
+}
+ 
+.gc-assess-name {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+ 
+.gc-assess-age {
+    white-space: nowrap;
+}
+ 
+.gc-assess-sub {
+    font-size: 12px;
+    font-weight: 600;
+    color: #8a8478;
+}
+ 
+@media (max-width: 560px) {
+    .gc-assess-table th,
+    .gc-assess-table td {
+        padding: 10px 8px;
+    }
+ 
+    .gc-assess-table thead th {
+        font-size: 10.5px;
+        letter-spacing: 0.03em;
+        white-space: normal;
+    }
+ 
+    .gc-assess-table td {
+        font-size: 13px;
+    }
+ 
+    .gc-assess-age {
+        white-space: normal;
+    }
+}
+
+/* Jarak antar bagian (tabel, dropzone, catatan, tombol) */
+.gc-assess-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Dropzone */
+.gc-assess-form .student-dropzone {
+    margin: 0;
+    padding: 18px 20px;
+    gap: 8px;
+}
+
+.gc-assess-form .dropzone-text {
+    max-width: 360px;
+    line-height: 1.45;
+    font-size: 12.5px;
+    text-wrap: balance;
+}
+
+/* Catatan guru */
+.gc-assess-form textarea.student-input {
+    min-height: 56px;                
+    padding: 10px 14px;
+    line-height: 1.45;
+    font-size: 13px;
+    resize: none;                    
+}
+
+/* Footer tombol */
+.gc-assess-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 2px;
+    padding-top: 14px;
+    border-top: 1px solid #ece6d8;
+}
+
+.gc-assess-actions .gc-secondary-btn,
+.gc-assess-actions .gc-primary-submit {
+    height: 40px;
+}
+
+.gc-primary-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 190px;
+    padding: 0 22px;
+    border: none;
+    border-radius: 10px;
+    background: #1c3446;
+    color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(28, 52, 70, 0.2);
+    transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
+}
+
+.gc-primary-submit:hover:not(:disabled) {
+    background: #254556;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(28, 52, 70, 0.28);
+}
+
+/* Nonaktif (belum ada foto) */
+.gc-primary-submit:disabled {
+    background: #ebe6d9;
+    color: #a39c88;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+@media (max-width: 560px) {
+    .gc-assess-actions {
+        flex-direction: column-reverse;
+    }
+
+    .gc-assess-actions .gc-secondary-btn,
+    .gc-assess-actions .gc-primary-submit {
+        width: 100%;
     }
 }
 
