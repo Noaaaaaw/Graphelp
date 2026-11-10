@@ -24,14 +24,6 @@ export default function AssessmentResult({ result, schoolName, gradeClass }) {
     const katStyle = KATEGORI_BADGE_STYLE[result.kategori] || KATEGORI_BADGE_STYLE.MB;
     const imageUrl = result.image_url || result.image_path;
 
-    const indTable = result.indikator_klinis_table && result.indikator_klinis_table.length > 0
-        ? result.indikator_klinis_table
-        : [
-            { no: 1, nama: "Kontrol Pegangan: kemampuan memegang alat tulis secara stabil", level: result.kategori || "MB" },
-            { no: 2, nama: "Kekuatan goresan konsisten (tidak terlalu tipis/gemetar dan tidak terlalu tebal)", level: result.kategori || "MB" },
-            { no: 3, nama: "Koordinasi mata: kemampuan menyalin atau menggambar pola geometri", level: result.kategori || "MB" },
-            { no: 4, nama: "Kemampuan menarik garis lurus secara kontinu tanpa banyak jeda", level: result.kategori || "MB" }
-        ];
 
     return (
         <div className="student-result-item" style={{ border: "1px solid #e2e8f0", boxShadow: "none" }}>
@@ -74,21 +66,6 @@ export default function AssessmentResult({ result, schoolName, gradeClass }) {
                 </div>
 
                 <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-                    {result.kategori && (
-                        <span
-                            style={{
-                                padding: "5px 10px",
-                                borderRadius: "6px",
-                                fontSize: "0.82rem",
-                                fontWeight: "700",
-                                background: katStyle.bg,
-                                color: katStyle.color,
-                                border: `1px solid ${katStyle.border}`,
-                            }}
-                        >
-                            {result.kategori} {result.kategori_label ? `(${result.kategori_label})` : ""}
-                        </span>
-                    )}
                     <span
                         style={{
                             padding: "5px 12px",
@@ -162,96 +139,11 @@ export default function AssessmentResult({ result, schoolName, gradeClass }) {
                 </div>
             )}
 
-            {/* BAGIAN I: ASESMEN 4 INDIKATOR KLINIS */}
-            <div style={{ marginTop: "14px", marginBottom: "12px" }}>
-                <h4
-                    style={{
-                        margin: "0 0 6px 0",
-                        fontSize: "0.95rem",
-                        fontWeight: "700",
-                        color: "#0f172a",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.3px",
-                    }}
-                >
-                    I. Asesmen 4 Indikator Klinis Motorik Halus (Bagian I)
-                </h4>
-                <div style={{ overflowX: "auto", border: "1px solid #cbd5e1", borderRadius: "6px", background: "#ffffff" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem", textAlign: "left" }}>
-                        <thead>
-                            <tr style={{ background: "#f1f5f9", borderBottom: "1px solid #cbd5e1", color: "#334155" }}>
-                                <th style={{ padding: "8px 10px", width: "36px", textAlign: "center" }}>No</th>
-                                <th style={{ padding: "8px 10px" }}>Indikator Klinis</th>
-                                <th style={{ padding: "8px 10px", width: "60px", textAlign: "center" }}>BB (1)</th>
-                                <th style={{ padding: "8px 10px", width: "60px", textAlign: "center" }}>MB (2)</th>
-                                <th style={{ padding: "8px 10px", width: "60px", textAlign: "center" }}>BSH (3)</th>
-                                <th style={{ padding: "8px 10px", width: "60px", textAlign: "center" }}>BSB (4)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {indTable.map((item, i) => (
-                                <tr key={i} style={{ borderBottom: i < 3 ? "1px solid #e2e8f0" : "none" }}>
-                                    <td style={{ padding: "8px 10px", textAlign: "center", color: "#64748b" }}>{item.no || i + 1}</td>
-                                    <td style={{ padding: "8px 10px", color: "#1e293b", fontWeight: "500" }}>{item.nama}</td>
-                                    <td
-                                        style={{
-                                            padding: "8px 10px",
-                                            textAlign: "center",
-                                            fontWeight: "bold",
-                                            fontSize: "1.1rem",
-                                            color: item.level === "BB" ? "#dc2626" : "#cbd5e1",
-                                        }}
-                                    >
-                                        {item.level === "BB" ? "✓" : "-"}
-                                    </td>
-                                    <td
-                                        style={{
-                                            padding: "8px 10px",
-                                            textAlign: "center",
-                                            fontWeight: "bold",
-                                            fontSize: "1.1rem",
-                                            color: item.level === "MB" ? "#d97706" : "#cbd5e1",
-                                        }}
-                                    >
-                                        {item.level === "MB" ? "✓" : "-"}
-                                    </td>
-                                    <td
-                                        style={{
-                                            padding: "8px 10px",
-                                            textAlign: "center",
-                                            fontWeight: "bold",
-                                            fontSize: "1.1rem",
-                                            color: item.level === "BSH" ? "#16a34a" : "#cbd5e1",
-                                        }}
-                                    >
-                                        {item.level === "BSH" ? "✓" : "-"}
-                                    </td>
-                                    <td
-                                        style={{
-                                            padding: "8px 10px",
-                                            textAlign: "center",
-                                            fontWeight: "bold",
-                                            fontSize: "1.1rem",
-                                            color: item.level === "BSB" ? "#2563eb" : "#cbd5e1",
-                                        }}
-                                    >
-                                        {item.level === "BSB" ? "✓" : "-"}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-                <small style={{ color: "#64748b", fontSize: "0.78rem", display: "block", marginTop: "4px" }}>
-                    *Keterangan: BB (Belum Berkembang), MB (Mulai Berkembang), BSH (Berkembang Sesuai Harapan), BSB (Berkembang Sangat Baik)
-                </small>
-            </div>
-
             {/* BAGIAN III: KESIMPULAN PERKEMBANGAN */}
             <div style={{ marginTop: "12px", marginBottom: "12px" }}>
                 <h4
                     style={{
-                        margin: "0 0 8px 0",
+                        margin: "0 0 10px 0",
                         fontSize: "0.95rem",
                         fontWeight: "700",
                         color: "#0f172a",
@@ -259,7 +151,7 @@ export default function AssessmentResult({ result, schoolName, gradeClass }) {
                         letterSpacing: "0.3px",
                     }}
                 >
-                    II. Kesimpulan Asesmen Perkembangan (Bagian III)
+                    Hasil Asesmen Motorik Halus (Bagian III Resmi PAUD)
                 </h4>
 
                 {/* Pertanyaan 1: Menulis */}

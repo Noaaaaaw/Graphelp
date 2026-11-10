@@ -13,7 +13,6 @@ from sqlalchemy.orm import Session
 
 from . import auth, models, schemas
 from .database import Base, engine, get_db, SessionLocal
-from .predict import predict_image
 from .predict_motorik import predict_motorik_siswa
 
 app = FastAPI()
@@ -1096,7 +1095,7 @@ async def create_student_assessment(
         "confidence": result["confidence"],
         "alasan_klinis": result["alasan_klinis"],
         "saran_guru": result["saran_guru"],
-        "indikator": result["indikator"],
+        "indikator": result.get("indikator", {}),
         "indikator_klinis_table": result.get("indikator_klinis_table", []),
         "kesimpulan_menulis": result.get("kesimpulan_menulis", {}),
         "kesimpulan_menggambar": result.get("kesimpulan_menggambar", {}),

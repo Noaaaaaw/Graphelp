@@ -3,292 +3,207 @@ import cv2
 import numpy as np
 import joblib
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "ml_models", "model_kesimpulan_motorik.joblib")
+# Lokasi Model Multi-Output Bagian III Resmi (PelatihanModel baru3010)
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "ml_models", "model_baseline_4_fitur_bagian3.joblib")
 
-_model_data = None
+_MODEL_PAYLOAD = None
 
 def get_model():
-    global _model_data
-    if _model_data is None:
+    global _MODEL_PAYLOAD
+    if _MODEL_PAYLOAD is None:
         if os.path.exists(MODEL_PATH):
-            _model_data = joblib.load(MODEL_PATH)
+            _MODEL_PAYLOAD = joblib.load(MODEL_PATH)
         else:
             raise FileNotFoundError(f"Model file not found at {MODEL_PATH}")
-    return _model_data
+    return _MODEL_PAYLOAD
 
-def extract_clinical_features_from_bytes(file_bytes: bytes):
+def extract_clean_features_from_bytes(file_bytes: bytes, target_width: int = 1600):
     """
-    Mengekstrak 5 fitur fisik klinis dari buffer citra lembar kerja.
+    Ekstraksi 4 Fitur Biomekanik OpenCV Standar Baru:
+    1. cv_tremor (Rasio RDP arcLength vs approxPolyDP)
+    2. cv_stroke_cv (Variasi Tebal Garis via Distance Transform)
+    3. cv_compactness (Isoperimetric Quotient)
+    4. cv_fragmentation (Pecahan Kontur per 1000 piksel tinta)
+    Bebas crop buta 15% & bebas margin bayangan scanner 2.5%.
     """
     bytes_arr = np.frombuffer(file_bytes, dtype=np.uint8)
     img = cv2.imdecode(bytes_arr, cv2.IMREAD_COLOR)
     if img is None:
         return None
 
-    h, w = img.shape[:2]
-    # Pangkas kop header 15% atas lembar kerja
-    roi = img[int(h * 0.15):, :]
-    gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
-    blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    thresh = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 25, 10)
-    cleaned = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2)))
+    h0, w0 = img.shape[:2]
 
-    ink_pixels = np.sum(cleaned > 0)
-    if ink_pixels == 0:
+    # 1. Bersihkan margin tepi bayangan scanner (2.5% keliling kertas)
+    my, mx = int(h0 * 0.025), int(w0 * 0.025)
+    img[:my, :] = 255
+    img[h0 - my:, :] = 255
+    img[:, :mx] = 255
+    img[:, w0 - mx:] = 255
+
+    # 2. Standarisasi resolusi lebar 1600 px
+    th = int(round(h0 * (target_width / float(w0))))
+    img_std = cv2.resize(img, (target_width, th), interpolation=cv2.INTER_AREA)
+
+    gray = cv2.cvtColor(img_std, cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    thresh = cv2.adaptiveThreshold(
+        blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 25, 10
+    )
+    cleaned = cv2.morphologyEx(
+        thresh, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
+    )
+
+    ink_px = int(np.sum(cleaned > 0))
+    if ink_px == 0:
         return None
 
     contours, _ = cv2.findContours(cleaned, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    perim_sum, approx_sum, area_sum = 0.0, 0.0, 0.0
-    cnt_valid = 0
-    compactness_list = []
+    valid_contours = [c for c in contours if cv2.contourArea(c) > 25]
 
-    for cnt in contours:
-        area = cv2.contourArea(cnt)
-        if area > 30:
-            cnt_valid += 1
-            perim = cv2.arcLength(cnt, True)
-            approx = cv2.arcLength(cv2.approxPolyDP(cnt, 0.02 * perim, True), True)
-            perim_sum += perim
-            approx_sum += approx
-            area_sum += area
+    perim_sum, approx_sum = 0.0, 0.0
+    comp_list = []
+    for c in valid_contours:
+        a = cv2.contourArea(c)
+        p = cv2.arcLength(c, True)
+        ap = cv2.arcLength(cv2.approxPolyDP(c, 0.02 * p, True), True)
+        perim_sum += p
+        approx_sum += ap
+        if p > 0:
+            comp_list.append((4.0 * np.pi * a) / (p ** 2))
 
-            if perim > 0:
-                compactness = (4 * np.pi * area) / (perim ** 2)
-                compactness_list.append(compactness)
-
-    ind1_tremor = float(perim_sum / approx_sum) if approx_sum > 0 else 1.0
+    cv_tremor = float(perim_sum / approx_sum) if approx_sum > 0 else 1.0
 
     dist = cv2.distanceTransform(cleaned, cv2.DIST_L2, 3)
-    widths = dist[dist > 0] * 2
+    widths = dist[dist > 0] * 2.0
     w_mean = float(np.mean(widths)) if len(widths) > 0 else 1.0
     w_std = float(np.std(widths)) if len(widths) > 0 else 0.0
-    ind2_stroke_cv = float(w_std / w_mean) if w_mean > 0 else 0.0
+    cv_stroke_cv = float(w_std / w_mean) if w_mean > 0 else 0.0
 
-    ink_grays = gray[cleaned > 0]
-    ind2_gray_std = float(np.std(ink_grays)) if len(ink_grays) > 0 else 0.0
-
-    ind3_compactness = float(np.mean(compactness_list)) if len(compactness_list) > 0 else 0.0
-    ind4_fragmentation = float(cnt_valid / ((ink_pixels / 1000.0) + 1e-5))
+    cv_compactness = float(np.mean(comp_list)) if comp_list else 0.0
+    cv_fragmentation = float(len(valid_contours) / ((ink_px / 1000.0) + 1e-5))
 
     return {
-        'ind1_tremor': ind1_tremor,
-        'ind2_stroke_cv': ind2_stroke_cv,
-        'ind2_gray_std': ind2_gray_std,
-        'ind3_compactness': ind3_compactness,
-        'ind4_fragmentation': ind4_fragmentation
+        "cv_tremor": round(cv_tremor, 4),
+        "cv_stroke_cv": round(cv_stroke_cv, 4),
+        "cv_compactness": round(cv_compactness, 4),
+        "cv_fragmentation": round(cv_fragmentation, 4)
     }
 
 def predict_motorik_siswa(image_bytes: bytes, usia_bulan: float = 45.0):
     """
-    Prediksi Asesmen Kematangan Motorik Halus Siswa:
-    Output:
-    - Kesimpulan: Sesuai Usia [Ya] vs Belum Sesuai [Tidak]
-    - Status & Kategori (BB, MB, BSH, BSB)
-    - Probabilitas Keyakinan AI
-    - 4 Indikator Fisik Klinis
-    - Alasan Klinis (Explainable AI) & Rekomendasi Guru
+    Prediksi Asesmen Kematangan Motorik Halus Siswa (Multi-Output Bagian III):
+    1. Kemampuan Menulis Sesuai Usia: Ya / Tidak
+    2. Kemampuan Menggambar Sesuai Usia: Ya / Tidak
+    Murni keluaran model Machine Learning tanpa heuristik tabel BB-BSB.
     """
-    feats = extract_clinical_features_from_bytes(image_bytes)
+    feats = extract_clean_features_from_bytes(image_bytes)
     if feats is None:
-        # Fallback jika gambar kosong / tidak terdeteksi coretan
         return {
             "kesimpulan": "Belum Sesuai [Tidak]",
             "status": "Coretan Tidak Terdeteksi",
-            "kategori": "BB",
-            "kategori_label": "Belum Berkembang",
+            "kategori": "Tidak Terdeteksi",
+            "kategori_label": "Coretan Belum Terdeteksi",
             "confidence": 0.0,
-            "alasan_klinis": "Gambar tidak memiliki kontras yang cukup atau tidak ada goresan tinta yang terdeteksi.",
-            "saran_guru": "Pastikan hasil foto atau scan lembar kerja cukup terang dan goresan pensil terlihat jelas.",
-            "indikator": {
-                "kontrol_pegangan": {"value": 1.0, "status": "Tidak Terdeteksi"},
-                "konsistensi_tekanan": {"value": 0.0, "status": "Tidak Terdeteksi"},
-                "koordinasi_geometri": {"value": 0.0, "status": "Tidak Terdeteksi"},
-                "kontinuitas_garis": {"value": 0.0, "status": "Tidak Terdeteksi"}
-            },
-            "indikator_klinis_table": [
-                {"no": 1, "nama": "Kontrol Pegangan: kemampuan memegang alat tulis secara stabil", "level": "BB"},
-                {"no": 2, "nama": "Kekuatan goresan konsisten (tidak terlalu tipis/gemetar dan tidak terlalu tebal)", "level": "BB"},
-                {"no": 3, "nama": "Koordinasi mata: kemampuan menyalin atau menggambar pola geometri", "level": "BB"},
-                {"no": 4, "nama": "Kemampuan menarik garis lurus secara kontinu tanpa banyak jeda", "level": "BB"}
-            ],
+            "alasan_klinis": "Gambar tidak memiliki kontras yang cukup atau goresan alat tulis tidak terdeteksi.",
+            "saran_guru": "Pastikan foto atau scan lembar kerja cukup terang dan goresan pensil terlihat jelas.",
             "kesimpulan_menulis": {
                 "sesuai": False,
                 "jawaban": "Tidak",
+                "confidence": 0.0,
                 "alasan": "Coretan lembar kerja tidak terdeteksi dengan jelas."
             },
             "kesimpulan_menggambar": {
                 "sesuai": False,
                 "jawaban": "Tidak",
+                "confidence": 0.0,
                 "alasan": "Coretan lembar kerja tidak terdeteksi dengan jelas."
+            },
+            "indikator": {},
+            "indikator_klinis_table": [],
+            "fitur_fisik_opencv": {
+                "cv_tremor": 0.0,
+                "cv_stroke_cv": 0.0,
+                "cv_compactness": 0.0,
+                "cv_fragmentation": 0.0,
+                "usia_bulan": float(usia_bulan) if usia_bulan > 0 else 45.0
             }
         }
 
-    model_data = get_model()
-    pipeline = model_data['pipeline']
-    optimal_threshold = model_data.get('optimal_threshold', 0.544)
+    payload = get_model()
+    pipeline = payload["pipeline"]
 
-    # Susun vektor fitur: ['ind1_tremor', 'ind2_stroke_cv', 'ind2_gray_std', 'ind3_compactness', 'ind4_fragmentation', 'usia_bulan_num']
     vector = np.array([[
-        feats['ind1_tremor'],
-        feats['ind2_stroke_cv'],
-        feats['ind2_gray_std'],
-        feats['ind3_compactness'],
-        feats['ind4_fragmentation'],
+        feats["cv_tremor"],
+        feats["cv_stroke_cv"],
+        feats["cv_compactness"],
+        feats["cv_fragmentation"],
         float(usia_bulan) if usia_bulan > 0 else 45.0
     ]])
 
-    prob_sesuai = float(pipeline.predict_proba(vector)[0, 1])
-    is_sesuai = prob_sesuai >= optimal_threshold
+    pred = pipeline.predict(vector)[0]           # [pred_menulis, pred_menggambar]
+    probs = pipeline.predict_proba(vector)       # list probabilities [prob_menulis, prob_menggambar]
 
-    # Penentuan Kategori Motorik PAUD (Kemendikbud)
-    if is_sesuai:
-        kesimpulan = "Sesuai Usia [Ya]"
-        status = "Perkembangan Sesuai / Mandiri"
-        confidence = prob_sesuai * 100.0
-        if prob_sesuai >= 0.88:
-            kategori = "BSB"
-            kategori_label = "Berkembang Sangat Baik"
-        else:
-            kategori = "BSH"
-            kategori_label = "Berkembang Sesuai Harapan"
+    prob_w = float(probs[0][0, 1])
+    prob_d = float(probs[1][0, 1])
 
-        alasan_klinis = "Anak sudah mampu mengontrol goresan alat tulis secara mandiri, stabil, dan tarikan garis kontinu sesuai tahapan usianya."
+    is_ya_w = bool(pred[0] == 1)
+    is_ya_d = bool(pred[1] == 1)
+
+    conf_w = round((prob_w if is_ya_w else (1.0 - prob_w)) * 100.0, 1)
+    conf_d = round((prob_d if is_ya_d else (1.0 - prob_d)) * 100.0, 1)
+
+    alasan_w = (
+        "Anak sudah mampu mengontrol pegangan alat tulis dengan stabil dan meniru goresan huruf sesuai usianya."
+        if is_ya_w else
+        "Kontrol pegangan alat tulis belum stabil dan tarikan goresan garis belum konsisten sesuai usianya."
+    )
+    alasan_d = (
+        "Koordinasi mata dan tangan anak sudah mampu membentuk goresan gambar terkontrol sesuai usianya."
+        if is_ya_d else
+        "Koordinasi visual-motorik dalam pembentukan pola objek gambar masih memerlukan latihan terarah."
+    )
+
+    is_sesuai_umum = is_ya_w or is_ya_d
+    if is_ya_w and is_ya_d:
+        status_umum = "Sesuai Usia (Menulis & Menggambar)"
         saran_guru = "Pertahankan stimulasi dengan latihan menggambar bebas dan memperkaya ragam bentuk huruf/angka."
+    elif is_ya_w:
+        status_umum = "Sesuai Menulis (Perlu Latihan Menggambar)"
+        saran_guru = "Berikan stimulasi berupa latihan menggambar bentuk geometris dan eksplorasi warna secara terbimbing."
+    elif is_ya_d:
+        status_umum = "Sesuai Menggambar (Perlu Latihan Menulis)"
+        saran_guru = "Berikan stimulasi berupa latihan meremas playdough serta menghubungkan garis titik putus-putus pembentuk huruf."
     else:
-        kesimpulan = "Belum Sesuai [Tidak]"
-        status = "Perlu Stimulasi Tambahan"
-        confidence = (1.0 - prob_sesuai) * 100.0
-        if prob_sesuai <= 0.30:
-            kategori = "BB"
-            kategori_label = "Belum Berkembang"
-        else:
-            kategori = "MB"
-            kategori_label = "Mulai Berkembang"
-
-        # Generate Explainable AI breakdown
-        reasons = []
-        if feats['ind1_tremor'] > 1.30:
-            reasons.append("kontrol pegangan belum stabil (terdeteksi getaran/tremor garis)")
-        if feats['ind4_fragmentation'] > 0.70:
-            reasons.append("goresan garis sering terangkat atau putus-putus")
-        if feats['ind2_stroke_cv'] > 0.52:
-            reasons.append("tekanan pensil pada kertas belum konsisten")
-        if feats['ind3_compactness'] < 0.24:
-            reasons.append("koordinasi bentuk geometri pola belum terbentuk rapi")
-
-        if reasons:
-            alasan_klinis = f"Karena {', '.join(reasons)}."
-        else:
-            alasan_klinis = "Kontrol motorik halus anak masih dalam tahap awal pembentukan dan membutuhkan latihan rutin."
-
-        saran_guru = "Berikan stimulasi berupa latihan meremas playdough/plastisin, menghubungkan titik garis putus-putus, serta melatih koordinasi jemari."
-
-    # Penentuan level klinis 4 indikator (BB=1, MB=2, BSH=3, BSB=4)
-    # 1. Kontrol Pegangan (Tremor)
-    if feats['ind1_tremor'] <= 1.15:
-        ind1_level = "BSB"
-    elif feats['ind1_tremor'] <= 1.28:
-        ind1_level = "BSH"
-    elif feats['ind1_tremor'] <= 1.40:
-        ind1_level = "MB"
-    else:
-        ind1_level = "BB"
-
-    # 2. Kekuatan Goresan / Tekanan
-    if feats['ind2_stroke_cv'] <= 0.44:
-        ind2_level = "BSB"
-    elif feats['ind2_stroke_cv'] <= 0.52:
-        ind2_level = "BSH"
-    elif feats['ind2_stroke_cv'] <= 0.62:
-        ind2_level = "MB"
-    else:
-        ind2_level = "BB"
-
-    # 3. Koordinasi Pola Geometri (Compactness)
-    if feats['ind3_compactness'] >= 0.35:
-        ind3_level = "BSB"
-    elif feats['ind3_compactness'] >= 0.24:
-        ind3_level = "BSH"
-    elif feats['ind3_compactness'] >= 0.14:
-        ind3_level = "MB"
-    else:
-        ind3_level = "BB"
-
-    # 4. Kemampuan Menarik Garis Lurus (Fragmentasi)
-    if feats['ind4_fragmentation'] <= 0.40:
-        ind4_level = "BSB"
-    elif feats['ind4_fragmentation'] <= 0.70:
-        ind4_level = "BSH"
-    elif feats['ind4_fragmentation'] <= 1.25:
-        ind4_level = "MB"
-    else:
-        ind4_level = "BB"
-
-    indikator_klinis_table = [
-        {
-            "no": 1,
-            "nama": "Kontrol Pegangan: kemampuan memegang alat tulis secara stabil",
-            "level": ind1_level
-        },
-        {
-            "no": 2,
-            "nama": "Kekuatan goresan konsisten (tidak terlalu tipis/gemetar dan tidak terlalu tebal)",
-            "level": ind2_level
-        },
-        {
-            "no": 3,
-            "nama": "Koordinasi mata: kemampuan menyalin atau menggambar pola geometri",
-            "level": ind3_level
-        },
-        {
-            "no": 4,
-            "nama": "Kemampuan menarik garis lurus secara kontinu tanpa banyak jeda",
-            "level": ind4_level
-        }
-    ]
-
-    kesimpulan_menulis = {
-        "sesuai": bool(is_sesuai),
-        "jawaban": "Ya" if is_sesuai else "Tidak",
-        "alasan": "Anak sudah mampu mengontrol goresan alat tulis secara mandiri, stabil, dan tarikan garis kontinu sesuai tahapan usianya." if is_sesuai else alasan_klinis
-    }
-
-    kesimpulan_menggambar = {
-        "sesuai": bool(is_sesuai),
-        "jawaban": "Ya" if is_sesuai else "Tidak",
-        "alasan": "Koordinasi motorik visual dan kemampuan menggambar pola geometri sudah berkembang baik sesuai tahapan usianya." if is_sesuai else "Koordinasi kontrol motorik dan reproduksi pola geometri masih dalam tahap pembentukan dan memerlukan latihan terarah."
-    }
-
-    # Breakdown 4 Indikator Fisik (Tetap dipertahankan untuk kompatibilitas)
-    indikator = {
-        "kontrol_pegangan": {
-            "value": round(feats['ind1_tremor'], 2),
-            "status": "Stabil" if feats['ind1_tremor'] <= 1.30 else "Kurang Stabil (Tremor)"
-        },
-        "konsistensi_tekanan": {
-            "value": round(feats['ind2_stroke_cv'], 2),
-            "status": "Konsisten" if feats['ind2_stroke_cv'] <= 0.52 else "Belum Merata"
-        },
-        "koordinasi_geometri": {
-            "value": round(feats['ind3_compactness'], 2),
-            "status": "Terkoordinasi" if feats['ind3_compactness'] >= 0.24 else "Perlu Latihan"
-        },
-        "kontinuitas_garis": {
-            "value": round(feats['ind4_fragmentation'], 2),
-            "status": "Kontinu" if feats['ind4_fragmentation'] <= 0.70 else "Sering Terputus"
-        }
-    }
+        status_umum = "Perlu Pendampingan Latihan Motorik"
+        saran_guru = "Berikan stimulasi bertahap: latihan meremas plastisin, meronce, dan menebalkan garis pola sederhana bersama guru/orang tua."
 
     return {
-        "kesimpulan": kesimpulan,
-        "status": status,
-        "kategori": kategori,
-        "kategori_label": kategori_label,
-        "confidence": round(confidence, 1),
-        "alasan_klinis": alasan_klinis,
+        "kesimpulan": "Sesuai Usia [Ya]" if is_sesuai_umum else "Belum Sesuai [Tidak]",
+        "status": status_umum,
+        "kategori": "Sesuai" if is_sesuai_umum else "Perlu Latihan",
+        "kategori_label": status_umum,
+        "confidence": conf_w,
+        "alasan_klinis": f"Menulis: {alasan_w} Menggambar: {alasan_d}",
         "saran_guru": saran_guru,
-        "indikator": indikator,
-        "indikator_klinis_table": indikator_klinis_table,
-        "kesimpulan_menulis": kesimpulan_menulis,
-        "kesimpulan_menggambar": kesimpulan_menggambar
+        "kesimpulan_menulis": {
+            "sesuai": is_ya_w,
+            "jawaban": "Ya" if is_ya_w else "Tidak",
+            "confidence": conf_w,
+            "alasan": alasan_w
+        },
+        "kesimpulan_menggambar": {
+            "sesuai": is_ya_d,
+            "jawaban": "Ya" if is_ya_d else "Tidak",
+            "confidence": conf_d,
+            "alasan": alasan_d
+        },
+        "indikator": {},
+        "indikator_klinis_table": [],
+        "fitur_fisik_opencv": {
+            "cv_tremor": feats["cv_tremor"],
+            "cv_stroke_cv": feats["cv_stroke_cv"],
+            "cv_compactness": feats["cv_compactness"],
+            "cv_fragmentation": feats["cv_fragmentation"],
+            "usia_bulan": float(usia_bulan) if usia_bulan > 0 else 45.0
+        }
     }

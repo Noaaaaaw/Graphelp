@@ -286,9 +286,9 @@ export default function StudentProgressView({
                             Grafik Perkembangan Motorik Halus Anak
                         </h3>
                     </div>
-                    {summary.first_kategori && summary.latest_kategori && (
+                    {summary.latest_kategori && (
                         <div style={{ fontSize: "0.84rem", color: "#334155", background: "#f8fafc", padding: "6px 12px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                            Awal: <strong>{summary.first_kategori}</strong> → Terkini: <strong>{summary.latest_kategori}</strong>
+                            Status Terkini: <strong>{["BSB", "BSH", "SESUAI"].includes(String(summary.latest_kategori).toUpperCase()) ? "✓ Sesuai Usia [Ya]" : "✗ Belum Sesuai [Tidak]"}</strong>
                         </div>
                     )}
                 </div>
@@ -373,7 +373,7 @@ export default function StudentProgressView({
                                                 fontWeight="700"
                                                 fill="#0f172a"
                                             >
-                                                {pt.kategori} ({pt.confidence}%)
+                                                {["BSB", "BSH", "SESUAI"].includes(String(pt.kategori).toUpperCase()) ? "Sesuai" : "Belum Sesuai"} ({pt.confidence}%)
                                             </text>
                                             <text
                                                 x={pt.x}
@@ -482,7 +482,8 @@ export default function StudentProgressView({
                         <div className="gc-period-tabs">
                             {assessments.map((item) => {
                                 const isSelected = activeAssessment?.id === item.id;
-                                const katBadge = KATEGORI_BADGE[item.kategori] || KATEGORI_BADGE.MB;
+                                const itemIsYa = (item.kesimpulan && item.kesimpulan.includes("Ya")) ||
+                                                 ["BSB", "BSH", "SESUAI"].includes(String(item.kategori).toUpperCase());
                                 const dStyle = DELTA_STYLE[item.delta_status] || DELTA_STYLE.Stabil;
                                 return (
                                     <button
@@ -501,12 +502,12 @@ export default function StudentProgressView({
                                                     borderRadius: "999px",
                                                     fontSize: "0.74rem",
                                                     fontWeight: "700",
-                                                    background: katBadge.bg,
-                                                    color: katBadge.color,
-                                                    border: `1px solid ${katBadge.border}`,
+                                                    background: itemIsYa ? "#dcfce7" : "#fee2e2",
+                                                    color: itemIsYa ? "#15803d" : "#b91c1c",
+                                                    border: `1px solid ${itemIsYa ? "#86efac" : "#fca5a5"}`,
                                                 }}
                                             >
-                                                {item.kategori}
+                                                {itemIsYa ? "✓ Sesuai Usia" : "✗ Belum Sesuai"}
                                             </span>
                                         </div>
                                         <div style={{ fontSize: "0.76rem", color: "#64748b", marginTop: "4px", display: "flex", justifyContent: "space-between", width: "100%" }}>

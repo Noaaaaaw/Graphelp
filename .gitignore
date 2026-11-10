@@ -26,7 +26,6 @@ ANALISIS_*.md
 
 # Local artifacts
 .archify/
-!backend/ml_models/*.joblib
 
 # AI Agent private skills & customizations (local only)
 .agents/
@@ -38,6 +37,8 @@ skills-lock.json
 AGENTS.md
 GEMINI.md
 .claude*
+MEMORY.md
+PANDUAN_*.md
 
 # Datasets
 dataset/
@@ -45,5 +46,7 @@ dataset/
 # Local Research Notebooks & Models (Do Not Push)
 *.ipynb
 *.joblib
+!backend/ml_models/model_baseline_4_fitur_bagian3.joblib
+backend/ml_models/model_kesimpulan_motorik.joblib
 
 backend/uploads/

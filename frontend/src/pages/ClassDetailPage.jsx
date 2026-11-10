@@ -80,18 +80,11 @@ const DELTA_KEYS = {
 };
 
 function renderKategoriBadge(lastAssessment, t) {
-    if (!lastAssessment || !lastAssessment.kategori) {
-        return <span className="gc-kat-badge gc-kat-empty">{t("classDetail.none")}</span>;
+    if (!lastAssessment || (!lastAssessment.kategori && !lastAssessment.kesimpulan)) {
+        return <span className="gc-kat-badge gc-kat-empty">{t ? t("classDetail.none") : "Belum ada"}</span>;
     }
-    const kat = lastAssessment.kategori.toUpperCase();
-    const label = t(`common.kategori.${kat}`, { defaultValue: lastAssessment.kategori_label || "" });
-    const clsMap = {
-        BB: "gc-kat-bb",
-        MB: "gc-kat-mb",
-        BSH: "gc-kat-bsh",
-        BSB: "gc-kat-bsb",
-    };
-    const badgeClass = clsMap[kat] || "gc-kat-mb";
+    const isYa = (lastAssessment.kesimpulan && lastAssessment.kesimpulan.includes("Ya")) ||
+                 ["BSB", "BSH", "SESUAI"].includes(String(lastAssessment.kategori).toUpperCase());
     const deltaMap = {
         Meningkat: "↗",
         Stabil: "→",
@@ -100,17 +93,30 @@ function renderKategoriBadge(lastAssessment, t) {
     };
     const deltaIcon = lastAssessment.delta_status ? deltaMap[lastAssessment.delta_status] || "" : "";
     const deltaKey = DELTA_KEYS[lastAssessment.delta_status];
-    const deltaText = deltaKey ? t(`common.delta.${deltaKey}`) : lastAssessment.delta_status || "";
+    const deltaText = deltaKey && t ? t(`common.delta.${deltaKey}`) : lastAssessment.delta_status || "";
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "5px", alignItems: "center" }}>
-            <span className={`gc-kat-badge ${badgeClass}`} title={label}>
-                {kat}{label ? ` - ${label}` : ""}
+            <span
+                style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    padding: "3px 10px",
+                    borderRadius: "999px",
+                    fontSize: "0.78rem",
+                    fontWeight: "700",
+                    background: isYa ? "#dcfce7" : "#fee2e2",
+                    color: isYa ? "#15803d" : "#b91c1c",
+                    border: `1px solid ${isYa ? "#86efac" : "#fca5a5"}`
+                }}
+            >
+                {isYa ? "✓ Sesuai Usia [Ya]" : "✗ Belum Sesuai [Tidak]"}
             </span>
             {(lastAssessment.period_label || lastAssessment.delta_status) && (
                 <small className={`gc-delta gc-delta-${deltaKey || "stable"}`}>
                     <span className="gc-delta-ico">{deltaIcon}</span>
                     {deltaText}{" "}
-                    {lastAssessment.sequence_number ? t("classDetail.seq", { n: lastAssessment.sequence_number }) : ""}
+                    {lastAssessment.sequence_number && t ? t("classDetail.seq", { n: lastAssessment.sequence_number }) : ""}
                 </small>
             )}
         </div>

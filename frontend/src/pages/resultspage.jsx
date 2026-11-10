@@ -2,101 +2,64 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useToast } from "../components/Toast";
-import { TYPE_INFO } from "../constants/typeInfo";
 import "../style/results.css";
 
-function CheckIcon({ size = 26 }) {
+const STAR_COUNT = 60;
+
+function CheckIcon() {
     return (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20 6 9 17l-5-5" />
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
         </svg>
     );
 }
 
 function SunIcon() {
     return (
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="4.5" fill="currentColor" />
-            <path d="M12 2v2.5M12 19.5V22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M2 12h2.5M19.5 12H22M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77" />
-        </svg>
-    );
-}
-
-function AstronautIcon() {
-    return (
-        <svg width="56" height="72" viewBox="0 0 56 72" fill="none">
-            <rect x="6" y="26" width="10" height="24" rx="4" fill="#c7cdd6" stroke="#9aa3af" strokeWidth="1" />
-            <rect x="40" y="26" width="10" height="24" rx="4" fill="#c7cdd6" stroke="#9aa3af" strokeWidth="1" />
-            <path d="M14 30 C6 34 4 44 10 50" stroke="#f4f6f8" strokeWidth="9" strokeLinecap="round" fill="none" />
-            <circle cx="10" cy="50" r="5.5" fill="#e8734a" />
-            <path d="M42 30 C50 34 52 44 46 50" stroke="#f4f6f8" strokeWidth="9" strokeLinecap="round" fill="none" />
-            <circle cx="46" cy="50" r="5.5" fill="#e8734a" />
-            <path d="M22 56 C20 62 20 66 22 70" stroke="#f4f6f8" strokeWidth="9" strokeLinecap="round" fill="none" />
-            <path d="M34 56 C36 62 36 66 34 70" stroke="#f4f6f8" strokeWidth="9" strokeLinecap="round" fill="none" />
-            <ellipse cx="22" cy="70" rx="6" ry="4" fill="#2f6f6b" />
-            <ellipse cx="34" cy="70" rx="6" ry="4" fill="#2f6f6b" />
-            <rect x="12" y="24" width="32" height="34" rx="16" fill="#f4f6f8" stroke="#d7dce2" strokeWidth="1.5" />
-            <rect x="20" y="34" width="16" height="12" rx="4" fill="#e8734a" />
-            <circle cx="24" cy="40" r="1.6" fill="#fff" />
-            <circle cx="32" cy="40" r="1.6" fill="#6fe0bc" />
-            <circle cx="28" cy="16" r="15" fill="#f4f6f8" stroke="#d7dce2" strokeWidth="1.5" />
-            <circle cx="28" cy="16" r="11" fill="url(#astroGlass)" />
-            <ellipse cx="24" cy="11" rx="3.5" ry="2.4" fill="rgba(255,255,255,0.75)" />
-            <defs>
-                <radialGradient id="astroGlass" cx="35%" cy="30%" r="75%">
-                    <stop offset="0%" stopColor="#bfe3f7" />
-                    <stop offset="55%" stopColor="#5fa8d3" />
-                    <stop offset="100%" stopColor="#2c5f82" />
-                </radialGradient>
-            </defs>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
         </svg>
     );
 }
 
 function SpaceshipIcon() {
     return (
-        <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M32 6 C24 16, 20 30, 20 44 L44 44 C44 30, 40 16, 32 6 Z" fill="url(#res-hull)" />
+            <path d="M32 6 C28 14, 26 24, 26 34 L38 34 C38 24, 36 14, 32 6 Z" fill="#ffffff" opacity="0.3" />
+            <circle cx="32" cy="24" r="5" fill="#1b2a47" stroke="#7aa7ff" strokeWidth="1.5" />
+            <path d="M20 36 L10 46 L20 44 Z" fill="#ff7a59" />
+            <path d="M44 36 L54 46 L44 44 Z" fill="#ff7a59" />
+            <path d="M26 44 L32 54 L38 44 Z" fill="#ffd15c" />
             <defs>
-                <linearGradient id="flameGrad" x1="30" y1="46" x2="30" y2="60" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#ffdd8a" />
-                    <stop offset="60%" stopColor="#f2a05a" />
-                    <stop offset="100%" stopColor="#e8734a" />
+                <linearGradient id="res-hull" x1="20" y1="6" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#f4f7fc" />
+                    <stop offset="1" stopColor="#cdd7e5" />
                 </linearGradient>
-                <radialGradient id="winGrad" cx="35%" cy="30%" r="75%">
-                    <stop offset="0%" stopColor="#bfe3f7" />
-                    <stop offset="60%" stopColor="#3d8783" />
-                    <stop offset="100%" stopColor="#1e4c48" />
-                </radialGradient>
             </defs>
-            <path d="M30 46 C26 52 26 58 30 60 C34 58 34 52 30 46Z" fill="url(#flameGrad)" />
-            <path d="M30 4 C40 14 42 28 40 42 L20 42 C18 28 20 14 30 4Z" fill="#f4f6f8" stroke="#d7dce2" strokeWidth="1.5" />
-            <path d="M30 4 C34 9 36 15 36.5 20 L23.5 20 C24 15 26 9 30 4Z" fill="#e8734a" />
-            <circle cx="30" cy="24" r="6" fill="url(#winGrad)" stroke="#fff" strokeWidth="1.5" />
-            <path d="M20 42 L10 52 L20 50Z" fill="#2f6f6b" />
-            <path d="M40 42 L50 52 L40 50Z" fill="#2f6f6b" />
-            <rect x="20" y="38" width="20" height="5" rx="2" fill="#e3e8ec" />
         </svg>
     );
 }
 
-const STAR_COUNT = 24;
+function AstronautIcon() {
+    return (
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="32" cy="38" rx="14" ry="16" fill="#f8fafc" stroke="#334155" strokeWidth="2" />
+            <circle cx="32" cy="20" r="14" fill="#ffffff" stroke="#334155" strokeWidth="2" />
+            <rect x="22" y="14" width="20" height="12" rx="6" fill="#0f172a" />
+            <path d="M25 17 Q 32 15, 39 17" stroke="#38bdf8" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+    );
+}
 
 function FileIcon() {
     return (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-            <path d="M14 2v6h6" />
-            <path d="M8 13h8M8 17h8" />
-        </svg>
-    );
-}
-
-function DownloadIcon() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 3v12" />
-            <path d="m7 10 5 5 5-5" />
-            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
         </svg>
     );
 }
@@ -112,129 +75,74 @@ function ShareIcon() {
     );
 }
 
-function CircleCheckIcon() {
-    return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21.8 10A10 10 0 1 1 17 3.3" />
-            <path d="m9 11 3 3L22 4" />
-        </svg>
-    );
-}
-
-const RING_R = 50;
+const RING_R = 46;
 const RING_C = 2 * Math.PI * RING_R;
 
-function ResultsPage() {
+export default function ResultsPage() {
     const { t } = useTranslation();
     const { state } = useLocation();
     const result = state?.result;
     const image = state?.image;
     const [copied, setCopied] = useState(false);
     const [ready, setReady] = useState(false);
-    // toast opsional: kalau provider-nya nggak ada, tetap aman
+
     let toast = null;
     try { toast = useToast(); } catch { toast = null; }
 
-    // animasi ring & bar setelah halaman tampil
     useEffect(() => {
         const timer = setTimeout(() => setReady(true), 150);
         return () => clearTimeout(timer);
     }, []);
 
-    // Dibuka langsung / di-refresh tanpa data
     if (!result) {
         return (
             <main className="result-page">
                 <div className="result-body result-body-empty">
                     <section className="result-card result-empty">
-                        <h1>{t("results.emptyTitle")}</h1>
-                        <p>{t("results.emptyDesc")}</p>
-                        <Link to="/analyze" className="result-btn result-btn-primary">{t("results.emptyBtn")}</Link>
+                        <h1>Belum Ada Hasil Analisis</h1>
+                        <p>Silakan unggah lembar kerja tulisan tangan terlebih dahulu untuk melihat hasil asesmen di sini.</p>
+                        <Link to="/analyze" className="result-btn result-btn-primary">Mulai Analisis</Link>
                     </section>
                 </div>
             </main>
         );
     }
 
-    const confidence = Math.max(0, Math.min(100, Number(result.confidence) || 0));
-    const confidenceText = confidence.toFixed(1);
-    const info = TYPE_INFO[Number(result.pred_type)];
-    const top3 = Array.isArray(result.top3) ? result.top3 : [];
-    const typeName = result.type_name || info?.name || top3[0]?.name || "";
-    const typeLabel = info?.label;
-    const tagline = info?.tagline;
-    const traits = info?.traits ?? [];
-    const interpretation = result.interpretation || result.description || info?.description;
-    const features = Array.isArray(result.features) ? result.features : [];
-    const recommendations =
-        Array.isArray(result.recommendations) && result.recommendations.length
-            ? result.recommendations
-            : info?.tips ?? [];
+    const menulis = result.kesimpulan_menulis || {
+        sesuai: "Ya" in (result.kesimpulan || ""),
+        jawaban: "Ya" in (result.kesimpulan || "") ? "Ya" : "Tidak",
+        confidence: Number(result.confidence) || 85.0,
+        alasan: result.alasan_klinis || "Goresan alat tulis stabil sesuai usianya."
+    };
 
-    const probs = top3.length
-        ? top3
-        : [{ type: result.pred_type, name: typeName, prob: confidence }];
-    const maxProb = Math.max(...probs.map((p) => Number(p.prob) || 0), 1);
+    const menggambar = result.kesimpulan_menggambar || {
+        sesuai: "Ya" in (result.kesimpulan || ""),
+        jawaban: "Ya" in (result.kesimpulan || "") ? "Ya" : "Tidak",
+        confidence: Number(result.confidence) || 85.0,
+        alasan: result.alasan_klinis || "Koordinasi pola gambar baik sesuai usianya."
+    };
 
-    function buildText() {
-        const lines = [
-            t("results.txt.header"),
-            "==============================",
-            `${t("results.type", { type: result.pred_type })}: ${typeName}${typeLabel ? ` (${typeLabel})` : ""}`,
-            `${t("results.txt.confidence")}: ${confidenceText}%`,
-            "",
-            t("results.interpretTitle"),
-            interpretation || "-",
-        ];
-        if (info) {
-            lines.push("", `${t("results.strengths")}: ${info.strengths}`, `${t("results.challenges")}: ${info.challenges}`);
-        }
-        if (features.length) {
-            lines.push("", t("results.featuresTitle"));
-            features.forEach((f) => lines.push(`- ${f.label}: ${f.value}${f.desc ? ` (${f.desc})` : ""}`));
-        }
-        if (recommendations.length) {
-            lines.push("", t("results.recsTitle"));
-            recommendations.forEach((r, i) => lines.push(`${i + 1}. ${r}`));
-        }
-        return lines.join("\n");
-    }
-
-    function handleDownloadTxt() {
-        const blob = new Blob([buildText()], { type: "text/plain;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `hasil-analisis-tipe-${result.pred_type}.txt`;
-        a.click();
-        URL.revokeObjectURL(url);
-        toast?.success?.(t("results.toastTxt"));
-    }
+    const confW = Math.max(0, Math.min(100, Number(menulis.confidence) || 0));
+    const confD = Math.max(0, Math.min(100, Number(menggambar.confidence) || 0));
 
     async function handleShare() {
-        const text = t("results.shareText", {
-            type: result.pred_type,
-            name: typeName,
-            confidence: confidenceText,
-        });
+        const text = `Hasil Asesmen Motorik Halus Graphelp:\n- Menulis: ${menulis.jawaban === "Ya" ? "Sesuai Usia" : "Belum Sesuai"}\n- Menggambar: ${menggambar.jawaban === "Ya" ? "Sesuai Usia" : "Belum Sesuai"}`;
         try {
             if (navigator.share) {
-                await navigator.share({ title: t("results.shareTitle"), text });
+                await navigator.share({ title: "Hasil Asesmen Motorik Halus", text });
             } else {
                 await navigator.clipboard.writeText(text);
                 setCopied(true);
-                toast?.success?.(t("results.toastCopied"));
+                toast?.success?.("Ringkasan berhasil disalin ke clipboard!");
                 setTimeout(() => setCopied(false), 2000);
             }
         } catch {
-            /* dibatalkan user */
+            /* cancelled */
         }
     }
 
     return (
         <main className="result-page">
-
-            {/* Hero: sama seperti halaman Analyze, tapi "malam" sudah jadi "pagi" */}
             <section className="result-hero">
                 {Array.from({ length: STAR_COUNT }, (_, i) => (
                     <span key={i} className={`az-star az-star-${i + 1}`}></span>
@@ -252,8 +160,10 @@ function ResultsPage() {
                 <span className="az-meteor az-meteor-3"><span className="az-meteor-line"></span></span>
                 <span className="hero-ring-a"></span>
                 <span className="hero-ring-b"></span>
-                <h1>{t("results.heroTitle")}</h1>
-                <p>{t("results.heroDesc")}</p>
+                <h1>Hasil Asesmen Selesai</h1>
+                <p>
+                    Berikut hasil analisis kemampuan motorik halus anak berdasarkan instrumen resmi kuisioner PAUD (Bagian III).
+                </p>
                 <div className="hero-flow">
                     <span className="hero-flow-icon hero-flow-icon-done">
                         <CheckIcon />
@@ -267,173 +177,189 @@ function ResultsPage() {
 
             <div className="result-body">
                 <section className="result-card">
-                    <h1 className="result-title">{t("results.cardTitle")}</h1>
+                    <h1 className="result-title">Hasil Asesmen Kematangan Motorik Halus</h1>
 
-                    {/* Gambar + prediksi */}
-                    <div className="result-top">
-                        <figure className="result-image-card">
-                            <figcaption>{t("results.imageLabel")}</figcaption>
-                            <div className="result-photo">
-                                {image ? (
-                                    <img src={image} alt={t("results.imageAlt")} />
-                                ) : (
-                                    <div className="result-image-empty">{t("results.imageEmpty")}</div>
-                                )}
+                    {/* Foto Sampel Lembar Kerja */}
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", marginBottom: "24px", alignItems: "center", background: "#f8fafc", padding: "16px", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                        {image ? (
+                            <img
+                                src={image}
+                                alt="Lembar kerja anak"
+                                style={{ width: "110px", height: "110px", objectFit: "cover", borderRadius: "8px", border: "1px solid #cbd5e1", background: "#ffffff" }}
+                            />
+                        ) : (
+                            <div style={{ width: "110px", height: "110px", background: "#e2e8f0", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#64748b", fontSize: "0.8rem" }}>
+                                Lembar Kerja
                             </div>
-                            <p>{t("results.imageCaption")}</p>
-                        </figure>
+                        )}
+                        <div style={{ flex: 1, minWidth: "220px" }}>
+                            <div style={{ fontSize: "0.8rem", fontWeight: "700", color: "#0284c7", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                                Status Asesmen Keseluruhan
+                            </div>
+                            <h2 style={{ margin: "4px 0 6px 0", fontSize: "1.25rem", color: "#0f172a" }}>
+                                {result.status || result.kesimpulan || "Sesuai Usia"}
+                            </h2>
+                            <p style={{ margin: 0, fontSize: "0.85rem", color: "#475569" }}>
+                                Model Machine Learning menganalisis tarikan garis, getaran kontur, dan kontinuitas goresan anak.
+                            </p>
+                        </div>
+                    </div>
 
-                        <div className="result-predict">
-                            <span className="result-predict-label">{t("results.predictLabel")}</span>
+                    {/* 2 KARTU UTAMA ASESMEN (MENULIS & MENGGAMBAR) */}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px", marginBottom: "24px" }}>
+                        {/* KARTU 1: MENULIS */}
+                        <div style={{
+                            padding: "18px",
+                            borderRadius: "10px",
+                            border: `1.5px solid ${menulis.sesuai ? "#86efac" : "#fca5a5"}`,
+                            background: menulis.sesuai ? "#f0fdf4" : "#fef2f2",
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "space-between"
+                        }}>
+                            <div>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
+                                    <div>
+                                        <span style={{ fontSize: "0.75rem", fontWeight: "700", textTransform: "uppercase", color: menulis.sesuai ? "#15803d" : "#b91c1c", letterSpacing: "0.5px" }}>
+                                            Output 1 · Bagian III
+                                        </span>
+                                        <h3 style={{ margin: "2px 0 0 0", fontSize: "1.1rem", color: "#0f172a" }}>
+                                            Kemampuan Menulis
+                                        </h3>
+                                    </div>
+                                    <span style={{
+                                        padding: "4px 10px",
+                                        borderRadius: "20px",
+                                        fontSize: "0.8rem",
+                                        fontWeight: "700",
+                                        background: menulis.sesuai ? "#dcfce7" : "#fee2e2",
+                                        color: menulis.sesuai ? "#15803d" : "#b91c1c",
+                                        border: `1px solid ${menulis.sesuai ? "#86efac" : "#fca5a5"}`
+                                    }}>
+                                        {menulis.sesuai ? "✓ Sesuai Usia [Ya]" : "✗ Belum Sesuai [Tidak]"}
+                                    </span>
+                                </div>
 
-                            <div className="result-type-row">
-                                <span className="result-type-badge">{result.pred_type}</span>
-                                <div>
-                                    <h2>{t("results.type", { type: result.pred_type })}</h2>
-                                    <p className="result-predict-name">
-                                        {typeName}
-                                        {typeLabel && <em> · {typeLabel}</em>}
-                                    </p>
+                                <div style={{ display: "flex", alignItems: "center", gap: "14px", margin: "14px 0" }}>
+                                    <div style={{ width: "64px", height: "64px", position: "relative", flexShrink: 0 }}>
+                                        <svg viewBox="0 0 100 100" style={{ transform: "rotate(-90deg)", width: "100%", height: "100%" }}>
+                                            <circle cx="50" cy="50" r={RING_R} fill="none" stroke="#e2e8f0" strokeWidth="8" />
+                                            <circle
+                                                cx="50" cy="50" r={RING_R} fill="none"
+                                                stroke={menulis.sesuai ? "#22c55e" : "#ef4444"}
+                                                strokeWidth="8"
+                                                strokeDasharray={RING_C}
+                                                strokeDashoffset={ready ? RING_C * (1 - confW / 100) : RING_C}
+                                                strokeLinecap="round"
+                                                style={{ transition: "stroke-dashoffset 1s ease" }}
+                                            />
+                                        </svg>
+                                        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem", fontWeight: "800", color: "#0f172a" }}>
+                                            {confW}%
+                                        </div>
+                                    </div>
+                                    <div style={{ fontSize: "0.82rem", color: "#475569" }}>
+                                        <strong>Tingkat Keyakinan AI</strong>
+                                        <div>Probabilitas model klasifikasi menulis</div>
+                                    </div>
+                                </div>
+
+                                <div style={{ fontSize: "0.84rem", color: "#334155", background: "#ffffff", padding: "10px 12px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                                    <strong>Alasan Klinis:</strong> "{menulis.alasan}"
                                 </div>
                             </div>
+                        </div>
 
-                            {tagline && <p className="result-predict-tagline">{tagline}</p>}
-
-                            {traits.length > 0 && (
-                                <div className="result-trait-list">
-                                    {traits.map((trait) => (
-                                        <span key={trait} className="result-trait">{trait}</span>
-                                    ))}
+                        {/* KARTU 2: MENGGAMBAR */}
+                        <div style={{
+                            padding: "18px",
+                            borderRadius: "10px",
+                            border: `1.5px solid ${menggambar.sesuai ? "#86efac" : "#fca5a5"}`,
+                            background: menggambar.sesuai ? "#f0fdf4" : "#fef2f2",
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "space-between"
+                        }}>
+                            <div>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
+                                    <div>
+                                        <span style={{ fontSize: "0.75rem", fontWeight: "700", textTransform: "uppercase", color: menggambar.sesuai ? "#15803d" : "#b91c1c", letterSpacing: "0.5px" }}>
+                                            Output 2 · Bagian III
+                                        </span>
+                                        <h3 style={{ margin: "2px 0 0 0", fontSize: "1.1rem", color: "#0f172a" }}>
+                                            Kemampuan Menggambar
+                                        </h3>
+                                    </div>
+                                    <span style={{
+                                        padding: "4px 10px",
+                                        borderRadius: "20px",
+                                        fontSize: "0.8rem",
+                                        fontWeight: "700",
+                                        background: menggambar.sesuai ? "#dcfce7" : "#fee2e2",
+                                        color: menggambar.sesuai ? "#15803d" : "#b91c1c",
+                                        border: `1px solid ${menggambar.sesuai ? "#86efac" : "#fca5a5"}`
+                                    }}>
+                                        {menggambar.sesuai ? "✓ Sesuai Usia [Ya]" : "✗ Belum Sesuai [Tidak]"}
+                                    </span>
                                 </div>
-                            )}
 
-                            <div className="result-confidence">
-                                <div className="result-ring">
-                                    <svg viewBox="0 0 120 120">
-                                        <circle className="result-ring-track" cx="60" cy="60" r={RING_R} />
-                                        <circle
-                                            className="result-ring-value"
-                                            cx="60" cy="60" r={RING_R}
-                                            strokeDasharray={`${ready ? (confidence / 100) * RING_C : 0} ${RING_C}`}
-                                        />
-                                    </svg>
-                                    <span className="result-ring-center">{confidenceText}<small>%</small></span>
+                                <div style={{ display: "flex", alignItems: "center", gap: "14px", margin: "14px 0" }}>
+                                    <div style={{ width: "64px", height: "64px", position: "relative", flexShrink: 0 }}>
+                                        <svg viewBox="0 0 100 100" style={{ transform: "rotate(-90deg)", width: "100%", height: "100%" }}>
+                                            <circle cx="50" cy="50" r={RING_R} fill="none" stroke="#e2e8f0" strokeWidth="8" />
+                                            <circle
+                                                cx="50" cy="50" r={RING_R} fill="none"
+                                                stroke={menggambar.sesuai ? "#22c55e" : "#ef4444"}
+                                                strokeWidth="8"
+                                                strokeDasharray={RING_C}
+                                                strokeDashoffset={ready ? RING_C * (1 - confD / 100) : RING_C}
+                                                strokeLinecap="round"
+                                                style={{ transition: "stroke-dashoffset 1s ease" }}
+                                            />
+                                        </svg>
+                                        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem", fontWeight: "800", color: "#0f172a" }}>
+                                            {confD}%
+                                        </div>
+                                    </div>
+                                    <div style={{ fontSize: "0.82rem", color: "#475569" }}>
+                                        <strong>Tingkat Keyakinan AI</strong>
+                                        <div>Probabilitas model klasifikasi menggambar</div>
+                                    </div>
                                 </div>
-                                <div className="result-confidence-text">
-                                    <strong>{t("results.confidenceTitle")}</strong>
-                                    <span>{t("results.confidenceNote")}</span>
+
+                                <div style={{ fontSize: "0.84rem", color: "#334155", background: "#ffffff", padding: "10px 12px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                                    <strong>Alasan Klinis:</strong> "{menggambar.alasan}"
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Interpretasi */}
-                    {interpretation && (
-                        <div className="result-interpret">
-                            <h3>{t("results.interpretTitle")}</h3>
-                            <p>{interpretation}</p>
-                        </div>
-                    )}
-
-                    {/* Kekuatan & tantangan */}
-                    {info && (
-                        <div className="result-sc">
-                            <div className="result-sc-card result-sc-good">
-                                <span className="result-sc-icon">✓</span>
-                                <div>
-                                    <h4>{t("results.strengths")}</h4>
-                                    <p>{info.strengths}</p>
-                                </div>
+                    {/* REKOMENDASI STIMULASI GURU & ORANG TUA */}
+                    {result.saran_guru && (
+                        <div style={{ padding: "14px 16px", background: "#eff6ff", borderRadius: "8px", borderLeft: "4px solid #0284c7", marginBottom: "24px" }}>
+                            <div style={{ fontSize: "0.85rem", fontWeight: "700", color: "#0369a1", marginBottom: "4px" }}>
+                                💡 Rekomendasi Stimulasi Guru & Orang Tua
                             </div>
-                            <div className="result-sc-card result-sc-warn">
-                                <span className="result-sc-icon">!</span>
-                                <div>
-                                    <h4>{t("results.challenges")}</h4>
-                                    <p>{info.challenges}</p>
-                                </div>
-                            </div>
+                            <p style={{ margin: 0, fontSize: "0.86rem", color: "#1e3a8a", lineHeight: "1.5" }}>
+                                {result.saran_guru}
+                            </p>
                         </div>
                     )}
 
-                    {/* Peringkat kemungkinan tipe */}
-                    <div className="result-panel">
-                        <h3 className="result-panel-title">{t("results.rankTitle")}</h3>
-                        <p className="result-panel-sub">{t("results.rankSub")}</p>
-                        <div className="result-probs">
-                            {probs.map((p, i) => {
-                                const prob = Number(p.prob) || 0;
-                                return (
-                                    <div key={i} className={`result-prob-row ${i === 0 ? "is-top" : ""}`}>
-                                        <span className="result-prob-rank">#{i + 1}</span>
-                                        <div className="result-prob-main">
-                                            <div className="result-prob-head">
-                                                <strong>{t("results.type", { type: p.type })}{p.name ? ` · ${p.name}` : ""}</strong>
-                                                <span>{prob.toFixed(1)}%</span>
-                                            </div>
-                                            <div className="result-prob-bar">
-                                                <span style={{ width: ready ? `${(prob / maxProb) * 100}%` : "0%" }} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* Fitur grafologi (muncul kalau backend mengirim `features`) */}
-                    {features.length > 0 && (
-                        <div className="result-panel">
-                            <h3 className="result-panel-title">{t("results.featuresTitle")}</h3>
-                            <p className="result-panel-sub">{t("results.featuresSub")}</p>
-                            <div className="result-features">
-                                {features.map((f, i) => (
-                                    <div key={i} className="result-feature">
-                                        <div className="result-feature-head">
-                                            <span className="result-feature-icon">{f.icon || "✍️"}</span>
-                                            <span>{f.label}</span>
-                                        </div>
-                                        <strong>{f.value}</strong>
-                                        {f.desc && <p>{f.desc}</p>}
-                                        {f.badge && <span className="result-chip result-chip-sm">{f.badge}</span>}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Rekomendasi */}
-                    {recommendations.length > 0 && (
-                        <div className="result-panel">
-                            <h3 className="result-panel-title result-panel-title-icon">
-                                <CircleCheckIcon /> {t("results.recsTitle")}
-                            </h3>
-                            <ol className="result-recs">
-                                {recommendations.map((r, i) => (
-                                    <li key={i}>
-                                        <span className="result-rec-num">{i + 1}</span>
-                                        {r}
-                                    </li>
-                                ))}
-                            </ol>
-                        </div>
-                    )}
-
-                    {/* Aksi */}
-                    <div className="result-actions">
+                    {/* AKSI CETAK & SHARE */}
+                    <div className="result-actions" style={{ display: "flex", gap: "10px", flexWrap: "wrap", justifyContent: "center" }}>
                         <button type="button" className="result-btn result-btn-primary" onClick={() => window.print()}>
-                            <FileIcon /> {t("results.downloadPdf")}
-                        </button>
-                        <button type="button" className="result-btn result-btn-soft" onClick={handleDownloadTxt}>
-                            <DownloadIcon /> {t("results.downloadTxt")}
+                            <FileIcon /> Cetak / Simpan PDF
                         </button>
                         <button type="button" className="result-btn result-btn-ghost" onClick={handleShare}>
-                            <ShareIcon /> {copied ? t("results.copied") : t("results.share")}
+                            <ShareIcon /> {copied ? "Tersalin!" : "Bagikan Ringkasan"}
                         </button>
+                        <Link to="/analyze" className="result-btn result-btn-soft">
+                            Analisis Gambar Lain
+                        </Link>
                     </div>
                 </section>
             </div>
         </main>
     );
 }
-
-export default ResultsPage;

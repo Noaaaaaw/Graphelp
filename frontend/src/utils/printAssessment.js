@@ -256,13 +256,21 @@ export function handlePrintStudentPDF(res, schoolName, gradeClass) {
     const menggambarText = menggambarSesuai
         ? "Sesuai usia. Koordinasi mata-tangan baik."
         : "Belum sesuai usia. Perlu latihan koordinasi pola.";
+    const confW = res.kesimpulan_menulis?.confidence !== undefined
+        ? Number(res.kesimpulan_menulis.confidence)
+        : confNum;
+    const confD = res.kesimpulan_menggambar?.confidence !== undefined
+        ? Number(res.kesimpulan_menggambar.confidence)
+        : confNum;
+    const confWFormatted = `${String(Number(confW.toFixed(1))).replace(".", ",")}%`;
+    const confDFormatted = `${String(Number(confD.toFixed(1))).replace(".", ",")}%`;
 
-    const pillActiveColor = (lvl) => {
-        if (lvl === "BSB") return "#1d4ed8";
-        if (lvl === "BSH") return "#15803d";
-        if (lvl === "MB") return "#d97706";
-        return "#dc2626";
-    };
+    const alasanW = res.kesimpulan_menulis?.alasan || (menulisSesuai
+        ? "Anak sudah mampu mengontrol pegangan alat tulis dengan stabil dan meniru goresan huruf sesuai usianya."
+        : "Kontrol pegangan alat tulis belum stabil dan tarikan goresan garis belum konsisten.");
+    const alasanD = res.kesimpulan_menggambar?.alasan || (menggambarSesuai
+        ? "Koordinasi mata dan tangan anak sudah mampu membentuk goresan gambar terkontrol sesuai usianya."
+        : "Koordinasi visual-motorik dalam pembentukan pola objek gambar masih memerlukan latihan terarah.");
 
     const html = `<!DOCTYPE html>
 <html lang="id">
@@ -870,20 +878,23 @@ export function handlePrintStudentPDF(res, schoolName, gradeClass) {
 
             <!-- HERO SUMMARY + WORKSHEET -->
             <div class="hero-row">
-                <div class="summary-card">
+                <div class="summary-card" style="border-left: 5px solid ${isYa ? "#16a34a" : "#ea580c"};">
                     <div class="summary-top">
-                        <div class="kat-circle">${escapeHtml(kategoriKey)}</div>
                         <div class="summary-text-col">
-                            <div class="summary-eyebrow">RINGKASAN HASIL</div>
-                            <div class="summary-kat-title">${escapeHtml(kategoriLabel)}</div>
-                            <div class="age-status-pill">${isYa ? "✓ Sesuai usia" : "✗ Belum sesuai usia"}</div>
+                            <div class="summary-eyebrow">RINGKASAN HASIL ASESMEN</div>
+                            <div class="summary-kat-title" style="color: ${isYa ? "#15803d" : "#b45309"}; font-size: 14pt;">
+                                ${isYa ? "Sesuai Tahap Perkembangan Usia" : "Perlu Pendampingan Latihan Motorik"}
+                            </div>
+                            <div class="age-status-pill" style="background: ${isYa ? "#dcfce7" : "#ffedd5"}; color: ${isYa ? "#15803d" : "#c2410c"};">
+                                ${isYa ? "✓ Sesuai Usia [Ya]" : "✗ Belum Sesuai Usia [Tidak]"}
+                            </div>
                             <p class="summary-desc">${escapeHtml(summaryParagraph)}</p>
                         </div>
                     </div>
                     <div class="confidence-row">
-                        <span class="confidence-label">Tingkat keyakinan AI</span>
+                        <span class="confidence-label">Tingkat Keyakinan AI</span>
                         <div class="confidence-track">
-                            <div class="confidence-fill"></div>
+                            <div class="confidence-fill" style="width: ${confFormatted}; background: ${isYa ? "#16a34a" : "#ea580c"};"></div>
                         </div>
                         <span class="confidence-val">${escapeHtml(confFormatted)}</span>
                     </div>
@@ -901,62 +912,45 @@ export function handlePrintStudentPDF(res, schoolName, gradeClass) {
                                    </svg>`
                         }
                     </div>
-                    <div class="worksheet-caption">(foto asli ditampilkan di sini)</div>
+                    <div class="worksheet-caption">(foto sampel goresan lembar kerja)</div>
                 </div>
             </div>
 
-            <!-- 4 INDIKATOR PERKEMBANGAN -->
+            <!-- HASIL ASESMEN BAGIAN III (RESMI INSTRUMEN PAUD) -->
             <div>
                 <div class="sec-header">
-                    <h2 class="sec-title">4 INDIKATOR PERKEMBANGAN</h2>
+                    <h2 class="sec-title">HASIL EVALUASI ASESMEN MOTORIK (BAGIAN III)</h2>
                     <div class="sec-accent"></div>
                 </div>
-                <div class="ind-list">
-                    ${indicatorRows
-                        .map(
-                            (row) => `
-                        <div class="ind-row">
-                            <div class="ind-left">
-                                <div class="ind-num">${row.no}</div>
-                                <div>
-                                    <div class="ind-name">${escapeHtml(row.title)}</div>
-                                    <div class="ind-desc">${escapeHtml(row.desc)}</div>
-                                </div>
+                <div class="dual-status-row" style="margin-top: 6px; margin-bottom: 8px;">
+                    <!-- KARTU 1: MENULIS -->
+                    <div class="status-card ${menulisSesuai ? "ok" : "warn"}" style="flex: 1; padding: 12px 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <div style="font-weight: 800; font-size: 10pt; color: #0f172a;">
+                                1. Kemampuan Menulis
                             </div>
-                            <div class="ind-pills">
-                                ${["BB", "MB", "BSH", "BSB"]
-                                    .map((lvl) => {
-                                        const active = row.level === lvl;
-                                        const bg = active ? pillActiveColor(lvl) : "#f1f5f9";
-                                        const col = active ? "#ffffff" : "#94a3b8";
-                                        return `<span class="ind-pill" style="background:${bg};color:${col};">${lvl}</span>`;
-                                    })
-                                    .join("")}
-                            </div>
+                            <span style="font-size: 8pt; font-weight: 700; padding: 3px 8px; border-radius: 12px; background: ${menulisSesuai ? "#dcfce7" : "#fee2e2"}; color: ${menulisSesuai ? "#15803d" : "#b91c1c"}; border: 1px solid ${menulisSesuai ? "#86efac" : "#fca5a5"};">
+                                ${menulisSesuai ? "✓ Sesuai Usia [Ya]" : "✗ Belum Sesuai [Tidak]"} (${escapeHtml(confWFormatted)})
+                            </span>
                         </div>
-                    `
-                        )
-                        .join("")}
-                </div>
-                <div class="ind-legend">
-                    BB = Belum Berkembang &nbsp;|&nbsp; MB = Mulai Berkembang &nbsp;|&nbsp; BSH = Berkembang Sesuai Harapan &nbsp;|&nbsp; BSB = Berkembang Sangat Baik
-                </div>
-            </div>
-
-            <!-- KEMAMPUAN MENULIS & MENGGAMBAR -->
-            <div class="dual-status-row">
-                <div class="status-card ${menulisSesuai ? "ok" : "warn"}">
-                    <div class="status-icon ${menulisSesuai ? "ok" : "warn"}">${menulisSesuai ? "✓" : "!"}</div>
-                    <div>
-                        <div class="status-card-title">Kemampuan Menulis</div>
-                        <div class="status-card-sub">${escapeHtml(menulisText)}</div>
+                        <div style="font-size: 8.2pt; color: #334155; line-height: 1.45;">
+                            <strong>Alasan Klinis:</strong> "${escapeHtml(alasanW)}"
+                        </div>
                     </div>
-                </div>
-                <div class="status-card ${menggambarSesuai ? "ok" : "warn"}">
-                    <div class="status-icon ${menggambarSesuai ? "ok" : "warn"}">${menggambarSesuai ? "✓" : "!"}</div>
-                    <div>
-                        <div class="status-card-title">Kemampuan Menggambar</div>
-                        <div class="status-card-sub">${escapeHtml(menggambarText)}</div>
+
+                    <!-- KARTU 2: MENGGAMBAR -->
+                    <div class="status-card ${menggambarSesuai ? "ok" : "warn"}" style="flex: 1; padding: 12px 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <div style="font-weight: 800; font-size: 10pt; color: #0f172a;">
+                                2. Kemampuan Menggambar
+                            </div>
+                            <span style="font-size: 8pt; font-weight: 700; padding: 3px 8px; border-radius: 12px; background: ${menggambarSesuai ? "#dcfce7" : "#fee2e2"}; color: ${menggambarSesuai ? "#15803d" : "#b91c1c"}; border: 1px solid ${menggambarSesuai ? "#86efac" : "#fca5a5"};">
+                                ${menggambarSesuai ? "✓ Sesuai Usia [Ya]" : "✗ Belum Sesuai [Tidak]"} (${escapeHtml(confDFormatted)})
+                            </span>
+                        </div>
+                        <div style="font-size: 8.2pt; color: #334155; line-height: 1.45;">
+                            <strong>Alasan Klinis:</strong> "${escapeHtml(alasanD)}"
+                        </div>
                     </div>
                 </div>
             </div>
