@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useToast } from "../components/Toast";
 import { authFetch, extractErrorMessage } from "../config/api";
 import StudentProgressView from "../components/StudentProgressView";
+import { SpaceHero } from "./ClassListPage";
 
 export default function ParentChildProgressPage() {
+    const { t } = useTranslation();
     const { studentId } = useParams();
     const navigate = useNavigate();
     const toast = useToast();
@@ -19,7 +22,7 @@ export default function ParentChildProgressPage() {
 
     useEffect(() => {
         if (!user) {
-            toast.error("Silakan masuk terlebih dahulu untuk melihat rapor perkembangan anak.");
+            toast.error(t("parentChildProgress.loginRequired"));
             navigate("/login");
             return;
         }
@@ -32,7 +35,12 @@ export default function ParentChildProgressPage() {
                 if (res.ok) {
                     setProgressData(data);
                 } else {
-                    toast.error(extractErrorMessage(data, `Gagal memuat rapor perkembangan anak (HTTP ${res.status}).`));
+                    toast.error(
+                        extractErrorMessage(
+                            data,
+                            t("parentChildProgress.errLoad", { status: res.status })
+                        )
+                    );
                     if (res.status === 403 || res.status === 404) {
                         navigate("/my-children");
                     }
@@ -40,7 +48,7 @@ export default function ParentChildProgressPage() {
             } catch (error) {
                 if (active) {
                     console.error("Error fetching parent child progress:", error);
-                    toast.error("Tidak dapat terhubung ke server.");
+                    toast.error(t("parentChildProgress.errConnect"));
                 }
             } finally {
                 if (active) setLoading(false);
@@ -56,48 +64,33 @@ export default function ParentChildProgressPage() {
     const student = progressData?.student;
     const classInfo = progressData?.class_info;
 
+    const heroTitle = student
+        ? t("parentChildProgress.heroTitleNamed", { name: student.name })
+        : t("parentChildProgress.heroTitle");
+
+    const heroSubtitle = classInfo
+        ? t("parentChildProgress.heroDescClass", {
+              className: classInfo.name,
+              year: classInfo.academic_year,
+              school: classInfo.school_name,
+          })
+        : t("parentChildProgress.heroDesc");
+
     return (
         <main className="student-page">
-            {/* Hero Luar Angkasa */}
-            <section className="student-hero">
-                <div className="student-star ss-1" />
-                <div className="student-star ss-2" />
-                <div className="student-star ss-3" />
-                <div className="student-star ss-4" />
-                <div className="student-star ss-5" />
-                <div className="student-star ss-6" />
-                <div className="student-sun" />
-
-                <div className="student-hero-content">
-                    <h1>{student ? `Perkembangan Anak: ${student.name}` : "Rapor Perkembangan Anak"}</h1>
-                    <p>
-                        {classInfo
-                            ? `Kelas ${classInfo.name} • Tahun Ajaran ${classInfo.academic_year} • ${classInfo.school_name}`
-                            : "Pantau grafik perkembangan motorik halus bulanan, riwayat asesmen, dan rekomendasi stimulasi di rumah."}
-                    </p>
-                </div>
-            </section>
+            <SpaceHero title={heroTitle} subtitle={heroSubtitle} />
 
             <section className="student-cardz">
                 <section className="student-container">
-                    <div className="gc-back-row">
-                        <button
-                            type="button"
-                            onClick={() => navigate("/my-children")}
-                            className="gc-back-btn"
-                        >
-                            <span>← Kembali ke Daftar Anak Saya</span>
-                        </button>
-                    </div>
 
                     {loading ? (
                         <div className="gc-state-box">
                             <span className="history-spinner" />
-                            <p>Memuat grafik & riwayat asesmen anak...</p>
+                            <p>{t("parentChildProgress.loading")}</p>
                         </div>
                     ) : !progressData ? (
                         <div className="gc-state-box">
-                            <h3>Data anak tidak ditemukan</h3>
+                            <h3>{t("parentChildProgress.notFound")}</h3>
                         </div>
                     ) : (
                         <StudentProgressView

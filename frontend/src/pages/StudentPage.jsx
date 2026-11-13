@@ -1,89 +1,40 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
-import { handlePrintStudentPDF } from "../utils/printAssessment";
+import AssessmentResult from "../components/AssessmentResult";
+import "../style/studentpage.css";
 
-function BookIcon() {
-    return (
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-        </svg>
-    );
-}
+const svgProps = {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": true,
+};
 
-function PencilFloatIcon() {
+function CameraIcon() {
     return (
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m18 2 4 4-13 13H5v-4Z" />
-            <path d="m14.5 5.5 4 4" />
+        <svg {...svgProps} width="26" height="26">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z" />
+            <circle cx="12" cy="13" r="4" />
         </svg>
     );
 }
 
 function XIcon() {
     return (
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+        <svg {...svgProps} width="13" height="13" strokeWidth="2.6">
             <path d="M18 6 6 18" />
             <path d="m6 6 12 12" />
         </svg>
     );
 }
 
-function PenFloatIcon() {
-    return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m12 19 7-7 3 3-7 7-3-3z" />
-            <path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
-            <path d="m2 2 7.586 7.586" />
-            <circle cx="11" cy="11" r="2" />
-        </svg>
-    );
-}
-
-function EraserFloatIcon() {
-    return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m7 21-4.3-4.3a1 1 0 0 1 0-1.4l9.6-9.6a1 1 0 0 1 1.4 0l5.6 5.6a1 1 0 0 1 0 1.4L12 21" />
-            <path d="M22 21H7" />
-            <path d="m5 11 6 6" />
-        </svg>
-    );
-}
-
-function RulerFloatIcon() {
-    return (
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0Z" />
-            <path d="m14.5 12.5 2-2" />
-            <path d="m11.5 9.5 2-2" />
-            <path d="m8.5 6.5 2-2" />
-            <path d="m17.5 15.5 2-2" />
-        </svg>
-    );
-}
-
-function StarFloatIcon() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2L12 16.4 5.7 21l2.3-7.2-6-4.6h7.6z" />
-        </svg>
-    );
-}
-
-function GraduationCapIcon() {
-    return (
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 10 12 5 2 10l10 5 10-5Z" />
-            <path d="M6 12v5c0 1.5 2.5 3 6 3s6-1.5 6-3v-5" />
-            <path d="M22 10v6" />
-        </svg>
-    );
-}
-
 function PlusIcon() {
     return (
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+        <svg {...svgProps} width="16" height="16" strokeWidth="2.4">
             <path d="M12 5v14M5 12h14" />
         </svg>
     );
@@ -91,43 +42,22 @@ function PlusIcon() {
 
 function SendIcon() {
     return (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg {...svgProps} width="16" height="16">
             <path d="m22 2-7 20-4-9-9-4Z" />
             <path d="M22 2 11 13" />
         </svg>
     );
 }
 
-function AppleIcon() {
+function TrashIcon() {
     return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 6c-1.5-2-4-2.5-5.5-1.5C4 6.2 3.5 9.5 5 12.5c1.2 2.4 3.5 5.5 7 5.5s5.8-3.1 7-5.5c1.5-3 1-6.3-1.5-8C16 3.5 13.5 4 12 6Z" />
-            <path d="M12 6c0-1.5.8-2.8 2-3.5" />
+        <svg {...svgProps} width="14" height="14">
+            <path d="M3 6h18" />
+            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            <path d="m19 6-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
         </svg>
     );
 }
-
-function NotebookFloatIcon() {
-    return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="4" y="3" width="16" height="18" rx="2" />
-            <path d="M8 3v18" />
-            <path d="M12 8h5" />
-            <path d="M12 12h5" />
-            <path d="M12 16h5" />
-        </svg>
-    );
-}
-
-function CameraIcon() {
-    return (
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z" />
-            <circle cx="12" cy="13" r="4" />
-        </svg>
-    );
-}
-
 
 function StudentPage() {
     const navigate = useNavigate();
@@ -164,6 +94,8 @@ function StudentPage() {
             toast.error("Minimal harus ada 1 siswa.");
             return;
         }
+        const target = students.find((s) => s.id === id);
+        if (target?.previewUrl) URL.revokeObjectURL(target.previewUrl);
         setStudents(students.filter((s) => s.id !== id));
     };
 
@@ -173,6 +105,7 @@ function StudentPage() {
                 if (s.id === id) {
                     if (field === "imageFile") {
                         const file = value;
+                        if (s.previewUrl) URL.revokeObjectURL(s.previewUrl);
                         const previewUrl = file ? URL.createObjectURL(file) : "";
                         return { ...s, imageFile: file, previewUrl };
                     }
@@ -185,9 +118,11 @@ function StudentPage() {
 
     const handleClearImage = (id) => {
         setStudents(
-            students.map((s) =>
-                s.id === id ? { ...s, imageFile: null, previewUrl: "" } : s
-            )
+            students.map((s) => {
+                if (s.id !== id) return s;
+                if (s.previewUrl) URL.revokeObjectURL(s.previewUrl);
+                return { ...s, imageFile: null, previewUrl: "" };
+            })
         );
     };
 
@@ -262,384 +197,335 @@ function StudentPage() {
 
             <section className="student-hero">
 
-    {/* === BACKGROUND SPACE === */}
-    <div className="space-glow space-glow-1" />
-    <div className="space-glow space-glow-2" />
+                {/* === BACKGROUND SPACE === */}
+                <div className="space-glow space-glow-1" />
+                <div className="space-glow space-glow-2" />
 
-    {/* === STARS === */}
-    <span className="space-star star-1">✦</span>
-    <span className="space-star star-2">✦</span>
-    <span className="space-star star-3">✧</span>
-    <span className="space-star star-4">✦</span>
-    <span className="space-star star-5">✧</span>
-    <span className="space-star star-6">✦</span>
-    <span className="space-star star-7">✧</span>
-    <span className="space-star star-8">✦</span>
-    <span className="space-star star-9">✧</span>
-    <span className="space-star star-10">✦</span>
+                {/* === STARS === */}
+                <span className="space-star star-1">✦</span>
+                <span className="space-star star-2">✦</span>
+                <span className="space-star star-3">✧</span>
+                <span className="space-star star-4">✦</span>
+                <span className="space-star star-5">✧</span>
+                <span className="space-star star-6">✦</span>
+                <span className="space-star star-7">✧</span>
+                <span className="space-star star-8">✦</span>
+                <span className="space-star star-9">✧</span>
+                <span className="space-star star-10">✦</span>
 
-    {/* titik-titik kecil */}
-    <span className="tiny-star tiny-star-1" />
-    <span className="tiny-star tiny-star-2" />
-    <span className="tiny-star tiny-star-3" />
-    <span className="tiny-star tiny-star-4" />
-    <span className="tiny-star tiny-star-5" />
-    <span className="tiny-star tiny-star-6" />
-    <span className="tiny-star tiny-star-7" />
-    <span className="tiny-star tiny-star-8" />
-    <span className="tiny-star tiny-star-9" />
-    <span className="tiny-star tiny-star-10" />
+                {/* titik-titik kecil */}
+                <span className="tiny-star tiny-star-1" />
+                <span className="tiny-star tiny-star-2" />
+                <span className="tiny-star tiny-star-3" />
+                <span className="tiny-star tiny-star-4" />
+                <span className="tiny-star tiny-star-5" />
+                <span className="tiny-star tiny-star-6" />
+                <span className="tiny-star tiny-star-7" />
+                <span className="tiny-star tiny-star-8" />
+                <span className="tiny-star tiny-star-9" />
+                <span className="tiny-star tiny-star-10" />
 
-    {/* === BULAN === */}
-    <div className="space-moon">
-        <span className="moon-crater moon-crater-1" />
-        <span className="moon-crater moon-crater-2" />
-        <span className="moon-crater moon-crater-3" />
-        <span className="moon-crater moon-crater-4" />
-    </div>
+                {/* === BULAN === */}
+                <div className="space-moon">
+                    <span className="moon-crater moon-crater-1" />
+                    <span className="moon-crater moon-crater-2" />
+                    <span className="moon-crater moon-crater-3" />
+                    <span className="moon-crater moon-crater-4" />
+                </div>
 
-    {/* === MATAHARI === */}
-    <div className="space-sun">
-        <div className="sun-core" />
-    </div>
+                {/* === MATAHARI === */}
+                <div className="space-sun">
+                    <div className="sun-core" />
+                </div>
 
-    {/* === PLANET === */}
-    <div className="space-planet planet-orange" />
-    <div className="space-planet planet-green" />
-    <div className="space-planet planet-purple" />
+                {/* === PLANET === */}
+                <div className="space-planet planet-orange" />
+                <div className="space-planet planet-green" />
+                <div className="space-planet planet-purple" />
 
-    {/* === ALIEN === */}
-    <div className="space-alien">
-        <div className="alien-antenna alien-antenna-left" />
-        <div className="alien-antenna alien-antenna-right" />
+                {/* === ALIEN === */}
+                <div className="space-alien">
+                    <div className="alien-antenna alien-antenna-left" />
+                    <div className="alien-antenna alien-antenna-right" />
 
-        <div className="alien-head">
-            <span className="alien-eye alien-eye-left" />
-            <span className="alien-eye alien-eye-right" />
-            <span className="alien-mouth" />
-        </div>
+                    <div className="alien-head">
+                        <span className="alien-eye alien-eye-left" />
+                        <span className="alien-eye alien-eye-right" />
+                        <span className="alien-mouth" />
+                    </div>
 
-        <div className="alien-body">
-            <span className="alien-arm alien-arm-left" />
-            <span className="alien-arm alien-arm-right" />
-        </div>
-    </div>
+                    <div className="alien-body">
+                        <span className="alien-arm alien-arm-left" />
+                        <span className="alien-arm alien-arm-right" />
+                    </div>
+                </div>
 
-    {/* === METEOR / BINTANG JATUH === */}
+                {/* === METEOR / BINTANG JATUH === */}
+                <div className="space-meteor meteor-1" />
+                <div className="space-meteor meteor-2" />
+                <div className="space-meteor meteor-3" />
 
-<div className="space-meteor meteor-1" />
-<div className="space-meteor meteor-2" />
-<div className="space-meteor meteor-3" />
+                {/* === UFO TERBANG ZIGZAG === */}
+                <div className="flying-ufo">
+                    <div className="ufo-beam" />
+                    <div className="ufo-dome" />
+                    <div className="ufo-body">
+                        <span className="ufo-light ufo-light-1" />
+                        <span className="ufo-light ufo-light-2" />
+                        <span className="ufo-light ufo-light-3" />
+                        <span className="ufo-light ufo-light-4" />
+                    </div>
+                </div>
 
-    {/* ==================================================
-        UFO TERBANG ZIGZAG
-        ================================================== */}
-    <div className="flying-ufo">
+                {/* === HERO CONTENT === */}
+                <div className="student-hero-content">
+                    <h1>Analisis Tulisan Tangan Siswa</h1>
+                    <p>
+                        Unggah sampel tulisan tangan siswa per kelas
+                        untuk dilakukan analisis menggunakan AI.
+                    </p>
+                </div>
 
-        <div className="ufo-beam" />
-
-        <div className="ufo-dome" />
-
-        <div className="ufo-body">
-            <span className="ufo-light ufo-light-1" />
-            <span className="ufo-light ufo-light-2" />
-            <span className="ufo-light ufo-light-3" />
-            <span className="ufo-light ufo-light-4" />
-        </div>
-
-    </div>
-
-    {/* === HERO CONTENT === */}
-    <div className="student-hero-content">
-
-        <h1>
-            Analisis Tulisan Tangan Siswa
-        </h1>
-
-        <p>
-            Unggah sampel tulisan tangan siswa per kelas
-            untuk dilakukan analisis menggunakan AI.
-        </p>
-
-    </div>
-
-</section>
+            </section>
 
             <section className="student-cardz">
                 <section className="student-container">
 
-                    <form onSubmit={handleAnalyze} className="student-form-card">
+                    <form onSubmit={handleAnalyze} className="sp-form">
 
-                        <div className="student-meta-row">
-                            <div className="student-field">
-                                <label>Nama Sekolah</label>
+                        {/* ===== INFO KELAS ===== */}
+                        <div className="sp-class">
+                            <div className="sp-field">
+                                <label htmlFor="sp-school">Nama sekolah</label>
                                 <input
+                                    id="sp-school"
                                     type="text"
                                     value={schoolName}
                                     disabled
-                                    className="student-input student-input-disabled"
+                                    className="sp-input"
                                 />
                             </div>
-                            <div className="student-field">
-                                <label>Kelas</label>
+                            <div className="sp-field">
+                                <label htmlFor="sp-class">Kelas</label>
                                 <input
+                                    id="sp-class"
                                     type="text"
-                                    placeholder=" "
+                                    placeholder="Contoh: TK B1"
                                     value={gradeClass}
                                     onChange={(e) => setGradeClass(e.target.value)}
                                     required
-                                    className="student-input"
+                                    className="sp-input"
                                 />
                             </div>
                         </div>
 
-                        <h3 className="student-list-title">Daftar Siswa ({students.length} Orang)</h3>
+                        {/* ===== DAFTAR SISWA ===== */}
+                        <div className="sp-list-head">
+                            <h3 className="sp-list-title">Daftar siswa</h3>
+                            <span className="sp-count">{students.length} siswa</span>
+                        </div>
 
-                        {students.map((student) => (
-                            <div key={student.id} className="student-row">
+                        <div className="sp-list">
+                            {students.map((student, idx) => (
+                                <article key={student.id} className="sp-student">
 
-                                {/* Baris 1: Nomor Absen + Tombol Hapus */}
-                                <div className="student-row-top">
-                                    <input
-                                        type="number"
-                                        placeholder="No."
-                                        value={student.absenceNumber}
-                                        onChange={(e) => handleStudentChange(student.id, "absenceNumber", e.target.value)}
-                                        required
-                                        className="student-input student-absence-input"
-                                    />
+                                    <div className="sp-student-head">
+                                        <div className="sp-student-title">
+                                            <span className="sp-index">{idx + 1}</span>
+                                            <span>{student.name.trim() || "Siswa baru"}</span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveStudent(student.id)}
+                                            className="sp-remove"
+                                        >
+                                            <TrashIcon />
+                                            Hapus
+                                        </button>
+                                    </div>
 
-                                    <button
-                                        type="button"
-                                        onClick={() => handleRemoveStudent(student.id)}
-                                        className="student-remove-btn"
-                                    >
-                                        Hapus
-                                    </button>
-                                </div>
+                                    <div className="sp-student-grid">
+                                        <div className="sp-fields">
+                                            <div className="sp-field">
+                                                <label htmlFor={`sp-name-${student.id}`}>Nama siswa</label>
+                                                <input
+                                                    id={`sp-name-${student.id}`}
+                                                    type="text"
+                                                    placeholder="Nama lengkap"
+                                                    value={student.name}
+                                                    onChange={(e) => handleStudentChange(student.id, "name", e.target.value)}
+                                                    required
+                                                    className="sp-input"
+                                                />
+                                            </div>
 
-                                {/* Baris 2: Nama Siswa */}
-                                <input
-                                    type="text"
-                                    placeholder="Nama Siswa"
-                                    value={student.name}
-                                    onChange={(e) => handleStudentChange(student.id, "name", e.target.value)}
-                                    required
-                                    className="student-input student-name-input"
-                                />
+                                            <div className="sp-row3">
+                                                <div className="sp-field">
+                                                    <label htmlFor={`sp-no-${student.id}`}>No. absen</label>
+                                                    <input
+                                                        id={`sp-no-${student.id}`}
+                                                        type="number"
+                                                        placeholder="No."
+                                                        value={student.absenceNumber}
+                                                        onChange={(e) => handleStudentChange(student.id, "absenceNumber", e.target.value)}
+                                                        required
+                                                        className="sp-input"
+                                                    />
+                                                </div>
 
-                                {/* Baris 3: Umur + Gender */}
-                                <div className="student-row-meta">
-                                    <input
-                                        type="number"
-                                        placeholder="Umur"
-                                        value={student.age}
-                                        onChange={(e) => handleStudentChange(student.id, "age", e.target.value)}
-                                        required
-                                        className="student-input student-age-input"
-                                    />
+                                                <div className="sp-field">
+                                                    <label htmlFor={`sp-age-${student.id}`}>Umur (bulan)</label>
+                                                    <input
+                                                        id={`sp-age-${student.id}`}
+                                                        type="number"
+                                                        placeholder="Contoh: 60"
+                                                        value={student.age}
+                                                        onChange={(e) => handleStudentChange(student.id, "age", e.target.value)}
+                                                        required
+                                                        className="sp-input"
+                                                    />
+                                                </div>
 
-                                    <select
-                                        value={student.gender}
-                                        onChange={(e) => handleStudentChange(student.id, "gender", e.target.value)}
-                                        required
-                                        className="student-input student-gender-select"
-                                    >
-                                        <option value="">Gender</option>
-                                        <option value="L">Laki-Laki</option>
-                                        <option value="P">Perempuan</option>
-                                    </select>
-                                </div>
+                                                <div className="sp-field" role="radiogroup" aria-label="Jenis kelamin">
+                                                    <span className="sp-label">Jenis kelamin</span>
+                                                    <div className="sp-seg">
+                                                        <label>
+                                                            <input
+                                                                type="radio"
+                                                                name={`gender-${student.id}`}
+                                                                value="L"
+                                                                checked={student.gender === "L"}
+                                                                onChange={(e) => handleStudentChange(student.id, "gender", e.target.value)}
+                                                                required
+                                                            />
+                                                            <span>Laki-laki</span>
+                                                        </label>
+                                                        <label>
+                                                            <input
+                                                                type="radio"
+                                                                name={`gender-${student.id}`}
+                                                                value="P"
+                                                                checked={student.gender === "P"}
+                                                                onChange={(e) => handleStudentChange(student.id, "gender", e.target.value)}
+                                                                required
+                                                            />
+                                                            <span>Perempuan</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                                {/* Baris Bawah: Dropzone Upload Foto Tulisan (preview foto tampil di tengah, gantiin icon kamera) */}
-                                <label
-                                    className={`dropzone student-dropzone ${draggingId === student.id ? "dragging" : ""} ${student.previewUrl ? "has-preview" : ""}`}
-                                    onDragOver={(e) => {
-                                        e.preventDefault();
-                                        setDraggingId(student.id);
-                                    }}
-                                    onDragLeave={() => setDraggingId(null)}
-                                    onDrop={(e) => {
-                                        e.preventDefault();
-                                        setDraggingId(null);
-                                        const file = e.dataTransfer.files?.[0];
-                                        if (file) handleStudentChange(student.id, "imageFile", file);
-                                    }}
-                                >
-                                    {student.previewUrl ? (
-                                        <span className="dropzone-preview-wrap">
-                                            <img
-                                                src={student.previewUrl}
-                                                alt="Preview"
-                                                className="dropzone-preview-img"
+                                        {/* Unggah foto tulisan */}
+                                        <label
+                                            className={`sp-drop ${draggingId === student.id ? "dragging" : ""} ${student.previewUrl ? "has-preview" : ""}`}
+                                            onDragOver={(e) => {
+                                                e.preventDefault();
+                                                setDraggingId(student.id);
+                                            }}
+                                            onDragLeave={() => setDraggingId(null)}
+                                            onDrop={(e) => {
+                                                e.preventDefault();
+                                                setDraggingId(null);
+                                                const file = e.dataTransfer.files?.[0];
+                                                if (file) handleStudentChange(student.id, "imageFile", file);
+                                            }}
+                                        >
+                                            {student.previewUrl ? (
+                                                <>
+                                                    <img
+                                                        src={student.previewUrl}
+                                                        alt={`Foto tulisan ${student.name || "siswa"}`}
+                                                        className="sp-drop-img"
+                                                    />
+                                                    <span className="sp-drop-name">{student.imageFile?.name}</span>
+                                                    <button
+                                                        type="button"
+                                                        className="sp-drop-clear"
+                                                        onMouseDown={(e) => e.preventDefault()}
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            handleClearImage(student.id);
+                                                        }}
+                                                        aria-label="Hapus foto"
+                                                        title="Hapus foto"
+                                                    >
+                                                        <XIcon />
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="sp-drop-ico">
+                                                        <CameraIcon />
+                                                    </span>
+                                                    <p className="sp-drop-text">
+                                                        Tarik foto tulisan ke sini atau klik untuk memilih
+                                                    </p>
+                                                </>
+                                            )}
+
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => handleStudentChange(student.id, "imageFile", e.target.files[0])}
+                                                required={!student.imageFile}
+                                                className="sp-file"
                                             />
-                                            <button
-                                                type="button"
-                                                className="dropzone-preview-clear"
-                                                onMouseDown={(e) => e.preventDefault()}
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    handleClearImage(student.id);
-                                                }}
-                                                aria-label="Batalkan gambar"
-                                                title="Batalkan gambar"
-                                            >
-                                                <XIcon />
-                                            </button>
-                                        </span>
-                                    ) : (
-                                        <span className="dropzone-icon">
-                                            <CameraIcon />
-                                        </span>
-                                    )}
-                                    <p className="dropzone-text">
-                                        {student.imageFile ? (
-                                            <span className="dropzone-filename">{student.imageFile.name}</span>
-                                        ) : (
-                                            "Tarik foto atau klik untuk pilih"
-                                        )}
-                                    </p>
+                                        </label>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
 
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => handleStudentChange(student.id, "imageFile", e.target.files[0])}
-                                        required
-                                        className="dropzone-input"
-                                    />
-                                </label>
-
-                            </div>
-                        ))}
-
-                        <div className="student-actions">
-                            <button type="button" onClick={handleAddStudent} className="student-add-btn">
+                        {/* ===== AKSI ===== */}
+                        <div className="sp-actions">
+                            <button type="button" onClick={handleAddStudent} className="sp-add">
                                 <PlusIcon />
-                                Tambah Siswa
+                                Tambah siswa
                             </button>
-                            <button type="submit" disabled={isLoading} className="student-submit-btn">
+                            <button type="submit" disabled={isLoading} className="sp-submit">
                                 {isLoading ? (
-                                    "Menganalisis..."
+                                    <>
+                                        <span className="sp-spinner" />
+                                        Menganalisis...
+                                    </>
                                 ) : (
                                     <>
                                         <SendIcon />
-                                        Proses Analisis
+                                        Proses analisis
                                     </>
                                 )}
                             </button>
                         </div>
                     </form>
 
+                    {/* ===== HASIL ===== */}
                     {analysisResult && (
-                        <div className="student-result-card">
-                            <h2>Hasil Asesmen Kematangan Motorik Halus Kelas {gradeClass}</h2>
-                            <p className="student-result-school">Sekolah: {schoolName}</p>
-                            <p className="student-result-total">Total Siswa Diproses: {analysisResult.total_processed} Siswa</p>
-                            <hr className="student-result-divider" />
+                        <section className="sp-results" aria-live="polite">
+                            <div>
+                                <h2 className="sp-results-title">
+                                    Hasil asesmen kematangan motorik halus kelas {gradeClass}
+                                </h2>
+                                <div className="sp-results-chips">
+                                    <span className="sp-results-chip">{schoolName}</span>
+                                    <span className="sp-results-chip">
+                                        {analysisResult.total_processed} siswa diproses
+                                    </span>
+                                </div>
+                            </div>
 
-                            <div className="student-result-list">
+                            <div className="sp-results-list">
                                 {analysisResult.details?.map((res, idx) => (
-                                    <div key={idx} className="student-result-item">
-                                        <div className="student-result-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
-                                            <span style={{ fontWeight: "700", fontSize: "1.05rem", color: "#1e293b" }}>
-                                                No. {res.absence_number || idx + 1} - {res.student_name}
-                                                <small style={{ marginLeft: "8px", color: "#64748b", fontWeight: "normal", fontSize: "0.85em" }}>
-                                                    ({res.age ? `${res.age} bln` : ""}{res.gender ? ` • ${res.gender === 'L' ? 'Laki-laki' : 'Perempuan'}` : ""})
-                                                </small>
-                                            </span>
-                                            <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-                                                <span 
-                                                    style={{
-                                                        padding: "5px 12px",
-                                                        borderRadius: "6px",
-                                                        fontSize: "0.85rem",
-                                                        fontWeight: "700",
-                                                        background: res.kesimpulan?.includes("Ya") ? "#dcfce7" : "#fee2e2",
-                                                        color: res.kesimpulan?.includes("Ya") ? "#15803d" : "#b91c1c",
-                                                        border: `1px solid ${res.kesimpulan?.includes("Ya") ? "#86efac" : "#fca5a5"}`
-                                                    }}
-                                                >
-                                                    {res.kesimpulan?.includes("Ya") ? "✓ Sesuai Usia [Ya]" : "✗ Belum Sesuai [Tidak]"} ({res.confidence}%)
-                                                </span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handlePrintStudentPDF(res, schoolName, gradeClass)}
-                                                    style={{
-                                                        display: "inline-flex",
-                                                        alignItems: "center",
-                                                        gap: "6px",
-                                                        padding: "5px 12px",
-                                                        borderRadius: "6px",
-                                                        fontSize: "0.83rem",
-                                                        fontWeight: "600",
-                                                        background: "#0284c7",
-                                                        color: "#ffffff",
-                                                        border: "none",
-                                                        cursor: "pointer",
-                                                        boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
-                                                        transition: "all 0.15s ease"
-                                                    }}
-                                                    title="Cetak atau simpan lembar laporan sebagai PDF"
-                                                >
-                                                    🖨️ Cetak / Unduh PDF
-                                                </button>
-                                            </div>
-                                        </div>
-
-
-                                        {/* BAGIAN III: KESIMPULAN PERKEMBANGAN */}
-                                        <div style={{ marginTop: "12px", marginBottom: "12px" }}>
-                                            <h4 style={{ margin: "0 0 8px 0", fontSize: "0.95rem", fontWeight: "700", color: "#0f172a", textTransform: "uppercase", letterSpacing: "0.3px" }}>
-                                                Hasil Asesmen Motorik Halus (Bagian III Resmi PAUD)
-                                            </h4>
-                                            {/* Pertanyaan 1: Menulis */}
-                                            <div style={{ padding: "10px 12px", background: "#f8fafc", borderRadius: "6px", border: "1px solid #e2e8f0", marginBottom: "8px" }}>
-                                                <p style={{ margin: "0 0 6px 0", fontWeight: "600", fontSize: "0.88rem", color: "#1e293b" }}>
-                                                    1) Apakah kemampuan menulis anak sudah sesuai dengan perkembangan usianya?
-                                                </p>
-                                                <div style={{ display: "flex", gap: "20px", marginBottom: "6px", fontSize: "0.85rem", fontWeight: "600" }}>
-                                                    <span style={{ color: res.kesimpulan?.includes("Ya") ? "#15803d" : "#94a3b8" }}>
-                                                        {res.kesimpulan?.includes("Ya") ? "[✓]" : "[  ]"} Sesuai Usia (Ya)
-                                                    </span>
-                                                    <span style={{ color: !res.kesimpulan?.includes("Ya") ? "#b91c1c" : "#94a3b8" }}>
-                                                        {!res.kesimpulan?.includes("Ya") ? "[✓]" : "[  ]"} Belum Sesuai (Tidak)
-                                                    </span>
-                                                </div>
-                                                <p style={{ margin: 0, fontSize: "0.82rem", color: "#475569", fontStyle: "italic" }}>
-                                                    <strong>Mohon sertakan alasannya:</strong> "{res.kesimpulan_menulis?.alasan || res.alasan_klinis || '-'}"
-                                                </p>
-                                            </div>
-
-                                            {/* Pertanyaan 2: Menggambar */}
-                                            <div style={{ padding: "10px 12px", background: "#f8fafc", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
-                                                <p style={{ margin: "0 0 6px 0", fontWeight: "600", fontSize: "0.88rem", color: "#1e293b" }}>
-                                                    2) Apakah kemampuan menggambar anak sudah sesuai dengan perkembangan usianya?
-                                                </p>
-                                                <div style={{ display: "flex", gap: "20px", marginBottom: "6px", fontSize: "0.85rem", fontWeight: "600" }}>
-                                                    <span style={{ color: res.kesimpulan?.includes("Ya") ? "#15803d" : "#94a3b8" }}>
-                                                        {res.kesimpulan?.includes("Ya") ? "[✓]" : "[  ]"} Sesuai Usia (Ya)
-                                                    </span>
-                                                    <span style={{ color: !res.kesimpulan?.includes("Ya") ? "#b91c1c" : "#94a3b8" }}>
-                                                        {!res.kesimpulan?.includes("Ya") ? "[✓]" : "[  ]"} Belum Sesuai (Tidak)
-                                                    </span>
-                                                </div>
-                                                <p style={{ margin: 0, fontSize: "0.82rem", color: "#475569", fontStyle: "italic" }}>
-                                                    <strong>Mohon sertakan alasannya:</strong> "{res.kesimpulan_menggambar?.alasan || res.alasan_klinis || '-'}"
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {/* REKOMENDASI STIMULASI GURU & ORANG TUA */}
-                                        {res.saran_guru && (
-                                            <div style={{ margin: "10px 0 4px 0", fontSize: "0.85rem", color: "#1e3a8a", background: "#f0fdf4", padding: "10px 14px", borderRadius: "8px", borderLeft: "4px solid #22c55e", lineHeight: "1.4" }}>
-                                                💡 <strong>Rekomendasi Stimulasi Guru & Orang Tua:</strong> {res.saran_guru}
-                                            </div>
-                                        )}
-                                    </div>
+                                    <AssessmentResult
+                                        key={idx}
+                                        result={{ ...res, absence_number: res.absence_number || idx + 1 }}
+                                        schoolName={schoolName}
+                                        gradeClass={gradeClass}
+                                    />
                                 ))}
                             </div>
-                        </div>
+                        </section>
                     )}
 
                 </section>

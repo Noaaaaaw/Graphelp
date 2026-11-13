@@ -1,0 +1,522 @@
+.sp-form {
+    --sp-navy: #1c3446;
+    --sp-teal: #2f6f6b;
+    --sp-sky: #0284c7;
+    --sp-line: #e7e1d3;
+    --sp-cream: #fbf9f4;
+    --sp-muted: #6b6b64;
+
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+/* ---------- Info kelas ---------- */
+.sp-class {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 20px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #eaf4f2 0%, #f5faf9 100%);
+    border: 1px solid #d3e8e4;
+}
+
+.sp-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+}
+
+.sp-field > label,
+.sp-field > .sp-label {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #475569;
+}
+
+.sp-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    box-sizing: border-box;
+    border: 1px solid #ddd6c4;
+    border-radius: 12px;
+    background: #ffffff;
+    font-family: inherit;
+    font-size: 14px;
+    color: #0f172a;
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.sp-input::placeholder {
+    color: #b0aa9b;
+}
+
+.sp-input:focus {
+    border-color: var(--sp-teal);
+    box-shadow: 0 0 0 3px rgba(47, 111, 107, 0.14);
+}
+
+.sp-input:disabled {
+    background: rgba(255, 255, 255, 0.65);
+    color: var(--sp-teal);
+    font-weight: 700;
+    cursor: not-allowed;
+}
+
+.sp-input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.sp-input[type="number"]::-webkit-outer-spin-button,
+.sp-input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* ---------- Judul daftar ---------- */
+.sp-list-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.sp-list-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--sp-navy);
+}
+
+.sp-count {
+    padding: 5px 13px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--sp-teal);
+    background: #eaf4f2;
+    border: 1px solid #cfe6e2;
+}
+
+/* ---------- Kartu siswa ---------- */
+.sp-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sp-student {
+    position: relative;
+    padding: 18px 20px 20px;
+    border-radius: 20px;
+    background: var(--sp-cream);
+    border: 1px solid var(--sp-line);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sp-student:focus-within {
+    border-color: #b6d3d0;
+    box-shadow: 0 16px 32px -24px rgba(28, 52, 70, 0.5);
+}
+
+.sp-student-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.sp-student-title {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--sp-navy);
+}
+
+.sp-student-title > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sp-index {
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--sp-navy), var(--sp-teal));
+}
+
+.sp-remove {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid #f0d9d2;
+    background: #ffffff;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #b6432a;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.sp-remove:hover {
+    background: #fbeee7;
+    border-color: #e8b8a8;
+}
+
+.sp-student-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    gap: 18px;
+    align-items: stretch;
+}
+
+.sp-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.sp-row3 {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 14px;
+}
+
+.sp-row3 .sp-field:last-child {
+    grid-column: 1 / -1;
+}
+
+/* Pilihan gender */
+.sp-seg {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 4px;
+    border-radius: 12px;
+    background: #ece6d8;
+}
+
+.sp-seg label {
+    position: relative;
+    display: block;
+}
+
+.sp-seg input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.sp-seg span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #6f6a5c;
+    transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.sp-seg label:hover input:not(:checked) + span {
+    color: var(--sp-navy);
+}
+
+.sp-seg input:checked + span {
+    color: #ffffff;
+    background: var(--sp-navy);
+    box-shadow: 0 6px 14px -6px rgba(28, 52, 70, 0.6);
+}
+
+.sp-seg input:focus-visible + span {
+    outline: 3px solid rgba(47, 111, 107, 0.45);
+    outline-offset: 2px;
+}
+
+/* ---------- Unggah foto ---------- */
+.sp-drop {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 190px;
+    padding: 18px 14px;
+    box-sizing: border-box;
+    text-align: center;
+    border-radius: 16px;
+    border: 2px dashed #bfe0da;
+    background: #f4faf9;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.sp-drop:hover,
+.sp-drop.dragging {
+    border-color: var(--sp-teal);
+    background: #eaf4f2;
+}
+
+.sp-drop:focus-within {
+    outline: 3px solid rgba(47, 111, 107, 0.4);
+    outline-offset: 2px;
+}
+
+.sp-drop-ico {
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--sp-teal);
+    background: #ffffff;
+    box-shadow: 0 6px 16px -6px rgba(47, 111, 107, 0.4);
+}
+
+.sp-drop-text {
+    margin: 0;
+    max-width: 170px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--sp-muted);
+}
+
+.sp-drop.has-preview {
+    border-style: solid;
+    border-color: var(--sp-teal);
+    padding: 0;
+    background: #101915;
+}
+
+.sp-drop-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sp-drop-name {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 22px 12px 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.7));
+}
+
+.sp-drop-clear {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border: none;
+    border-radius: 50%;
+    color: #ffffff;
+    background: rgba(15, 23, 42, 0.65);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.sp-drop-clear:hover {
+    background: #c0392b;
+}
+
+.sp-file {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+/* ---------- Tombol aksi ---------- */
+.sp-actions {
+    display: flex;
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 1px solid var(--sp-line);
+}
+
+.sp-add,
+.sp-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 48px;
+    padding: 0 22px;
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.sp-add {
+    color: var(--sp-teal);
+    background: #ffffff;
+    border: 1.5px dashed #9fcac4;
+}
+
+.sp-add:hover {
+    background: #f4faf9;
+    border-color: var(--sp-teal);
+}
+
+.sp-submit {
+    flex: 1;
+    border: none;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--sp-navy) 0%, #2c5063 55%, var(--sp-teal) 100%);
+    box-shadow: 0 14px 26px -14px rgba(28, 52, 70, 0.8);
+}
+
+.sp-submit:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 30px -14px rgba(28, 52, 70, 0.9);
+}
+
+.sp-submit:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.sp-spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    animation: spSpin 0.75s linear infinite;
+}
+
+@keyframes spSpin {
+    to { transform: rotate(360deg); }
+}
+
+.sp-add:focus-visible,
+.sp-submit:focus-visible,
+.sp-remove:focus-visible,
+.sp-drop-clear:focus-visible {
+    outline: 3px solid rgba(47, 111, 107, 0.45);
+    outline-offset: 2px;
+}
+
+/* ---------- Hasil ---------- */
+.sp-results {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 28px;
+    padding-top: 26px;
+    border-top: 1px solid var(--sp-line);
+}
+
+.sp-results-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    color: #1c3446;
+}
+
+.sp-results-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.sp-results-chip {
+    padding: 5px 13px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #475569;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+}
+
+.sp-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* ---------- Responsif ---------- */
+@media (max-width: 800px) {
+    .sp-student-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sp-drop {
+        min-height: 150px;
+    }
+}
+
+@media (max-width: 560px) {
+    .sp-class {
+        grid-template-columns: 1fr;
+        padding: 16px;
+    }
+
+    .sp-student {
+        padding: 16px;
+    }
+
+    .sp-actions {
+        flex-direction: column;
+    }
+
+    .sp-add,
+    .sp-submit {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sp-spinner {
+        animation-duration: 1.6s;
+    }
+
+    .sp-submit,
+    .sp-student {
+        transition: none;
+    }
+}

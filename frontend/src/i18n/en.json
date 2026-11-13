@@ -1,3 +1,4 @@
+
 {
   "nav": {
     "home": "Home",
@@ -19,40 +20,73 @@
     "aboutP1": "GraphHelp is an AI-based application designed to analyze handwriting from images uploaded by users. The system uses Artificial Intelligence to deliver analysis results automatically and in an easy-to-understand way.",
     "aboutP2": "We believe everyone deserves to understand themselves better with the help of technology.",
     "quote": "GraphHelp is an Artificial Intelligence-based platform that helps analyze handwriting quickly, easily, and efficiently through handwriting pattern recognition technology",
-    "stats": { "accuracy": "Accuracy", "online": "Online", "analysis": "Analyses" },
+    "stats": {
+      "accuracy": "Accuracy",
+      "online": "Online",
+      "analysis": "Analyses"
+    },
     "techTitle": "Our Technology",
     "step1": {
       "title": "Prepare your handwriting",
       "desc": "Good handwriting is the key to an accurate analysis. Make sure the physical condition of the writing supports AI readability.",
       "tipsDo": "Tips (Do)",
       "tipsDont": "Avoid (Don't)",
-      "doList": ["Use plain or thin-lined paper", "Write naturally, don't force it", "Write at least 3-5 lines"],
-      "dontList": ["Writing that is too small or too large", "Excessive scribbles", "Digitally edited writing"]
+      "doList": [
+        "Use plain or thin-lined paper",
+        "Write naturally, don't force it",
+        "Write at least 3-5 lines"
+      ],
+      "dontList": [
+        "Writing that is too small or too large",
+        "Excessive scribbles",
+        "Digitally edited writing"
+      ]
     },
     "step2": {
       "title": "Quality photo & scan",
       "desc": "The AI reads visual details. Make sure the image is:",
-      "list": ["Clear and not blurry", "Well lit (bright)", "Writing is complete and not cropped"]
+      "list": [
+        "Clear and not blurry",
+        "Well lit (bright)",
+        "Writing is complete and not cropped"
+      ]
     },
     "step3": {
       "title": "Upload & analyze",
       "desc": "Easy steps to get started:",
-      "list": ["Open the Handwriting Analyst menu", "Upload a photo/scan of the writing", "Wait for the AI to process (a few seconds)"]
+      "list": [
+        "Open the Handwriting Analyst menu",
+        "Upload a photo/scan of the writing",
+        "Wait for the AI to process (a few seconds)"
+      ]
     },
     "step4": {
       "title": "4. Understanding the Results",
       "scopeLabel": "Scope of Analysis",
-      "scopeList": ["Dominant character & personality patterns", "Emotional tendencies", "Insights for self-development"],
+      "scopeList": [
+        "Dominant character & personality patterns",
+        "Emotional tendencies",
+        "Insights for self-development"
+      ],
       "tip": "Tip: Focus on the main pattern, not just a single indicator. Use it as a tool for self-reflection."
     },
     "step5": {
       "title": "5. Self-Development",
       "intro": "Grapholyze is not just an analysis tool, but a means to grow. Use it to:",
-      "list": ["Recognize your learning & working style", "Understand effective communication", "Manage emotions & decisions", "Daily self-reflection"]
+      "list": [
+        "Recognize your learning & working style",
+        "Understand effective communication",
+        "Manage emotions & decisions",
+        "Daily self-reflection"
+      ]
     },
     "step6": {
       "title": "Things to Know",
-      "list": ["Results are non-medical & supportive only.", "Influenced by physical condition while writing.", "Does not replace professional diagnosis."]
+      "list": [
+        "Results are non-medical & supportive only.",
+        "Influenced by physical condition while writing.",
+        "Does not replace professional diagnosis."
+      ]
     },
     "step7": {
       "title": "Re-analysis",
@@ -78,13 +112,32 @@
     "errEmpty": "The analysis result is empty.",
     "errFailed": "Failed to process the analysis.",
     "errServer": "Unable to connect to the server.",
-    "tabs": { "foto": "Upload Photo", "manual": "Write Manually", "kamera": "Camera Scan" },
-    "tabMeta": {
-      "foto": { "title": "Upload Handwriting Photo", "hint": "Photograph the writing clearly" },
-      "manual": { "title": "Write Manually on Screen", "hint": "Write sentences directly in the area below, like writing on paper" },
-      "kamera": { "title": "Camera Scan", "hint": "Take a photo directly using your device camera" }
+    "tabs": {
+      "foto": "Upload Photo",
+      "manual": "Write Manually",
+      "kamera": "Camera Scan"
     },
-    "pad": { "placeholder": "Start writing here...", "pen": "Pen", "eraser": "Eraser", "size": "Stroke size", "clearAll": "Clear all" },
+    "tabMeta": {
+      "foto": {
+        "title": "Upload Handwriting Photo",
+        "hint": "Photograph the writing clearly"
+      },
+      "manual": {
+        "title": "Write Manually on Screen",
+        "hint": "Write sentences directly in the area below, like writing on paper"
+      },
+      "kamera": {
+        "title": "Camera Scan",
+        "hint": "Take a photo directly using your device camera"
+      }
+    },
+    "pad": {
+      "placeholder": "Start writing here...",
+      "pen": "Pen",
+      "eraser": "Eraser",
+      "size": "Stroke size",
+      "clearAll": "Clear all"
+    },
     "camera": {
       "error": "Cannot access the camera. Please check the camera permission in your browser.",
       "close": "Close camera",
@@ -97,16 +150,40 @@
       "removePhoto": "Remove photo"
     },
     "tips": {
-      "light": { "title": "Bright & even lighting", "desc": "Avoid shadows or direct light from above" },
-      "paper": { "title": "Lay the paper flat on the table", "desc": "Shoot from above, perpendicular, not tilted" },
-      "lines": { "title": "Write 3-5 complete lines", "desc": "Use a black/blue pen with dark ink" },
-      "clear": { "title": "Make sure the writing is clear & not cropped", "desc": "Sharp focus, not blurry" }
+      "light": {
+        "title": "Bright & even lighting",
+        "desc": "Avoid shadows or direct light from above"
+      },
+      "paper": {
+        "title": "Lay the paper flat on the table",
+        "desc": "Shoot from above, perpendicular, not tilted"
+      },
+      "lines": {
+        "title": "Write 3-5 complete lines",
+        "desc": "Use a black/blue pen with dark ink"
+      },
+      "clear": {
+        "title": "Make sure the writing is clear & not cropped",
+        "desc": "Sharp focus, not blurry"
+      }
     },
     "photoTips": {
-      "pencil": { "title": "Write with varied size & pressure", "desc": "Just like writing normally on paper" },
-      "ruler": { "title": "Write at least 3-5 complete lines", "desc": "For a more accurate analysis" },
-      "phone": { "title": "Use a stylus if available", "desc": "More natural and precise results" },
-      "sun": { "title": "Choose a comfortable pen size", "desc": "Click the pencil icon to adjust" }
+      "pencil": {
+        "title": "Write with varied size & pressure",
+        "desc": "Just like writing normally on paper"
+      },
+      "ruler": {
+        "title": "Write at least 3-5 complete lines",
+        "desc": "For a more accurate analysis"
+      },
+      "phone": {
+        "title": "Use a stylus if available",
+        "desc": "More natural and precise results"
+      },
+      "sun": {
+        "title": "Choose a comfortable pen size",
+        "desc": "Click the pencil icon to adjust"
+      }
     }
   },
   "results": {
@@ -140,7 +217,10 @@
     "shareText": "My handwriting analysis result: Type {{type}} - {{name}} ({{confidence}}%)",
     "toastTxt": "TXT file downloaded successfully",
     "toastCopied": "Result copied to clipboard",
-    "txt": { "header": "HANDWRITING ANALYSIS RESULT", "confidence": "AI confidence level" }
+    "txt": {
+      "header": "HANDWRITING ANALYSIS RESULT",
+      "confidence": "AI confidence level"
+    }
   },
   "common": {
     "close": "Close",
@@ -153,7 +233,12 @@
       "BSH": "Developing as Expected",
       "BSB": "Developing Very Well"
     },
-    "delta": { "up": "Improving", "stable": "Stable", "down": "Declining", "initial": "Initial Assessment" },
+    "delta": {
+      "up": "Improving",
+      "stable": "Stable",
+      "down": "Declining",
+      "initial": "Initial Assessment"
+    },
     "reminder": {
       "none": "Not scheduled",
       "overdue": "Time for Re-assessment (Overdue by {{days}} days)",
@@ -183,7 +268,12 @@
     "noAssessment": "No assessment yet",
     "unlinkTitle": "Unlink Child",
     "unlinkAria": "Unlink {{name}}",
-    "relations": { "parent": "Parent", "father": "Father", "mother": "Mother", "guardian": "Guardian" },
+    "relations": {
+      "parent": "Parent",
+      "father": "Father",
+      "mother": "Mother",
+      "guardian": "Guardian"
+    },
     "claimTitle": "Link Child Data",
     "codeLabel": "Unique Child Code (From Teacher)",
     "codePlaceholder": "Example: GRH-4829KT",
@@ -289,7 +379,7 @@
     "resultTotal": "Total Students Processed: {{n}}",
     "matchYes": "Age-Appropriate [Yes]",
     "matchNo": "Not Yet Appropriate [No]",
-    "printBtn": "Print / Download PDF",
+    "printBtn": "Print or Download PDF",
     "printTitle": "Print or save the report sheet as a PDF"
   },
   "classList": {
@@ -356,7 +446,7 @@
     "errAssessServer": "Unable to connect to the server while processing the assessment.",
     "heroTitle": "Class : {{name}}",
     "heroTitleLoading": "Class Details",
-    "heroSubtitle": "Academic Year {{year}} • {{school}}",
+    "heroSubtitle": "Academic Year {{year}} - {{school}}",
     "heroLoading": "Loading class information...",
     "back": "Back to Class List",
     "listTitle": "Student List ({{n}} Students)",
@@ -406,5 +496,117 @@
     "processAssess": "Process Assessment",
     "uploadAnother": "Upload Another Photo",
     "doneClose": "Done & Close"
+  },
+  "parentChildProgress": {
+    "loginRequired": "Please log in first to view your child's progress report.",
+    "errLoad": "Failed to load your child's progress report (HTTP {{status}}).",
+    "errConnect": "Unable to connect to the server.",
+    "heroTitle": "Child Progress Report",
+    "heroTitleNamed": "Child Progress : {{name}}",
+    "heroDesc": "Monitor monthly fine motor development charts, assessment history, and home stimulation recommendations.",
+    "heroDescClass": "Class {{className}} - Academic Year {{year}} - {{school}}",
+    "back": "Back to My Children",
+    "loading": "Loading your child's charts & assessment history...",
+    "notFound": "Child data not found"
+  },
+  "studentProgress": {
+    "errLoad": "Failed to load student progress data (HTTP {{status}}).",
+    "scheduleSaved": "Assessment reminder schedule updated successfully.",
+    "errSchedule": "Failed to save the reminder schedule.",
+    "heroTitle": "Student Motor Skills Progress",
+    "heroTitleNamed": "Periodic Report : {{name}}",
+    "heroDesc": "Monitor monthly progress charts, assessment history, and the next evaluation schedule.",
+    "heroDescClass": "Class {{className}} - Academic Year {{year}} - {{school}}",
+    "back": "Back to Class Student List",
+    "loading": "Loading student progress charts & history...",
+    "notFound": "Student data not found",
+    "assessModalTitle": "Periodic Assessment #{{n}} - {{name}}",
+    "period": "Period",
+    "periodValue": "Assessment #{{n}}",
+    "doneViewChart": "Done & View Latest Chart"
+  },
+  "progressView": {
+    "eyebrowProfile": "STUDENT PROFILE",
+    "classLabel": "Class",
+    "schoolLabel": "School",
+    "birthDate": "Date of Birth",
+    "currentAge": "Current Age",
+    "totalAssessments": "Total Assessments",
+    "latestProgress": "Latest Progress",
+    "none": "None yet",
+    "months": "{{n}} months",
+    "times": "{{n}} times",
+    "codeTitle": "Parent Monitoring Code (Public Account)",
+    "codeDescTeacher": "Share this unique code with the student's parents so they can monitor the assessment results.",
+    "codeDescParent": "The unique child code linked to your account.",
+    "copyCode": "Copy Code",
+    "copied": "Copied",
+    "copyToast": "Child code ({{code}}) copied!",
+    "reminderEyebrow": "PERIODIC ASSESSMENT REMINDER",
+    "setSchedule": "Set Schedule",
+    "nextDate": "Next Assessment Date",
+    "nextDateAuto": "Automatic (+30 days after the first assessment)",
+    "cycle": "Periodic Cycle",
+    "cycleValue": "Every {{n}} days",
+    "reminderNote": "This reminder is only a notification so monthly evaluations stay on schedule. The system keeps working normally whenever an assessment is done.",
+    "startNew": "Start New Periodic Assessment",
+    "startFirst": "Start First Assessment",
+    "chartEyebrow": "PERIODIC ANALYSIS (TIME-SERIES)",
+    "chartTitle": "Child Fine Motor Development Chart",
+    "statusNow": "Current Status:",
+    "statusYes": "Age-Appropriate [Yes]",
+    "statusNo": "Not Yet Appropriate [No]",
+    "fit": "Appropriate",
+    "notFit": "Not Yet Appropriate",
+    "fitShort": "Age-Appropriate",
+    "notFitShort": "Not Yet",
+    "assessmentN": "Assessment #{{n}}",
+    "seqShort": "#{{n}}",
+    "noChartTitle": "No Development Chart Data Yet",
+    "noChartDesc": "The monthly development trend chart appears automatically after the student has had at least 1 assessment.",
+    "matrixTitle": "Comparison of the 4 Clinical Indicators Month to Month",
+    "matrixIndicator": "Clinical Indicator",
+    "indicators": {
+      "kestabilan_goresan": "Stroke Stability & Grip",
+      "kontrol_tekanan": "Writing Tool Pressure Control",
+      "proporsi_spasial": "Eye Coordination & Geometric Proportion",
+      "kontinuitas_garis": "Line Stroke Continuity"
+    },
+    "historyEyebrow": "FULL HISTORY PER PERIOD",
+    "historyTitle": "Worksheets & Assessment Reports ({{n}} Periods)",
+    "historyDesc": "Select an assessment period to see the 4 clinical indicator details, writing & drawing conclusions, and to print a PDF.",
+    "noHistoryTitle": "No Assessment History Yet",
+    "noHistoryDesc": "This student has no fine motor assessment history yet.",
+    "scheduleModalTitle": "Set Assessment Reminder Schedule",
+    "schedDateLabel": "Next Assessment Date",
+    "schedDateHelp": "Leave empty if you don't want to schedule a reminder yet.",
+    "schedIntervalLabel": "Periodic Assessment Cycle Interval (Days)",
+    "schedIntervalHelp": "Default: 30 days (1 month). After each new assessment, the next schedule is automatically added using this cycle.",
+    "saving": "Saving...",
+    "saveSchedule": "Save Schedule",
+    "view": {
+        "line": "Line",
+        "bar": "Bar"
+    }
+  },
+  "assessmentResult": {
+    "ageMonths": "{{n}} months",
+    "assessedAt": "Assessed on: {{date}}",
+    "worksheetAlt": "{{name}}'s worksheet",
+    "verdictYes": "Age - appropriate",
+    "verdictNo": "Not yet age - appropriate",
+    "confidence": "AI confidence level",
+    "sectionTitle": "Fine motor assessment results",
+    "writing": "Writing",
+    "drawing": "Drawing",
+    "writingQ": "Is the child's writing ability appropriate for their age?",
+    "drawingQ": "Is the child's drawing ability appropriate for their age?",
+    "fit": "Age-appropriate",
+    "notFit": "Not yet",
+    "reasonLabel": "Assessment reason",
+    "noteStimulation": "Stimulation recommendations for teachers and parents",
+    "noteTeacher": "Teacher observation notes",
+    "noteNext": "Next periodic assessment reminder",
+    "nextDate": "{{date}} (automatically +30 days)"
   }
 }

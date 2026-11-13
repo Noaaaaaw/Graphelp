@@ -1,15 +1,46 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation, Trans } from "react-i18next";
 import { useToast } from "../components/Toast";
 import { authFetch, extractErrorMessage } from "../config/api";
+import { SpaceHero } from "./ClassListPage";
 import AssessmentResult from "../components/AssessmentResult";
 import StudentProgressView from "../components/StudentProgressView";
 
-const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const ALLOWED_EXT_REGEX = /\.(jpg|jpeg|png|webp)$/i;
+const ALLOWED_EXT_REGEX = /\.(jpe?g|png|webp)$/i;
+
+/* ---------- Ikon ---------- */
+function CameraIcon() {
+    return (
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z" />
+            <circle cx="12" cy="13" r="4" />
+        </svg>
+    );
+}
+
+function XIcon() {
+    return (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+        </svg>
+    );
+}
+
+function SendIcon() {
+    return (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m22 2-7 20-4-9-9-4Z" />
+            <path d="M22 2 11 13" />
+        </svg>
+    );
+}
 
 export default function StudentProgressPage() {
+    const { t } = useTranslation();
     const { classId, studentId } = useParams();
     const navigate = useNavigate();
     const toast = useToast();
@@ -38,22 +69,22 @@ export default function StudentProgressPage() {
             if (res.ok) {
                 setProgressData(data);
             } else {
-                toast.error(extractErrorMessage(data, `Gagal memuat data perkembangan siswa (HTTP ${res.status}).`));
+                toast.error(extractErrorMessage(data, t("studentProgress.errLoad", { status: res.status })));
                 if (res.status === 403 || res.status === 404) {
                     navigate(`/student/${classId}`);
                 }
             }
         } catch (error) {
             console.error("Error fetching student progress:", error);
-            toast.error("Tidak dapat terhubung ke server.");
+            toast.error(t("classList.errConnect"));
         } finally {
             setLoading(false);
         }
-    }, [studentId, classId, navigate, toast]);
+    }, [studentId, classId, navigate, toast, t]);
 
     useEffect(() => {
         if (!user || user.role !== "guru") {
-            toast.error("Akses ditolak. Halaman ini hanya untuk guru.");
+            toast.error(t("classList.accessDenied"));
             navigate("/");
             return;
         }
@@ -66,7 +97,7 @@ export default function StudentProgressPage() {
                 if (res.ok) {
                     setProgressData(data);
                 } else {
-                    toast.error(extractErrorMessage(data, `Gagal memuat data perkembangan siswa (HTTP ${res.status}).`));
+                    toast.error(extractErrorMessage(data, t("studentProgress.errLoad", { status: res.status })));
                     if (res.status === 403 || res.status === 404) {
                         navigate(`/student/${classId}`);
                     }
@@ -74,7 +105,7 @@ export default function StudentProgressPage() {
             } catch (error) {
                 if (active) {
                     console.error("Error fetching student progress:", error);
-                    toast.error("Tidak dapat terhubung ke server.");
+                    toast.error(t("classList.errConnect"));
                 }
             } finally {
                 if (active) setLoading(false);
@@ -96,14 +127,14 @@ export default function StudentProgressPage() {
             });
             const data = await res.json().catch(() => ({}));
             if (res.ok) {
-                toast.success("Jadwal pengingat asesmen berhasil diperbarui.");
+                toast.success(t("studentProgress.scheduleSaved"));
                 fetchProgress();
             } else {
-                toast.error(extractErrorMessage(data, "Gagal menyimpan jadwal pengingat."));
+                toast.error(extractErrorMessage(data, t("studentProgress.errSchedule")));
             }
         } catch (error) {
             console.error("Error updating schedule:", error);
-            toast.error("Gagal menghubungi server.");
+            toast.error(t("classList.errServer"));
         }
     };
 
@@ -132,11 +163,11 @@ export default function StudentProgressPage() {
             ALLOWED_MIME_TYPES.includes((file.type || "").toLowerCase()) ||
             ALLOWED_EXT_REGEX.test(file.name || "");
         if (!isValidType) {
-            toast.error("Format berkas tidak didukung. Harap unggah gambar JPG, JPEG, PNG, atau WEBP.");
+            toast.error(t("classDetail.errFormat"));
             return;
         }
         if (file.size > MAX_UPLOAD_BYTES) {
-            toast.error(`Ukuran berkas melebihi batas maksimum 5 MB (${(file.size / (1024 * 1024)).toFixed(2)} MB).`);
+            toast.error(t("classDetail.errSize", { size: (file.size / (1024 * 1024)).toFixed(2) }));
             return;
         }
         if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -153,7 +184,7 @@ export default function StudentProgressPage() {
     const handleProcessAssessment = async (e) => {
         e.preventDefault();
         if (!imageFile) {
-            toast.error("Silakan pilih atau tarik foto lembar kerja siswa terlebih dahulu.");
+            toast.error(t("classDetail.errNoImage"));
             return;
         }
 
@@ -172,14 +203,14 @@ export default function StudentProgressPage() {
             const data = await res.json().catch(() => ({}));
             if (res.ok) {
                 setAssessmentResult(data);
-                toast.success("Asesmen berkala siswa berhasil diproses!");
+                toast.success(t("student.success"));
                 fetchProgress();
             } else {
-                toast.error(extractErrorMessage(data, `Gagal memproses asesmen (HTTP ${res.status}).`));
+                toast.error(extractErrorMessage(data, t("classDetail.errAssess", { status: res.status })));
             }
         } catch (error) {
             console.error("Error processing assessment:", error);
-            toast.error("Gagal terhubung ke server saat memproses asesmen.");
+            toast.error(t("classDetail.errAssessServer"));
         } finally {
             setIsAnalyzing(false);
         }
@@ -187,49 +218,34 @@ export default function StudentProgressPage() {
 
     const student = progressData?.student;
     const classInfo = progressData?.class_info;
+    const nextPeriod = (student?.total_assessments || 0) + 1;
+
+    const heroTitle = student
+        ? t("studentProgress.heroTitleNamed", { name: student.name })
+        : t("studentProgress.heroTitle");
+
+    const heroSubtitle = classInfo
+        ? t("studentProgress.heroDescClass", {
+              className: classInfo.name,
+              year: classInfo.academic_year,
+              school: classInfo.school_name,
+          })
+        : t("studentProgress.heroDesc");
 
     return (
         <main className="student-page">
-            {/* Hero Luar Angkasa */}
-            <section className="student-hero">
-                <div className="student-star ss-1" />
-                <div className="student-star ss-2" />
-                <div className="student-star ss-3" />
-                <div className="student-star ss-4" />
-                <div className="student-star ss-5" />
-                <div className="student-star ss-6" />
-                <div className="student-sun" />
-
-                <div className="student-hero-content">
-                    <h1>{student ? `Rapor Berkala: ${student.name}` : "Perkembangan Motorik Siswa"}</h1>
-                    <p>
-                        {classInfo
-                            ? `Kelas ${classInfo.name} - Tahun Ajaran ${classInfo.academic_year} - ${classInfo.school_name}`
-                            : "Pantau grafik perkembangan bulanan, riwayat asesmen, dan jadwal evaluasi berikutnya."}
-                    </p>
-                </div>
-            </section>
+            <SpaceHero title={heroTitle} subtitle={heroSubtitle} />
 
             <section className="student-cardz">
                 <section className="student-container">
-                    <div className="gc-back-row">
-                        <button
-                            type="button"
-                            onClick={() => navigate(`/student/${classId}`)}
-                            className="gc-back-btn"
-                        >
-                            <span>← Kembali ke Daftar Siswa Kelas</span>
-                        </button>
-                    </div>
-
                     {loading ? (
                         <div className="gc-state-box">
                             <span className="history-spinner" />
-                            <p>Memuat grafik & riwayat perkembangan siswa...</p>
+                            <p>{t("studentProgress.loading")}</p>
                         </div>
                     ) : !progressData ? (
                         <div className="gc-state-box">
-                            <h3>Data siswa tidak ditemukan</h3>
+                            <h3>{t("studentProgress.notFound")}</h3>
                         </div>
                     ) : (
                         <StudentProgressView
@@ -242,44 +258,70 @@ export default function StudentProgressPage() {
                 </section>
             </section>
 
-            {/* MODAL MULAI ASESMEN BERKALA BARU */}
+            {/* MODAL ASESMEN BERKALA BARU / HASIL ASESMEN */}
             {isAssessModalOpen && student && (
                 <div className="gc-modal-overlay" onClick={handleCloseAssessModal}>
                     <div
-                        className={`gc-modal-card ${assessmentResult ? "gc-modal-card-wide" : ""}`}
+                        className={`gc-modal-card ${assessmentResult ? "gc-modal-card-wide" : "gc-modal-card-assess"}`}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="gc-modal-header">
                             <h3>
                                 {assessmentResult
-                                    ? `Hasil Asesmen Berkala - ${student.name}`
-                                    : `Asesmen Berkala Ke-${(student.total_assessments || 0) + 1} - ${student.name}`}
+                                    ? t("classDetail.resultModalTitle", { name: student.name })
+                                    : t("studentProgress.assessModalTitle", { n: nextPeriod, name: student.name })}
                             </h3>
                             <button
                                 type="button"
                                 className="gc-modal-close"
                                 onClick={handleCloseAssessModal}
-                                aria-label="Tutup"
+                                aria-label={t("common.close")}
                             >
-                                ✕
+                                <XIcon />
                             </button>
                         </div>
 
                         <div className="gc-modal-body">
                             {!assessmentResult ? (
-                                <form onSubmit={handleProcessAssessment}>
-                                    <div className="gc-student-summary-bar">
-                                        <div>
-                                            <strong>Nama Siswa:</strong> No. {student.absence_number} - {student.name}
-                                        </div>
-                                        <div>
-                                            <strong>Usia Saat Ini:</strong> {student.age_months} Bulan
-                                        </div>
-                                        <div>
-                                            <strong>Periode:</strong> Asesmen Ke-{(student.total_assessments || 0) + 1}
-                                        </div>
+                                <form onSubmit={handleProcessAssessment} className="gc-assess-form">
+                                    {/* Ringkasan siswa */}
+                                    <div className="gc-assess-table-wrap">
+                                        <table className="gc-assess-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>{t("student.metaName")}</th>
+                                                    <th>{t("student.metaGender")}</th>
+                                                    <th>{t("parentChildren.currentAge")}</th>
+                                                    <th>{t("studentProgress.period")}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <div className="gc-assess-name">
+                                                            <span>
+                                                                {student.absence_number ? `${student.absence_number}. ` : ""}
+                                                                {student.name}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        {student.gender === "P" ? t("common.female") : t("common.male")}
+                                                    </td>
+                                                    <td className="gc-assess-age">
+                                                        <Trans
+                                                            i18nKey="classDetail.ageMonths"
+                                                            values={{ n: student.age_months }}
+                                                            components={{ strong: <strong /> }}
+                                                        />
+                                                    </td>
+                                                    <td>{t("studentProgress.periodValue", { n: nextPeriod })}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
 
+                                    {/* Unggah foto */}
                                     <label
                                         className={`dropzone student-dropzone ${isDragging ? "dragging" : ""} ${previewUrl ? "has-preview" : ""}`}
                                         onDragOver={(e) => {
@@ -298,7 +340,7 @@ export default function StudentProgressPage() {
                                             <span className="dropzone-preview-wrap">
                                                 <img
                                                     src={previewUrl}
-                                                    alt="Preview Lembar Kerja"
+                                                    alt={t("classDetail.previewAlt")}
                                                     className="dropzone-preview-img"
                                                 />
                                                 <button
@@ -310,19 +352,22 @@ export default function StudentProgressPage() {
                                                         e.stopPropagation();
                                                         handleClearImage();
                                                     }}
-                                                    title="Batalkan gambar"
+                                                    aria-label={t("student.cancelImage")}
+                                                    title={t("student.cancelImage")}
                                                 >
-                                                    ✕
+                                                    <XIcon />
                                                 </button>
                                             </span>
                                         ) : (
-                                            <span className="dropzone-icon">📷</span>
+                                            <span className="dropzone-icon">
+                                                <CameraIcon />
+                                            </span>
                                         )}
                                         <p className="dropzone-text">
                                             {imageFile ? (
                                                 <span className="dropzone-filename">{imageFile.name}</span>
                                             ) : (
-                                                "Tarik foto lembar kerja atau klik untuk pilih (JPG, PNG, WEBP maks. 5 MB)"
+                                                t("classDetail.dropHint")
                                             )}
                                         </p>
                                         <input
@@ -333,35 +378,42 @@ export default function StudentProgressPage() {
                                         />
                                     </label>
 
-                                    <div className="student-field" style={{ marginTop: "14px" }}>
-                                        <label htmlFor="progress-teacher-notes">Catatan Observasi Guru (Opsional)</label>
+                                    {/* Catatan guru */}
+                                    <div className="student-field">
+                                        <label htmlFor="progress-teacher-notes">{t("classDetail.notesLabel")}</label>
                                         <textarea
                                             id="progress-teacher-notes"
-                                            rows={2}
-                                            placeholder="Contoh: Anak sudah lebih tenang saat memegang pensil dibanding bulan lalu..."
+                                            rows={3}
+                                            placeholder={t("classDetail.notesPh")}
                                             value={teacherNotes}
                                             onChange={(e) => setTeacherNotes(e.target.value)}
                                             className="student-input"
-                                            style={{ resize: "vertical", minHeight: "56px" }}
                                         />
                                     </div>
 
-                                    <div className="gc-modal-actions" style={{ marginTop: "18px" }}>
+                                    {/* Aksi */}
+                                    <div className="gc-assess-actions">
                                         <button
                                             type="button"
                                             onClick={handleCloseAssessModal}
                                             className="gc-secondary-btn"
                                             disabled={isAnalyzing}
                                         >
-                                            Batal
+                                            {t("common.cancel")}
                                         </button>
                                         <button
                                             type="submit"
                                             disabled={isAnalyzing || !imageFile}
-                                            className="student-submit-btn"
-                                            style={{ flex: "0 0 auto", minWidth: "180px" }}
+                                            className="gc-primary-submit"
                                         >
-                                            {isAnalyzing ? "Menganalisis..." : "Proses Asesmen"}
+                                            {isAnalyzing ? (
+                                                t("student.analyzing")
+                                            ) : (
+                                                <>
+                                                    <SendIcon />
+                                                    <span>{t("classDetail.processAssess")}</span>
+                                                </>
+                                            )}
                                         </button>
                                     </div>
                                 </form>
@@ -379,7 +431,7 @@ export default function StudentProgressPage() {
                                             onClick={handleCloseAssessModal}
                                             className="gc-navy-btn"
                                         >
-                                            Selesai & Lihat Grafik Terbaru
+                                            {t("studentProgress.doneViewChart")}
                                         </button>
                                     </div>
                                 </div>

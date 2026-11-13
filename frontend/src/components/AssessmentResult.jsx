@@ -1,254 +1,332 @@
+import { useTranslation } from "react-i18next";
 import { handlePrintStudentPDF } from "../utils/printAssessment";
 import { getApiUrl } from "../config/api";
+import "../style/assasment.css";
 
-const KATEGORI_BADGE_STYLE = {
-    BB: { bg: "#fee2e2", color: "#b91c1c", border: "#fca5a5" },
-    MB: { bg: "#ffedd5", color: "#c2410c", border: "#fdba74" },
-    BSH: { bg: "#dcfce7", color: "#15803d", border: "#86efac" },
-    BSB: { bg: "#dbeafe", color: "#1d4ed8", border: "#93c5fd" },
+/* ---------- Ikon ---------- */
+const svgProps = {
+    width: 18,
+    height: 18,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": true,
 };
 
-const DELTA_BADGE_STYLE = {
-    Meningkat: { bg: "#dcfce7", color: "#15803d", border: "#86efac", icon: "📈" },
-    Stabil: { bg: "#f1f5f9", color: "#334155", border: "#cbd5e1", icon: "➖" },
-    Menurun: { bg: "#fee2e2", color: "#b91c1c", border: "#fca5a5", icon: "📉" },
-    "Asesmen Awal": { bg: "#e0f2fe", color: "#0369a1", border: "#7dd3fc", icon: "🆕" },
+const small = { width: 13, height: 13, strokeWidth: 2.6 };
+
+const TrendUpIcon = () => (
+    <svg {...svgProps} {...small}>
+        <path d="m22 7-8.5 8.5-5-5L2 17" />
+        <path d="M16 7h6v6" />
+    </svg>
+);
+
+const TrendDownIcon = () => (
+    <svg {...svgProps} {...small}>
+        <path d="m22 17-8.5-8.5-5 5L2 7" />
+        <path d="M16 17h6v-6" />
+    </svg>
+);
+
+const TrendFlatIcon = () => (
+    <svg {...svgProps} {...small}>
+        <path d="M5 12h14" />
+    </svg>
+);
+
+const SparkIcon = () => (
+    <svg {...svgProps} {...small}>
+        <path d="M12 3v4M12 17v4M3 12h4M17 12h4" />
+    </svg>
+);
+
+/* status dari backend (bahasa Indonesia) -> kelas CSS, ikon, dan kunci terjemahan */
+const DELTA_BADGE = {
+    Meningkat: { cls: "ar-tag-up", Icon: TrendUpIcon, key: "up" },
+    Stabil: { cls: "ar-tag-stable", Icon: TrendFlatIcon, key: "stable" },
+    Menurun: { cls: "ar-tag-down", Icon: TrendDownIcon, key: "down" },
+    "Asesmen Awal": { cls: "ar-tag-initial", Icon: SparkIcon, key: "initial" },
 };
+
+const PrinterIcon = () => (
+    <svg {...svgProps} width={17} height={17}>
+        <path d="M6 9V2h12v7" />
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+        <rect x="6" y="14" width="12" height="8" />
+    </svg>
+);
+
+const ClockIcon = () => (
+    <svg {...svgProps} width={14} height={14}>
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 6v6l4 2" />
+    </svg>
+);
+
+const PencilIcon = () => (
+    <svg {...svgProps} width={20} height={20}>
+        <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+    </svg>
+);
+
+const ShapesIcon = () => (
+    <svg {...svgProps} width={20} height={20}>
+        <path d="M8.3 10a.7.7 0 0 1-.6-1l3.7-6a.7.7 0 0 1 1.2 0l3.7 6a.7.7 0 0 1-.6 1Z" />
+        <rect x="3" y="14" width="7" height="7" rx="1" />
+        <circle cx="17.5" cy="17.5" r="3.5" />
+    </svg>
+);
+
+const BulbIcon = () => (
+    <svg {...svgProps}>
+        <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+        <path d="M9 18h6" />
+        <path d="M10 22h4" />
+    </svg>
+);
+
+const NoteIcon = () => (
+    <svg {...svgProps}>
+        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5Z" />
+        <path d="M14 2v6h6" />
+        <path d="M8 13h8" />
+        <path d="M8 17h5" />
+    </svg>
+);
+
+const BellIcon = () => (
+    <svg {...svgProps}>
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+    </svg>
+);
+
+const CheckIcon = ({ size = 13 }) => (
+    <svg {...svgProps} width={size} height={size} strokeWidth={3}>
+        <path d="M20 6 9 17l-5-5" />
+    </svg>
+);
+
+const CrossIcon = ({ size = 13 }) => (
+    <svg {...svgProps} width={size} height={size} strokeWidth={3}>
+        <path d="M18 6 6 18" />
+        <path d="m6 6 12 12" />
+    </svg>
+);
+
+/* ---------- Kartu penilaian ---------- */
+function CriterionCard({ icon, name, question, isYa, reason }) {
+    const { t } = useTranslation();
+
+    return (
+        <article className={`ar-crit ${isYa ? "ar-ok" : "ar-no"}`}>
+            <div className="ar-crit-top">
+                <div className="ar-crit-name">
+                    <span className="ar-crit-ico">{icon}</span>
+                    {name}
+                </div>
+                <span className="ar-pill">
+                    {isYa ? <CheckIcon /> : <CrossIcon />}
+                    {isYa ? t("assessmentResult.fit") : t("assessmentResult.notFit")}
+                </span>
+            </div>
+
+            <p className="ar-crit-q">{question}</p>
+
+            <p className="ar-reason">
+                <b>{t("assessmentResult.reasonLabel")}</b>
+                {reason}
+            </p>
+        </article>
+    );
+}
 
 export default function AssessmentResult({ result, schoolName, gradeClass }) {
+    const { t } = useTranslation();
+
     if (!result) return null;
 
     const isYa = result.kesimpulan?.includes("Ya");
+    const tone = isYa ? "ar-ok" : "ar-no";
     const ageVal = result.age_months ?? result.age;
-    const studentName = result.student_name || result.name || "Siswa";
-    const katStyle = KATEGORI_BADGE_STYLE[result.kategori] || KATEGORI_BADGE_STYLE.MB;
+    const studentName = result.student_name || result.name || t("student.studentFallback");
     const imageUrl = result.image_url || result.image_path;
+    const delta = DELTA_BADGE[result.delta_status];
+    const initial = studentName.trim().charAt(0).toUpperCase() || "S";
 
+    const confidence = Math.min(100, Math.max(0, Number(result.confidence) || 0));
+    const confidenceLabel = Number.isInteger(confidence) ? confidence : confidence.toFixed(1);
+
+    const genderLabel = result.gender
+        ? result.gender === "L"
+            ? t("common.male")
+            : result.gender === "P"
+              ? t("common.female")
+              : ""
+        : "";
+
+    const reasonWriting = result.kesimpulan_menulis?.alasan || result.alasan_klinis || "-";
+    const reasonDrawing = result.kesimpulan_menggambar?.alasan || result.alasan_klinis || "-";
 
     return (
-        <div className="student-result-item" style={{ border: "1px solid #e2e8f0", boxShadow: "none" }}>
-            <div
-                className="student-result-header"
-                style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}
-            >
-                <div>
-                    <span style={{ fontWeight: "700", fontSize: "1.05rem", color: "#1e293b" }}>
-                        {result.absence_number ? `No. ${result.absence_number} - ` : ""}{studentName}
-                        <small style={{ marginLeft: "8px", color: "#64748b", fontWeight: "normal", fontSize: "0.85em" }}>
-                            ({ageVal ? `${ageVal} bln` : ""}{result.gender ? ` - ${result.gender === "L" ? "Laki-laki" : "Perempuan"}` : ""})
-                        </small>
-                    </span>
-                    {result.tanggal && (
-                        <div style={{ fontSize: "0.78rem", color: "#64748b", fontWeight: "500", marginTop: "2px", display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
-                            <span>Waktu Asesmen: {result.tanggal}</span>
-                            {result.period_label && (
-                                <span style={{ background: "#eff6ff", color: "#1d4ed8", border: "1px solid #bfdbfe", padding: "1px 7px", borderRadius: "999px", fontWeight: "700", fontSize: "0.74rem" }}>
-                                    {result.period_label}
-                                </span>
-                            )}
-                            {result.delta_status && DELTA_BADGE_STYLE[result.delta_status] && (
-                                <span
-                                    style={{
-                                        background: DELTA_BADGE_STYLE[result.delta_status].bg,
-                                        color: DELTA_BADGE_STYLE[result.delta_status].color,
-                                        border: `1px solid ${DELTA_BADGE_STYLE[result.delta_status].border}`,
-                                        padding: "1px 7px",
-                                        borderRadius: "999px",
-                                        fontWeight: "700",
-                                        fontSize: "0.74rem",
-                                    }}
-                                >
-                                    {DELTA_BADGE_STYLE[result.delta_status].icon} {result.delta_status}
-                                </span>
-                            )}
-                        </div>
+        <section className="ar-card">
+            {/* ===== HEADER ===== */}
+            <header className="ar-head">
+                <div className="ar-identity">
+                    <div className="ar-avatar">{initial}</div>
+                    <div>
+                        <h4 className="ar-name">
+                            {result.absence_number ? `No. ${result.absence_number} - ` : ""}
+                            {studentName}
+                        </h4>
+                        {(ageVal || genderLabel) && (
+                            <div className="ar-chips">
+                                {ageVal ? <span className="ar-chip">{t("assessmentResult.ageMonths", { n: ageVal })}</span> : null}
+                                {genderLabel ? <span className="ar-chip">{genderLabel}</span> : null}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    className="ar-print"
+                    onClick={() => handlePrintStudentPDF(result, schoolName, gradeClass)}
+                    title={t("student.printTitle")}
+                >
+                    <PrinterIcon />
+                    <span>{t("student.printBtn")}</span>
+                </button>
+            </header>
+
+            {/* ===== ISI ===== */}
+            <div className="ar-body">
+                {result.tanggal && (
+                    <div className="ar-meta">
+                        <span className="ar-meta-time">
+                            <ClockIcon />
+                            {t("assessmentResult.assessedAt", { date: result.tanggal })}
+                        </span>
+                        {result.period_label && (
+                            <span className="ar-tag ar-tag-period">{result.period_label}</span>
+                        )}
+                        {delta && (
+                            <span className={`ar-tag ${delta.cls}`}>
+                                <delta.Icon />
+                                {t(`common.delta.${delta.key}`)}
+                            </span>
+                        )}
+                    </div>
+                )}
+
+                {/* Ringkasan: foto, kesimpulan, keyakinan */}
+                <div className={`ar-summary ${tone}`}>
+                    {imageUrl && (
+                        <img
+                            className="ar-photo"
+                            src={getApiUrl(imageUrl)}
+                            alt={t("assessmentResult.worksheetAlt", { name: studentName })}
+                        />
                     )}
-                </div>
 
-                <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-                    <span
-                        style={{
-                            padding: "5px 12px",
-                            borderRadius: "6px",
-                            fontSize: "0.85rem",
-                            fontWeight: "700",
-                            background: isYa ? "#dcfce7" : "#fee2e2",
-                            color: isYa ? "#15803d" : "#b91c1c",
-                            border: `1px solid ${isYa ? "#86efac" : "#fca5a5"}`,
-                        }}
-                    >
-                        {isYa ? "✓ Sesuai Usia [Ya]" : "✗ Belum Sesuai [Tidak]"} ({result.confidence}%)
-                    </span>
-                    <button
-                        type="button"
-                        onClick={() => handlePrintStudentPDF(result, schoolName, gradeClass)}
-                        style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            padding: "6px 12px",
-                            borderRadius: "6px",
-                            fontSize: "0.83rem",
-                            fontWeight: "600",
-                            background: "#0284c7",
-                            color: "#ffffff",
-                            border: "none",
-                            cursor: "pointer",
-                            boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
-                            transition: "all 0.15s ease",
-                        }}
-                        title="Cetak atau simpan lembar laporan sebagai PDF"
-                    >
-                        🖨️ Cetak / Unduh PDF
-                    </button>
-                </div>
-            </div>
-
-            {imageUrl && (
-                <div
-                    style={{
-                        marginTop: "12px",
-                        marginBottom: "14px",
-                        padding: "10px",
-                        background: "#f8fafc",
-                        border: "1px solid #e2e8f0",
-                        borderRadius: "8px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                    }}
-                >
-                    <img
-                        src={getApiUrl(imageUrl)}
-                        alt={`Lembar kerja ${studentName}`}
-                        style={{
-                            width: "80px",
-                            height: "80px",
-                            objectFit: "cover",
-                            borderRadius: "6px",
-                            border: "1px solid #cbd5e1",
-                            background: "#fff",
-                        }}
-                    />
-                    <div style={{ fontSize: "0.83rem", color: "#475569" }}>
-                        <div style={{ fontWeight: "700", color: "#1e293b", marginBottom: "2px" }}>
-                            Status Perkembangan: {result.status || "-"}
+                    <div className="ar-summary-main">
+                        <div className="ar-verdict">
+                            <span className="ar-verdict-ico">
+                                {isYa ? <CheckIcon size={22} /> : <CrossIcon size={22} />}
+                            </span>
+                            <div>
+                                <div className="ar-verdict-text">
+                                    {isYa ? t("assessmentResult.verdictYes") : t("assessmentResult.verdictNo")}
+                                </div>
+                                {result.status && <p className="ar-verdict-sub">{result.status}</p>}
+                            </div>
                         </div>
-                        <div>Sampel foto lembar kerja yang dianalisis oleh AI</div>
+
+                        <div>
+                            <div className="ar-conf-row">
+                                <span>{t("assessmentResult.confidence")}</span>
+                                <span className="ar-conf-num">{confidenceLabel}%</span>
+                            </div>
+                            <div
+                                className="ar-meter"
+                                role="progressbar"
+                                aria-label={t("assessmentResult.confidence")}
+                                aria-valuenow={confidence}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                            >
+                                <span style={{ width: `${confidence}%` }} />
+                            </div>
+                        </div>
                     </div>
                 </div>
-            )}
 
-            {/* BAGIAN III: KESIMPULAN PERKEMBANGAN */}
-            <div style={{ marginTop: "12px", marginBottom: "12px" }}>
-                <h4
-                    style={{
-                        margin: "0 0 10px 0",
-                        fontSize: "0.95rem",
-                        fontWeight: "700",
-                        color: "#0f172a",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.3px",
-                    }}
-                >
-                    Hasil Asesmen Motorik Halus (Bagian III Resmi PAUD)
-                </h4>
+                {/* Penilaian motorik halus */}
+                <div className="ar-section">
+                    <h4 className="ar-section-title">{t("assessmentResult.sectionTitle")}</h4>
 
-                {/* Pertanyaan 1: Menulis */}
-                <div style={{ padding: "10px 12px", background: "#f8fafc", borderRadius: "6px", border: "1px solid #e2e8f0", marginBottom: "8px" }}>
-                    <p style={{ margin: "0 0 6px 0", fontWeight: "600", fontSize: "0.88rem", color: "#1e293b" }}>
-                        1) Apakah kemampuan menulis anak sudah sesuai dengan perkembangan usianya?
-                    </p>
-                    <div style={{ display: "flex", gap: "20px", marginBottom: "6px", fontSize: "0.85rem", fontWeight: "600" }}>
-                        <span style={{ color: isYa ? "#15803d" : "#94a3b8" }}>
-                            {isYa ? "[✓]" : "[  ]"} Sesuai Usia (Ya)
-                        </span>
-                        <span style={{ color: !isYa ? "#b91c1c" : "#94a3b8" }}>
-                            {!isYa ? "[✓]" : "[  ]"} Belum Sesuai (Tidak)
-                        </span>
+                    <div className="ar-crit-grid">
+                        <CriterionCard
+                            icon={<PencilIcon />}
+                            name={t("assessmentResult.writing")}
+                            question={t("assessmentResult.writingQ")}
+                            isYa={isYa}
+                            reason={reasonWriting}
+                        />
+                        <CriterionCard
+                            icon={<ShapesIcon />}
+                            name={t("assessmentResult.drawing")}
+                            question={t("assessmentResult.drawingQ")}
+                            isYa={isYa}
+                            reason={reasonDrawing}
+                        />
                     </div>
-                    <p style={{ margin: 0, fontSize: "0.82rem", color: "#475569", fontStyle: "italic" }}>
-                        <strong>Mohon sertakan alasannya:</strong> "{result.kesimpulan_menulis?.alasan || result.alasan_klinis || "-"}"
-                    </p>
                 </div>
 
-                {/* Pertanyaan 2: Menggambar */}
-                <div style={{ padding: "10px 12px", background: "#f8fafc", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
-                    <p style={{ margin: "0 0 6px 0", fontWeight: "600", fontSize: "0.88rem", color: "#1e293b" }}>
-                        2) Apakah kemampuan menggambar anak sudah sesuai dengan perkembangan usianya?
-                    </p>
-                    <div style={{ display: "flex", gap: "20px", marginBottom: "6px", fontSize: "0.85rem", fontWeight: "600" }}>
-                        <span style={{ color: isYa ? "#15803d" : "#94a3b8" }}>
-                            {isYa ? "[✓]" : "[  ]"} Sesuai Usia (Ya)
-                        </span>
-                        <span style={{ color: !isYa ? "#b91c1c" : "#94a3b8" }}>
-                            {!isYa ? "[✓]" : "[  ]"} Belum Sesuai (Tidak)
-                        </span>
+                {(result.saran_guru || result.teacher_notes || result.next_assessment_date) && (
+                    <div className="ar-notes">
+                        {result.saran_guru && (
+                            <div className="ar-note ar-note-tip">
+                                <span className="ar-note-ico">
+                                    <BulbIcon />
+                                </span>
+                                <div>
+                                    <strong>{t("assessmentResult.noteStimulation")}</strong>
+                                    {result.saran_guru}
+                                </div>
+                            </div>
+                        )}
+
+                        {result.teacher_notes && (
+                            <div className="ar-note ar-note-teacher">
+                                <span className="ar-note-ico">
+                                    <NoteIcon />
+                                </span>
+                                <div>
+                                    <strong>{t("assessmentResult.noteTeacher")}</strong>
+                                    {result.teacher_notes}
+                                </div>
+                            </div>
+                        )}
+
+                        {result.next_assessment_date && (
+                            <div className="ar-note ar-note-next">
+                                <span className="ar-note-ico">
+                                    <BellIcon />
+                                </span>
+                                <div>
+                                    <strong>{t("assessmentResult.noteNext")}</strong>
+                                    {t("assessmentResult.nextDate", { date: result.next_assessment_date })}
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    <p style={{ margin: 0, fontSize: "0.82rem", color: "#475569", fontStyle: "italic" }}>
-                        <strong>Mohon sertakan alasannya:</strong> "{result.kesimpulan_menggambar?.alasan || result.alasan_klinis || "-"}"
-                    </p>
-                </div>
+                )}
             </div>
-
-            {/* REKOMENDASI STIMULASI GURU & ORANG TUA */}
-            {result.saran_guru && (
-                <div
-                    style={{
-                        margin: "10px 0 4px 0",
-                        fontSize: "0.85rem",
-                        color: "#1e3a8a",
-                        background: "#f0fdf4",
-                        padding: "10px 14px",
-                        borderRadius: "8px",
-                        borderLeft: "4px solid #22c55e",
-                        lineHeight: "1.4",
-                    }}
-                >
-                    💡 <strong>Rekomendasi Stimulasi Guru & Orang Tua:</strong> {result.saran_guru}
-                </div>
-            )}
-
-            {/* CATATAN GURU (JIKA ADA) */}
-            {result.teacher_notes && (
-                <div
-                    style={{
-                        margin: "8px 0 4px 0",
-                        fontSize: "0.84rem",
-                        color: "#334155",
-                        background: "#fffbeb",
-                        padding: "10px 14px",
-                        borderRadius: "8px",
-                        borderLeft: "4px solid #f59e0b",
-                        lineHeight: "1.45",
-                    }}
-                >
-                    📝 <strong>Catatan Observasi Guru:</strong> {result.teacher_notes}
-                </div>
-            )}
-
-            {/* PENGINGAT JADWAL ASESMEN BERIKUTNYA (JIKA BARU SELESAI ASESMEN) */}
-            {result.next_assessment_date && (
-                <div
-                    style={{
-                        margin: "8px 0 2px 0",
-                        fontSize: "0.82rem",
-                        color: "#0f766e",
-                        background: "#f0fdfa",
-                        padding: "9px 14px",
-                        borderRadius: "8px",
-                        border: "1px solid #99f6e4",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                    }}
-                >
-                    <span>🔔</span>
-                    <span>
-                        <strong>Jadwal Pengingat Asesmen Berkala Berikutnya:</strong> {result.next_assessment_date} (Otomatis +30 hari)
-                    </span>
-                </div>
-            )}
-        </div>
+        </section>
     );
 }
